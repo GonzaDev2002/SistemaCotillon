@@ -1,0 +1,65 @@
+﻿using Cotillon.LocalApi.Service.Repositories;
+using Cotillon.Shared.DTOs;
+using Cotillon.Shared.Responses;
+
+namespace Cotillon.LocalApi.Service.Services;
+
+public class CategoriasService
+{
+    private readonly CategoriasRepository _repository;
+
+    public CategoriasService(CategoriasRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public ApiResponse<List<CategoriaDto>> ObtenerTodas()
+    {
+        var lista = _repository.ObtenerTodas();
+        return ApiResponse<List<CategoriaDto>>.Ok(lista, "Categorías obtenidas correctamente.");
+    }
+
+    public ApiResponse<List<CategoriaDto>> ObtenerPorSeccion(int seccionId)
+    {
+        if (seccionId <= 0)
+            return ApiResponse<List<CategoriaDto>>.Fail("La sección es obligatoria.");
+
+        var lista = _repository.ObtenerPorSeccion(seccionId);
+        return ApiResponse<List<CategoriaDto>>.Ok(lista, "Categorías obtenidas correctamente.");
+    }
+
+    public ApiResponse<string> Crear(CategoriaDto categoria)
+    {
+        if (categoria.SeccionId <= 0)
+            return ApiResponse<string>.Fail("La sección es obligatoria.");
+
+        if (string.IsNullOrWhiteSpace(categoria.NombreCategoria))
+            return ApiResponse<string>.Fail("El nombre de la categoría es obligatorio.");
+
+        var ok = _repository.Insertar(categoria);
+
+        if (!ok)
+            return ApiResponse<string>.Fail("No se pudo guardar la categoría.");
+
+        return ApiResponse<string>.Ok("OK", "Categoría agregada con éxito.");
+    }
+
+    public ApiResponse<string> Actualizar(CategoriaDto categoria)
+    {
+        if (categoria.CategoriaId <= 0)
+            return ApiResponse<string>.Fail("La categoría es inválida.");
+
+        if (categoria.SeccionId <= 0)
+            return ApiResponse<string>.Fail("La sección es obligatoria.");
+
+        if (string.IsNullOrWhiteSpace(categoria.NombreCategoria))
+            return ApiResponse<string>.Fail("El nombre de la categoría es obligatorio.");
+
+        var ok = _repository.Actualizar(categoria);
+
+        if (!ok)
+            return ApiResponse<string>.Fail("No se pudo actualizar la categoría.");
+
+        return ApiResponse<string>.Ok("OK", "Categoría actualizada con éxito.");
+    }
+}

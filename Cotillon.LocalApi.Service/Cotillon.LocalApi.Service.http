@@ -1,0 +1,6 @@
+@Cotillon.LocalApi.Service_HostAddress = http://localhost:5189
+
+GET {{Cotillon.LocalApi.Service_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
