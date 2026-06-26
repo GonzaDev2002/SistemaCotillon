@@ -1,5 +1,4 @@
 ﻿using Cotillon.Desktop.WinForms.Helpers;
-using Cotillon.Desktop.WinForms.Models;
 using Cotillon.Desktop.WinForms.Services;
 
 namespace Cotillon.Desktop.WinForms.Forms;
@@ -11,8 +10,47 @@ public partial class FrmLogin : Form
     public FrmLogin()
     {
         InitializeComponent();
+
         _authApiService = new AuthApiService();
-        AplicarTema();
+
+        AplicarDiseñoCotillon();
+    }
+
+    private void AplicarDiseñoCotillon()
+    {
+        PopTheme.ApplyForm(this);
+
+        Text = "POP Cotillón - Iniciar sesión";
+
+        pnlContenedor.BackColor = Color.White;
+        pnlContenedor.BorderStyle = BorderStyle.None;
+
+        lblTitulo.Text = "🎈 POP Cotillón";
+        lblTitulo.ForeColor = PopTheme.Colors.Principal;
+        lblTitulo.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
+
+        lblSubtitulo.Text = "Ingresá al sistema de gestión";
+        lblSubtitulo.ForeColor = PopTheme.Colors.TextoSuave;
+        lblSubtitulo.Font = new Font("Segoe UI", 10F);
+
+        lblUsuario.ForeColor = PopTheme.Colors.Texto;
+        lblUsuario.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+
+        lblPin.ForeColor = PopTheme.Colors.Texto;
+        lblPin.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+
+        PopTheme.ApplyInput(txtUsuario);
+        PopTheme.ApplyInput(txtPin);
+
+        PopTheme.ApplyPrimaryButton(btnIngresar);
+        PopTheme.ApplySecondaryButton(btnSalir);
+
+        btnIngresar.Text = "Ingresar";
+        btnSalir.Text = "Salir";
+
+        lblFooter.Text = "Sistema administrativo POP Cotillón";
+        lblFooter.ForeColor = PopTheme.Colors.TextoSuave;
+        lblFooter.Font = new Font("Segoe UI", 8.5F);
     }
 
     private async void btnIngresar_Click(object sender, EventArgs e)
@@ -40,9 +78,21 @@ public partial class FrmLogin : Form
 
             var result = await _authApiService.LoginAsync(username, pin);
 
+            if (result == null)
+            {
+                MessageBox.Show("No se obtuvo respuesta del servidor.", "Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtPin.SelectAll();
+                txtPin.Focus();
+                return;
+            }
+
             if (!result.Success || result.Data is null)
             {
-                MessageBox.Show(result.Message, "Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string mensaje = string.IsNullOrWhiteSpace(result.Message)
+                    ? "Usuario o PIN incorrectos."
+                    : result.Message;
+
+                MessageBox.Show(mensaje, "Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 txtPin.SelectAll();
                 txtPin.Focus();
                 return;
@@ -50,14 +100,21 @@ public partial class FrmLogin : Form
 
             var usuario = result.Data;
 
-            var frmMain = new FrmMain(usuario);
-            frmMain.Show();
+            CajaApiService cajaApi = new();
+            int sesionCajaId = await cajaApi.ObtenerOCrearCajaAsync(usuario.UsuarioId);
+
+            FrmMain frm = new FrmMain(usuario, sesionCajaId);
+            frm.Show();
 
             Hide();
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            string mensajeError = string.IsNullOrWhiteSpace(ex.Message)
+                ? "Ocurrió un error inesperado al iniciar sesión."
+                : ex.Message;
+
+            MessageBox.Show($"Error inesperado: {mensajeError}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
         {
@@ -81,20 +138,6 @@ public partial class FrmLogin : Form
 
     private void FrmLogin_Load(object sender, EventArgs e)
     {
-
-    }
-    private void AplicarTema()
-    {
-        AppTheme.ApplyFormStyle(this);
-
-        pnlContenedor.BackColor = AppTheme.Colors.Surface;
-
-        lblTitulo.ForeColor = AppTheme.Colors.Accent;
-
-        AppTheme.ApplyTextBox(txtUsuario);
-        AppTheme.ApplyTextBox(txtPin);
-
-        AppTheme.ApplyPrimaryButton(btnIngresar);
-        AppTheme.ApplySecondaryButton(btnSalir);
+        txtUsuario.Focus();
     }
 }

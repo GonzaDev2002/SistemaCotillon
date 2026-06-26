@@ -46,33 +46,37 @@ partial class FrmCategorias
         colActivo = new DataGridViewCheckBoxColumn();
         ((System.ComponentModel.ISupportInitialize)dgvCategorias).BeginInit();
         SuspendLayout();
-
+        // 
         // lblTitulo
+        // 
         lblTitulo.AutoSize = true;
         lblTitulo.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
         lblTitulo.Location = new Point(25, 20);
         lblTitulo.Name = "lblTitulo";
-        lblTitulo.Size = new Size(122, 30);
+        lblTitulo.Size = new Size(124, 30);
         lblTitulo.TabIndex = 0;
         lblTitulo.Text = "Categorías";
-
+        // 
         // lblSeccion
+        // 
         lblSeccion.AutoSize = true;
         lblSeccion.Location = new Point(25, 75);
         lblSeccion.Name = "lblSeccion";
         lblSeccion.Size = new Size(48, 15);
         lblSeccion.TabIndex = 1;
         lblSeccion.Text = "Sección";
-
+        // 
         // cmbSeccion
+        // 
         cmbSeccion.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbSeccion.FormattingEnabled = true;
         cmbSeccion.Location = new Point(25, 95);
         cmbSeccion.Name = "cmbSeccion";
         cmbSeccion.Size = new Size(280, 23);
         cmbSeccion.TabIndex = 2;
-
+        // 
         // btnBuscar
+        // 
         btnBuscar.Location = new Point(320, 93);
         btnBuscar.Name = "btnBuscar";
         btnBuscar.Size = new Size(120, 28);
@@ -80,31 +84,35 @@ partial class FrmCategorias
         btnBuscar.Text = "Buscar";
         btnBuscar.UseVisualStyleBackColor = true;
         btnBuscar.Click += btnBuscar_Click;
-
+        // 
         // lblNombreCategoria
+        // 
         lblNombreCategoria.AutoSize = true;
         lblNombreCategoria.Location = new Point(25, 145);
         lblNombreCategoria.Name = "lblNombreCategoria";
-        lblNombreCategoria.Size = new Size(123, 15);
+        lblNombreCategoria.Size = new Size(119, 15);
         lblNombreCategoria.TabIndex = 4;
         lblNombreCategoria.Text = "Nombre de categoría";
-
+        // 
         // txtNombreCategoria
+        // 
         txtNombreCategoria.Location = new Point(25, 165);
         txtNombreCategoria.Name = "txtNombreCategoria";
         txtNombreCategoria.Size = new Size(280, 23);
         txtNombreCategoria.TabIndex = 5;
-
+        // 
         // chkActivo
+        // 
         chkActivo.AutoSize = true;
         chkActivo.Location = new Point(25, 205);
         chkActivo.Name = "chkActivo";
-        chkActivo.Size = new Size(59, 19);
+        chkActivo.Size = new Size(60, 19);
         chkActivo.TabIndex = 6;
         chkActivo.Text = "Activo";
         chkActivo.UseVisualStyleBackColor = true;
-
+        // 
         // btnGuardar
+        // 
         btnGuardar.Location = new Point(25, 240);
         btnGuardar.Name = "btnGuardar";
         btnGuardar.Size = new Size(120, 35);
@@ -112,8 +120,9 @@ partial class FrmCategorias
         btnGuardar.Text = "Agregar";
         btnGuardar.UseVisualStyleBackColor = true;
         btnGuardar.Click += btnGuardar_Click;
-
+        // 
         // btnActualizar
+        // 
         btnActualizar.Location = new Point(155, 240);
         btnActualizar.Name = "btnActualizar";
         btnActualizar.Size = new Size(120, 35);
@@ -121,8 +130,9 @@ partial class FrmCategorias
         btnActualizar.Text = "Actualizar";
         btnActualizar.UseVisualStyleBackColor = true;
         btnActualizar.Click += btnActualizar_Click;
-
+        // 
         // btnLimpiar
+        // 
         btnLimpiar.Location = new Point(285, 240);
         btnLimpiar.Name = "btnLimpiar";
         btnLimpiar.Size = new Size(120, 35);
@@ -130,8 +140,9 @@ partial class FrmCategorias
         btnLimpiar.Text = "Limpiar";
         btnLimpiar.UseVisualStyleBackColor = true;
         btnLimpiar.Click += btnLimpiar_Click;
-
+        // 
         // dgvCategorias
+        // 
         dgvCategorias.AllowUserToAddRows = false;
         dgvCategorias.AllowUserToDeleteRows = false;
         dgvCategorias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -146,36 +157,42 @@ partial class FrmCategorias
         dgvCategorias.Size = new Size(620, 260);
         dgvCategorias.TabIndex = 10;
         dgvCategorias.CellClick += dgvCategorias_CellClick;
-
+        // 
         // colCategoriaId
+        // 
         colCategoriaId.DataPropertyName = "CategoriaId";
         colCategoriaId.HeaderText = "CategoriaId";
         colCategoriaId.Name = "colCategoriaId";
         colCategoriaId.ReadOnly = true;
         colCategoriaId.Visible = false;
-
+        // 
         // colSeccionId
+        // 
         colSeccionId.DataPropertyName = "SeccionId";
         colSeccionId.HeaderText = "SeccionId";
         colSeccionId.Name = "colSeccionId";
         colSeccionId.ReadOnly = true;
         colSeccionId.Visible = false;
-
+        // 
         // colNombreCategoria
+        // 
         colNombreCategoria.DataPropertyName = "NombreCategoria";
         colNombreCategoria.HeaderText = "Nombre";
         colNombreCategoria.Name = "colNombreCategoria";
         colNombreCategoria.ReadOnly = true;
-
+        // 
         // colActivo
+        // 
         colActivo.DataPropertyName = "Activo";
         colActivo.HeaderText = "Activo";
         colActivo.Name = "colActivo";
         colActivo.ReadOnly = true;
-
+        // 
         // FrmCategorias
+        // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
+        BackgroundImage = Properties.Resources.fondoForms;
         ClientSize = new Size(680, 590);
         Controls.Add(dgvCategorias);
         Controls.Add(btnLimpiar);

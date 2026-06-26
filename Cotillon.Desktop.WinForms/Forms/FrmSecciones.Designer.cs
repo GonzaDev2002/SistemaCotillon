@@ -147,6 +147,7 @@ partial class FrmSecciones
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
+        BackgroundImage = Properties.Resources.fondoForms;
         ClientSize = new Size(600, 520);
         Controls.Add(dgvSecciones);
         Controls.Add(btnLimpiarCampos);

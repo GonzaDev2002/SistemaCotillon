@@ -28,6 +28,23 @@ builder.Services.AddScoped<ProductosRepository>();
 builder.Services.AddScoped<ProductosService>();
 builder.Services.AddScoped<CategoriasRepository>();
 builder.Services.AddScoped<CategoriasService>();
+builder.Services.AddScoped<ReportesRepository>();
+builder.Services.AddScoped<ReportesService>();
+//Lo nuevo
+builder.Services.AddScoped<EstadisticasRepository>();
+builder.Services.AddScoped<EstadisticasService>();
+builder.Services.AddScoped<VentasRepository>();
+builder.Services.AddScoped<VentasService>();
+builder.Services.AddScoped<ClientesRepository>();
+builder.Services.AddScoped<ClientesService>();
+builder.Services.AddScoped<CajaRepository>();
+builder.Services.AddScoped<CajaService>();
+builder.Services.AddScoped<UsuariosRepository>();
+builder.Services.AddScoped<UsuariosService>();
+builder.Services.AddScoped<ComprasRepository>();
+builder.Services.AddScoped<ComprasService>();
+builder.Services.AddScoped<ProveedoresRepository>();
+builder.Services.AddScoped<ProveedoresService>();
 
 
 

@@ -17,12 +17,18 @@ partial class FrmMain
     private ToolStripMenuItem gestionToolStripMenuItem;
     private ToolStripMenuItem clientesToolStripMenuItem;
     private ToolStripMenuItem controlToolStripMenuItem;
+    private ToolStripMenuItem cajaToolStripMenuItem;
     private ToolStripMenuItem auditoriaToolStripMenuItem;
+    private ToolStripMenuItem usuariosToolStripMenuItem;
+    private ToolStripMenuItem reportesToolStripMenuItem;
+    private ToolStripMenuItem reportesInformesToolStripMenuItem;
+    private ToolStripMenuItem estadisticasToolStripMenuItem;
 
     private Panel pnlHeader;
     private Label lblTitulo;
-    private Label lblUsuario;
     private Label lblBienvenida;
+    private Label lblUsuario;
+    private Button btnCerrarSesion;
     private Button btnRecargarDashboard;
 
     private Panel pnlKpi1;
@@ -46,19 +52,10 @@ partial class FrmMain
     private DataGridView dgvBajoStock;
     private DataGridView dgvUltimosProductos;
 
-    private DataGridViewTextBoxColumn colBsProducto;
-    private DataGridViewTextBoxColumn colBsCategoria;
-    private DataGridViewTextBoxColumn colBsStock;
-    private DataGridViewTextBoxColumn colBsStockMinimo;
-
-    private DataGridViewTextBoxColumn colUpProducto;
-    private DataGridViewTextBoxColumn colUpCategoria;
-    private DataGridViewTextBoxColumn colUpFechaAlta;
-    private DataGridViewTextBoxColumn colUpPrecio;
-
     private Button btnAccesoProductos;
     private Button btnAccesoCategorias;
     private Button btnAccesoSecciones;
+    private Button btnAccesoReportes;
 
     private Panel pnlDerecho;
     private GroupBox grpAlertas;
@@ -69,18 +66,22 @@ partial class FrmMain
     private Label lblResumen3;
     private Label lblResumen4;
 
+    private GroupBox grpPanelTrabajo;
+    private Button btnTrabajoVentas;
+    private Button btnTrabajoClientes;
+    private Button btnTrabajoCaja;
+    private Panel pnlContenidoTrabajo;
+
     protected override void Dispose(bool disposing)
     {
-        if (disposing && (components != null))
+        if (disposing && components != null)
             components.Dispose();
+
         base.Dispose(disposing);
     }
 
     private void InitializeComponent()
     {
-        System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-        System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-
         menuPrincipal = new MenuStrip();
         sistemaToolStripMenuItem = new ToolStripMenuItem();
         salirToolStripMenuItem = new ToolStripMenuItem();
@@ -94,12 +95,18 @@ partial class FrmMain
         gestionToolStripMenuItem = new ToolStripMenuItem();
         clientesToolStripMenuItem = new ToolStripMenuItem();
         controlToolStripMenuItem = new ToolStripMenuItem();
+        cajaToolStripMenuItem = new ToolStripMenuItem();
         auditoriaToolStripMenuItem = new ToolStripMenuItem();
+        usuariosToolStripMenuItem = new ToolStripMenuItem();
+        reportesToolStripMenuItem = new ToolStripMenuItem();
+        reportesInformesToolStripMenuItem = new ToolStripMenuItem();
+        estadisticasToolStripMenuItem = new ToolStripMenuItem();
 
         pnlHeader = new Panel();
         lblTitulo = new Label();
         lblBienvenida = new Label();
         lblUsuario = new Label();
+        btnCerrarSesion = new Button();
         btnRecargarDashboard = new Button();
 
         pnlKpi1 = new Panel();
@@ -120,31 +127,30 @@ partial class FrmMain
 
         grpBajoStock = new GroupBox();
         dgvBajoStock = new DataGridView();
-        colBsProducto = new DataGridViewTextBoxColumn();
-        colBsCategoria = new DataGridViewTextBoxColumn();
-        colBsStock = new DataGridViewTextBoxColumn();
-        colBsStockMinimo = new DataGridViewTextBoxColumn();
 
         grpUltimosProductos = new GroupBox();
         dgvUltimosProductos = new DataGridView();
-        colUpProducto = new DataGridViewTextBoxColumn();
-        colUpCategoria = new DataGridViewTextBoxColumn();
-        colUpFechaAlta = new DataGridViewTextBoxColumn();
-        colUpPrecio = new DataGridViewTextBoxColumn();
 
         grpAccesosRapidos = new GroupBox();
         btnAccesoProductos = new Button();
         btnAccesoCategorias = new Button();
         btnAccesoSecciones = new Button();
+        btnAccesoReportes = new Button();
 
         pnlDerecho = new Panel();
         grpAlertas = new GroupBox();
-        grpResumenRapido = new GroupBox();
         lstAlertas = new ListBox();
+        grpResumenRapido = new GroupBox();
         lblResumen1 = new Label();
         lblResumen2 = new Label();
         lblResumen3 = new Label();
         lblResumen4 = new Label();
+
+        grpPanelTrabajo = new GroupBox();
+        btnTrabajoVentas = new Button();
+        btnTrabajoClientes = new Button();
+        btnTrabajoCaja = new Button();
+        pnlContenidoTrabajo = new Panel();
 
         menuPrincipal.SuspendLayout();
         pnlHeader.SuspendLayout();
@@ -160,378 +166,295 @@ partial class FrmMain
         pnlDerecho.SuspendLayout();
         grpAlertas.SuspendLayout();
         grpResumenRapido.SuspendLayout();
+        grpPanelTrabajo.SuspendLayout();
         SuspendLayout();
 
-        // menuPrincipal
-        menuPrincipal.Items.AddRange(new ToolStripItem[] {
+        // MENU
+        menuPrincipal.Items.AddRange(new ToolStripItem[]
+        {
             sistemaToolStripMenuItem,
             catalogoToolStripMenuItem,
             operacionesToolStripMenuItem,
             gestionToolStripMenuItem,
-            controlToolStripMenuItem
+            controlToolStripMenuItem,
+            reportesToolStripMenuItem
         });
         menuPrincipal.Location = new Point(0, 0);
         menuPrincipal.Name = "menuPrincipal";
         menuPrincipal.Size = new Size(1440, 24);
         menuPrincipal.TabIndex = 0;
 
-        // sistema
         sistemaToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { salirToolStripMenuItem });
-        sistemaToolStripMenuItem.Name = "sistemaToolStripMenuItem";
-        sistemaToolStripMenuItem.Size = new Size(60, 20);
         sistemaToolStripMenuItem.Text = "Sistema";
 
-        salirToolStripMenuItem.Name = "salirToolStripMenuItem";
-        salirToolStripMenuItem.Size = new Size(96, 22);
         salirToolStripMenuItem.Text = "Salir";
         salirToolStripMenuItem.Click += salirToolStripMenuItem_Click;
 
-        // catalogo
-        catalogoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] {
+        catalogoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[]
+        {
             seccionesToolStripMenuItem,
             categoriasToolStripMenuItem,
             productosToolStripMenuItem
         });
-        catalogoToolStripMenuItem.Name = "catalogoToolStripMenuItem";
-        catalogoToolStripMenuItem.Size = new Size(67, 20);
         catalogoToolStripMenuItem.Text = "Catálogo";
 
-        seccionesToolStripMenuItem.Name = "seccionesToolStripMenuItem";
-        seccionesToolStripMenuItem.Size = new Size(130, 22);
         seccionesToolStripMenuItem.Text = "Secciones";
         seccionesToolStripMenuItem.Click += seccionesToolStripMenuItem_Click;
 
-        categoriasToolStripMenuItem.Name = "categoriasToolStripMenuItem";
-        categoriasToolStripMenuItem.Size = new Size(130, 22);
         categoriasToolStripMenuItem.Text = "Categorías";
         categoriasToolStripMenuItem.Click += categoriasToolStripMenuItem_Click;
 
-        productosToolStripMenuItem.Name = "productosToolStripMenuItem";
-        productosToolStripMenuItem.Size = new Size(130, 22);
         productosToolStripMenuItem.Text = "Productos";
         productosToolStripMenuItem.Click += productosToolStripMenuItem_Click;
 
-        // operaciones
-        operacionesToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] {
+        operacionesToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[]
+        {
             ventasToolStripMenuItem,
             comprasToolStripMenuItem
         });
-        operacionesToolStripMenuItem.Name = "operacionesToolStripMenuItem";
-        operacionesToolStripMenuItem.Size = new Size(85, 20);
         operacionesToolStripMenuItem.Text = "Operaciones";
 
-        ventasToolStripMenuItem.Name = "ventasToolStripMenuItem";
-        ventasToolStripMenuItem.Size = new Size(122, 22);
         ventasToolStripMenuItem.Text = "Ventas";
         ventasToolStripMenuItem.Click += ventasToolStripMenuItem_Click;
 
-        comprasToolStripMenuItem.Name = "comprasToolStripMenuItem";
-        comprasToolStripMenuItem.Size = new Size(122, 22);
         comprasToolStripMenuItem.Text = "Compras";
         comprasToolStripMenuItem.Click += comprasToolStripMenuItem_Click;
 
-        // gestion
         gestionToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { clientesToolStripMenuItem });
-        gestionToolStripMenuItem.Name = "gestionToolStripMenuItem";
-        gestionToolStripMenuItem.Size = new Size(59, 20);
         gestionToolStripMenuItem.Text = "Gestión";
 
-        clientesToolStripMenuItem.Name = "clientesToolStripMenuItem";
-        clientesToolStripMenuItem.Size = new Size(116, 22);
         clientesToolStripMenuItem.Text = "Clientes";
         clientesToolStripMenuItem.Click += clientesToolStripMenuItem_Click;
 
-        // control
-        controlToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { auditoriaToolStripMenuItem });
-        controlToolStripMenuItem.Name = "controlToolStripMenuItem";
-        controlToolStripMenuItem.Size = new Size(59, 20);
+        controlToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            cajaToolStripMenuItem,
+            auditoriaToolStripMenuItem,
+            usuariosToolStripMenuItem
+        });
         controlToolStripMenuItem.Text = "Control";
 
-        auditoriaToolStripMenuItem.Name = "auditoriaToolStripMenuItem";
-        auditoriaToolStripMenuItem.Size = new Size(123, 22);
+        cajaToolStripMenuItem.Text = "Caja";
+        cajaToolStripMenuItem.Click += cajaToolStripMenuItem_Click;
+
         auditoriaToolStripMenuItem.Text = "Auditoría";
         auditoriaToolStripMenuItem.Click += auditoriaToolStripMenuItem_Click;
 
-        // pnlHeader
-        pnlHeader.BackColor = Color.White;
-        pnlHeader.BorderStyle = BorderStyle.FixedSingle;
-        pnlHeader.Controls.Add(lblTitulo);
-        pnlHeader.Controls.Add(lblBienvenida);
-        pnlHeader.Controls.Add(lblUsuario);
-        pnlHeader.Controls.Add(btnRecargarDashboard);
+        usuariosToolStripMenuItem.Text = "Usuarios";
+        usuariosToolStripMenuItem.Click += usuariosToolStripMenuItem_Click;
+
+        reportesToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            reportesInformesToolStripMenuItem,
+            estadisticasToolStripMenuItem
+        });
+        reportesToolStripMenuItem.Text = "Reportes";
+
+        reportesInformesToolStripMenuItem.Text = "Reportes e informes";
+        reportesInformesToolStripMenuItem.Click += reportesInformesToolStripMenuItem_Click;
+
+        estadisticasToolStripMenuItem.Text = "Estadísticas";
+        estadisticasToolStripMenuItem.Click += estadisticasToolStripMenuItem_Click;
+
+        // HEADER
+        pnlHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        pnlHeader.BackColor = Color.FromArgb(255, 77, 109);
+        pnlHeader.BorderStyle = BorderStyle.None;
         pnlHeader.Location = new Point(20, 40);
         pnlHeader.Name = "pnlHeader";
-        pnlHeader.Size = new Size(980, 90);
+        pnlHeader.Size = new Size(1140, 95);
         pnlHeader.TabIndex = 1;
-        pnlHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
         lblTitulo.AutoSize = true;
-        lblTitulo.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
-        lblTitulo.Location = new Point(20, 10);
-        lblTitulo.Name = "lblTitulo";
-        lblTitulo.Size = new Size(197, 41);
+        lblTitulo.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
+        lblTitulo.ForeColor = Color.White;
+        lblTitulo.Location = new Point(25, 10);
         lblTitulo.Text = "POP Cotillón";
 
         lblBienvenida.AutoSize = true;
         lblBienvenida.Font = new Font("Segoe UI", 11F);
-        lblBienvenida.Location = new Point(24, 55);
-        lblBienvenida.Name = "lblBienvenida";
-        lblBienvenida.Size = new Size(83, 20);
+        lblBienvenida.ForeColor = Color.White;
+        lblBienvenida.Location = new Point(28, 58);
         lblBienvenida.Text = "Bienvenido";
 
-        lblUsuario.AutoSize = true;
-        lblUsuario.Font = new Font("Segoe UI", 10F);
-        lblUsuario.Location = new Point(690, 20);
-        lblUsuario.Name = "lblUsuario";
-        lblUsuario.Size = new Size(59, 19);
-        lblUsuario.Text = "Usuario:";
         lblUsuario.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        lblUsuario.AutoSize = true;
+        lblUsuario.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        lblUsuario.ForeColor = Color.White;
+        lblUsuario.Location = new Point(790, 20);
+        lblUsuario.Text = "Usuario:";
 
-        btnRecargarDashboard.Location = new Point(760, 48);
-        btnRecargarDashboard.Name = "btnRecargarDashboard";
-        btnRecargarDashboard.Size = new Size(180, 30);
-        btnRecargarDashboard.TabIndex = 0;
-        btnRecargarDashboard.Text = "Recargar dashboard";
-        btnRecargarDashboard.UseVisualStyleBackColor = true;
-        btnRecargarDashboard.Click += btnRecargarDashboard_Click;
+        btnCerrarSesion.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnCerrarSesion.Location = new Point(790, 55);
+        btnCerrarSesion.Size = new Size(150, 32);
+        btnCerrarSesion.Text = "Cerrar sesión";
+        btnCerrarSesion.Click += btnCerrarSesion_Click;
+
         btnRecargarDashboard.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnRecargarDashboard.Location = new Point(955, 55);
+        btnRecargarDashboard.Size = new Size(150, 32);
+        btnRecargarDashboard.Text = "Recargar";
+        btnRecargarDashboard.Click += btnRecargarDashboard_Click;
 
-        // KPI panels
-        ConfigurarKpiPanel(pnlKpi4, 20, 150);
-        ConfigurarKpiPanel(pnlKpi3, 270, 150);
-        ConfigurarKpiPanel(pnlKpi2, 520, 150);
-        ConfigurarKpiPanel(pnlKpi1, 770, 150);
+        pnlHeader.Controls.Add(lblTitulo);
+        pnlHeader.Controls.Add(lblBienvenida);
+        pnlHeader.Controls.Add(lblUsuario);
+        pnlHeader.Controls.Add(btnCerrarSesion);
+        pnlHeader.Controls.Add(btnRecargarDashboard);
 
-        // pnlKpi4 - Bajo stock
-        pnlKpi4.Controls.Add(lblKpiBajoStockTitulo);
-        pnlKpi4.Controls.Add(lblKpiBajoStockValor);
+        // KPIS
+        ConfigurarKpiPanel(pnlKpi1, 20, 155);
+        ConfigurarKpiPanel(pnlKpi2, 270, 155);
+        ConfigurarKpiPanel(pnlKpi3, 520, 155);
+        ConfigurarKpiPanel(pnlKpi4, 770, 155);
 
-        lblKpiBajoStockTitulo.AutoSize = true;
-        lblKpiBajoStockTitulo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        lblKpiBajoStockTitulo.Location = new Point(20, 18);
-        lblKpiBajoStockTitulo.Text = "Bajo stock";
-
-        lblKpiBajoStockValor.AutoSize = true;
-        lblKpiBajoStockValor.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
-        lblKpiBajoStockValor.Location = new Point(20, 50);
-        lblKpiBajoStockValor.Text = "0";
-
-        // pnlKpi3 - Inactivos
-        pnlKpi3.Controls.Add(lblKpiInactivosTitulo);
-        pnlKpi3.Controls.Add(lblKpiInactivosValor);
-
-        lblKpiInactivosTitulo.AutoSize = true;
-        lblKpiInactivosTitulo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        lblKpiInactivosTitulo.Location = new Point(20, 18);
-        lblKpiInactivosTitulo.Text = "Productos inactivos";
-
-        lblKpiInactivosValor.AutoSize = true;
-        lblKpiInactivosValor.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
-        lblKpiInactivosValor.Location = new Point(20, 50);
-        lblKpiInactivosValor.Text = "0";
-
-        // pnlKpi2 - Activos
-        pnlKpi2.Controls.Add(lblKpiActivosTitulo);
-        pnlKpi2.Controls.Add(lblKpiActivosValor);
-
-        lblKpiActivosTitulo.AutoSize = true;
-        lblKpiActivosTitulo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        lblKpiActivosTitulo.Location = new Point(20, 18);
-        lblKpiActivosTitulo.Text = "Productos activos";
-
-        lblKpiActivosValor.AutoSize = true;
-        lblKpiActivosValor.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
-        lblKpiActivosValor.Location = new Point(20, 50);
-        lblKpiActivosValor.Text = "0";
-
-        // pnlKpi1 - Total
+        ConfigurarKpiLabel(lblKpiTotalProductosTitulo, "Total productos", 20, 18);
+        ConfigurarKpiValor(lblKpiTotalProductosValor, "0");
         pnlKpi1.Controls.Add(lblKpiTotalProductosTitulo);
         pnlKpi1.Controls.Add(lblKpiTotalProductosValor);
 
-        lblKpiTotalProductosTitulo.AutoSize = true;
-        lblKpiTotalProductosTitulo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        lblKpiTotalProductosTitulo.Location = new Point(20, 18);
-        lblKpiTotalProductosTitulo.Text = "Total productos";
+        ConfigurarKpiLabel(lblKpiActivosTitulo, "Productos activos", 20, 18);
+        ConfigurarKpiValor(lblKpiActivosValor, "0");
+        pnlKpi2.Controls.Add(lblKpiActivosTitulo);
+        pnlKpi2.Controls.Add(lblKpiActivosValor);
 
-        lblKpiTotalProductosValor.AutoSize = true;
-        lblKpiTotalProductosValor.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
-        lblKpiTotalProductosValor.Location = new Point(20, 50);
-        lblKpiTotalProductosValor.Text = "0";
+        ConfigurarKpiLabel(lblKpiInactivosTitulo, "Productos inactivos", 20, 18);
+        ConfigurarKpiValor(lblKpiInactivosValor, "0");
+        pnlKpi3.Controls.Add(lblKpiInactivosTitulo);
+        pnlKpi3.Controls.Add(lblKpiInactivosValor);
 
-        // grpBajoStock
-        grpBajoStock.Controls.Add(dgvBajoStock);
-        grpBajoStock.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        grpBajoStock.Location = new Point(20, 290);
-        grpBajoStock.Name = "grpBajoStock";
-        grpBajoStock.Size = new Size(480, 330);
-        grpBajoStock.TabIndex = 6;
-        grpBajoStock.TabStop = false;
+        ConfigurarKpiLabel(lblKpiBajoStockTitulo, "Bajo stock", 20, 18);
+        ConfigurarKpiValor(lblKpiBajoStockValor, "0");
+        pnlKpi4.Controls.Add(lblKpiBajoStockTitulo);
+        pnlKpi4.Controls.Add(lblKpiBajoStockValor);
+
+        // GRILLAS
         grpBajoStock.Text = "Productos con bajo stock";
+        grpBajoStock.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        grpBajoStock.BackColor = Color.White;
+        grpBajoStock.Location = new Point(20, 290);
+        grpBajoStock.Size = new Size(490, 330);
 
+        dgvBajoStock.Dock = DockStyle.Fill;
         dgvBajoStock.AllowUserToAddRows = false;
         dgvBajoStock.AllowUserToDeleteRows = false;
-        dgvBajoStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        dgvBajoStock.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        dgvBajoStock.Columns.AddRange(new DataGridViewColumn[] {
-            colBsProducto, colBsCategoria, colBsStock, colBsStockMinimo
-        });
-        dgvBajoStock.Dock = DockStyle.Fill;
         dgvBajoStock.ReadOnly = true;
         dgvBajoStock.RowHeadersVisible = false;
         dgvBajoStock.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        grpBajoStock.Controls.Add(dgvBajoStock);
 
-        colBsProducto.DataPropertyName = "NombreProducto";
-        colBsProducto.HeaderText = "Producto";
-        colBsProducto.ReadOnly = true;
-
-        colBsCategoria.DataPropertyName = "NombreCategoria";
-        colBsCategoria.HeaderText = "Categoría";
-        colBsCategoria.ReadOnly = true;
-
-        colBsStock.DataPropertyName = "Stock";
-        colBsStock.HeaderText = "Stock";
-        colBsStock.ReadOnly = true;
-
-        colBsStockMinimo.DataPropertyName = "StockMinimo";
-        colBsStockMinimo.HeaderText = "Stock mínimo";
-        colBsStockMinimo.ReadOnly = true;
-
-        // grpUltimosProductos
-        grpUltimosProductos.Controls.Add(dgvUltimosProductos);
-        grpUltimosProductos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        grpUltimosProductos.Location = new Point(520, 290);
-        grpUltimosProductos.Name = "grpUltimosProductos";
-        grpUltimosProductos.Size = new Size(480, 330);
-        grpUltimosProductos.TabIndex = 7;
-        grpUltimosProductos.TabStop = false;
         grpUltimosProductos.Text = "Últimos productos agregados";
+        grpUltimosProductos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        grpUltimosProductos.BackColor = Color.White;
+        grpUltimosProductos.Location = new Point(530, 290);
+        grpUltimosProductos.Size = new Size(490, 330);
 
+        dgvUltimosProductos.Dock = DockStyle.Fill;
         dgvUltimosProductos.AllowUserToAddRows = false;
         dgvUltimosProductos.AllowUserToDeleteRows = false;
-        dgvUltimosProductos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        dgvUltimosProductos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        dgvUltimosProductos.Columns.AddRange(new DataGridViewColumn[] {
-            colUpProducto, colUpCategoria, colUpFechaAlta, colUpPrecio
-        });
-        dgvUltimosProductos.Dock = DockStyle.Fill;
         dgvUltimosProductos.ReadOnly = true;
         dgvUltimosProductos.RowHeadersVisible = false;
         dgvUltimosProductos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        grpUltimosProductos.Controls.Add(dgvUltimosProductos);
 
-        colUpProducto.DataPropertyName = "NombreProducto";
-        colUpProducto.HeaderText = "Producto";
-        colUpProducto.ReadOnly = true;
-
-        colUpCategoria.DataPropertyName = "NombreCategoria";
-        colUpCategoria.HeaderText = "Categoría";
-        colUpCategoria.ReadOnly = true;
-
-        colUpFechaAlta.DataPropertyName = "FechaAlta";
-        dataGridViewCellStyle1.Format = "dd/MM/yyyy HH:mm";
-        colUpFechaAlta.DefaultCellStyle = dataGridViewCellStyle1;
-        colUpFechaAlta.HeaderText = "Fecha alta";
-        colUpFechaAlta.ReadOnly = true;
-
-        colUpPrecio.DataPropertyName = "Precio";
-        dataGridViewCellStyle2.Format = "N2";
-        colUpPrecio.DefaultCellStyle = dataGridViewCellStyle2;
-        colUpPrecio.HeaderText = "Precio";
-        colUpPrecio.ReadOnly = true;
-
-        // grpAccesosRapidos
-        grpAccesosRapidos.Controls.Add(btnAccesoProductos);
-        grpAccesosRapidos.Controls.Add(btnAccesoCategorias);
-        grpAccesosRapidos.Controls.Add(btnAccesoSecciones);
-        grpAccesosRapidos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        grpAccesosRapidos.Location = new Point(20, 640);
-        grpAccesosRapidos.Name = "grpAccesosRapidos";
-        grpAccesosRapidos.Size = new Size(980, 110);
-        grpAccesosRapidos.TabIndex = 8;
-        grpAccesosRapidos.TabStop = false;
+        // ACCESOS RAPIDOS
         grpAccesosRapidos.Text = "Accesos rápidos";
+        grpAccesosRapidos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        grpAccesosRapidos.BackColor = Color.White;
+        grpAccesosRapidos.Location = new Point(20, 640);
+        grpAccesosRapidos.Size = new Size(1050, 110);
 
         ConfigurarBotonRapido(btnAccesoProductos, "Productos", 25);
-        ConfigurarBotonRapido(btnAccesoCategorias, "Categorías", 270);
-        ConfigurarBotonRapido(btnAccesoSecciones, "Secciones", 515);
+        ConfigurarBotonRapido(btnAccesoCategorias, "Categorías", 280);
+        ConfigurarBotonRapido(btnAccesoSecciones, "Secciones", 535);
+        ConfigurarBotonRapido(btnAccesoReportes, "Reportes", 790);
 
         btnAccesoProductos.Click += btnAccesoProductos_Click;
         btnAccesoCategorias.Click += btnAccesoCategorias_Click;
         btnAccesoSecciones.Click += btnAccesoSecciones_Click;
+        btnAccesoReportes.Click += btnAccesoReportes_Click;
 
-        // pnlDerecho
+        grpAccesosRapidos.Controls.Add(btnAccesoProductos);
+        grpAccesosRapidos.Controls.Add(btnAccesoCategorias);
+        grpAccesosRapidos.Controls.Add(btnAccesoSecciones);
+        grpAccesosRapidos.Controls.Add(btnAccesoReportes);
+
+        // PANEL DERECHO
+        pnlDerecho.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
         pnlDerecho.BackColor = Color.White;
         pnlDerecho.BorderStyle = BorderStyle.FixedSingle;
-        pnlDerecho.Controls.Add(grpAlertas);
-        pnlDerecho.Controls.Add(grpResumenRapido);
-        pnlDerecho.Location = new Point(1020, 40);
-        pnlDerecho.Name = "pnlDerecho";
+        pnlDerecho.Location = new Point(1180, 40);
         pnlDerecho.Size = new Size(340, 710);
-        pnlDerecho.TabIndex = 9;
-        pnlDerecho.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
 
-        // grpAlertas
-        grpAlertas.Controls.Add(lstAlertas);
+        grpAlertas.Text = "Alertas";
         grpAlertas.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         grpAlertas.Location = new Point(15, 15);
-        grpAlertas.Name = "grpAlertas";
         grpAlertas.Size = new Size(308, 360);
-        grpAlertas.TabIndex = 0;
-        grpAlertas.TabStop = false;
-        grpAlertas.Text = "Alertas";
 
-        // lstAlertas
         lstAlertas.Dock = DockStyle.Fill;
         lstAlertas.Font = new Font("Segoe UI", 10F);
-        lstAlertas.FormattingEnabled = true;
-        lstAlertas.ItemHeight = 17;
-        lstAlertas.Name = "lstAlertas";
+        grpAlertas.Controls.Add(lstAlertas);
 
-        // grpResumenRapido
+        grpResumenRapido.Text = "Resumen rápido";
+        grpResumenRapido.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        grpResumenRapido.Location = new Point(15, 395);
+        grpResumenRapido.Size = new Size(308, 230);
+
+        ConfigurarResumenLabel(lblResumen1, "Activos: 0", 35);
+        ConfigurarResumenLabel(lblResumen2, "Inactivos: 0", 70);
+        ConfigurarResumenLabel(lblResumen3, "Total: 0", 105);
+        ConfigurarResumenLabel(lblResumen4, "Bajo stock: 0", 140);
+
         grpResumenRapido.Controls.Add(lblResumen1);
         grpResumenRapido.Controls.Add(lblResumen2);
         grpResumenRapido.Controls.Add(lblResumen3);
         grpResumenRapido.Controls.Add(lblResumen4);
-        grpResumenRapido.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-        grpResumenRapido.Location = new Point(15, 395);
-        grpResumenRapido.Name = "grpResumenRapido";
-        grpResumenRapido.Size = new Size(308, 230);
-        grpResumenRapido.TabIndex = 1;
-        grpResumenRapido.TabStop = false;
-        grpResumenRapido.Text = "Resumen rápido";
 
-        lblResumen1.AutoSize = true;
-        lblResumen1.Font = new Font("Segoe UI", 10F);
-        lblResumen1.Location = new Point(18, 35);
-        lblResumen1.Name = "lblResumen1";
-        lblResumen1.Size = new Size(80, 19);
-        lblResumen1.Text = "Activos: 0";
+        pnlDerecho.Controls.Add(grpAlertas);
+        pnlDerecho.Controls.Add(grpResumenRapido);
 
-        lblResumen2.AutoSize = true;
-        lblResumen2.Font = new Font("Segoe UI", 10F);
-        lblResumen2.Location = new Point(18, 70);
-        lblResumen2.Name = "lblResumen2";
-        lblResumen2.Size = new Size(89, 19);
-        lblResumen2.Text = "Inactivos: 0";
+        // PANEL TRABAJADOR
+        grpPanelTrabajo.Text = "Panel de trabajo";
+        grpPanelTrabajo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        grpPanelTrabajo.BackColor = Color.White;
+        grpPanelTrabajo.Location = new Point(20, 170);
+        grpPanelTrabajo.Size = new Size(1500, 650);
+        grpPanelTrabajo.Visible = false;
 
-        lblResumen3.AutoSize = true;
-        lblResumen3.Font = new Font("Segoe UI", 10F);
-        lblResumen3.Location = new Point(18, 105);
-        lblResumen3.Name = "lblResumen3";
-        lblResumen3.Size = new Size(61, 19);
-        lblResumen3.Text = "Total: 0";
+        btnTrabajoVentas.Location = new Point(20, 30);
+        btnTrabajoVentas.Size = new Size(220, 45);
+        btnTrabajoVentas.Text = "Ventas";
+        btnTrabajoVentas.Click += btnTrabajoVentas_Click;
 
-        lblResumen4.AutoSize = true;
-        lblResumen4.Font = new Font("Segoe UI", 10F);
-        lblResumen4.Location = new Point(18, 140);
-        lblResumen4.Name = "lblResumen4";
-        lblResumen4.Size = new Size(91, 19);
-        lblResumen4.Text = "Bajo stock: 0";
+        btnTrabajoClientes.Location = new Point(260, 30);
+        btnTrabajoClientes.Size = new Size(220, 45);
+        btnTrabajoClientes.Text = "Clientes";
+        btnTrabajoClientes.Click += btnTrabajoClientes_Click;
 
-        // FrmMain
+        btnTrabajoCaja.Location = new Point(500, 30);
+        btnTrabajoCaja.Size = new Size(220, 45);
+        btnTrabajoCaja.Text = "Caja";
+        btnTrabajoCaja.Click += btnTrabajoCaja_Click;
+
+        pnlContenidoTrabajo.Location = new Point(20, 90);
+        pnlContenidoTrabajo.Size = new Size(1460, 535);
+        pnlContenidoTrabajo.BorderStyle = BorderStyle.FixedSingle;
+
+        grpPanelTrabajo.Controls.Add(btnTrabajoVentas);
+        grpPanelTrabajo.Controls.Add(btnTrabajoClientes);
+        grpPanelTrabajo.Controls.Add(btnTrabajoCaja);
+        grpPanelTrabajo.Controls.Add(pnlContenidoTrabajo);
+
+        // FORM
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.FromArgb(245, 247, 250);
+        BackColor = Color.FromArgb(250, 248, 242);
+
+        BackgroundImage = Properties.Resources.FondoEscritorioApp;
+        BackgroundImageLayout = ImageLayout.Stretch;
+
         ClientSize = new Size(1440, 795);
+
         Controls.Add(pnlDerecho);
         Controls.Add(grpAccesosRapidos);
         Controls.Add(grpUltimosProductos);
@@ -540,12 +463,14 @@ partial class FrmMain
         Controls.Add(pnlKpi3);
         Controls.Add(pnlKpi2);
         Controls.Add(pnlKpi1);
+        Controls.Add(grpPanelTrabajo);
         Controls.Add(pnlHeader);
         Controls.Add(menuPrincipal);
+
         MainMenuStrip = menuPrincipal;
         Name = "FrmMain";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "Sistema Cotillón";
+        Text = "Sistema POP Cotillón";
         WindowState = FormWindowState.Maximized;
         Load += FrmMain_Load;
 
@@ -570,6 +495,7 @@ partial class FrmMain
         grpAlertas.ResumeLayout(false);
         grpResumenRapido.ResumeLayout(false);
         grpResumenRapido.PerformLayout();
+        grpPanelTrabajo.ResumeLayout(false);
         ResumeLayout(false);
         PerformLayout();
     }
@@ -578,14 +504,37 @@ partial class FrmMain
     {
         panel.BackColor = Color.White;
         panel.Location = new Point(x, y);
-        panel.Name = "panel";
         panel.Size = new Size(230, 110);
         panel.BorderStyle = BorderStyle.FixedSingle;
     }
 
+    private void ConfigurarKpiLabel(Label label, string texto, int x, int y)
+    {
+        label.AutoSize = true;
+        label.Text = texto;
+        label.Location = new Point(x, y);
+        label.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+    }
+
+    private void ConfigurarKpiValor(Label label, string texto)
+    {
+        label.AutoSize = true;
+        label.Text = texto;
+        label.Location = new Point(20, 50);
+        label.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
+    }
+
+    private void ConfigurarResumenLabel(Label label, string texto, int y)
+    {
+        label.AutoSize = true;
+        label.Text = texto;
+        label.Location = new Point(18, y);
+        label.Font = new Font("Segoe UI", 10F);
+    }
+
     private void ConfigurarBotonRapido(Button button, string texto, int x)
     {
-        button.Location = new Point(x, 35);
+        button.Location = new Point(x, 40);
         button.Size = new Size(220, 45);
         button.Text = texto;
         button.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
