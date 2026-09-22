@@ -22,6 +22,10 @@ public sealed class EscenarioVentas : IDisposable
         Ventas = new VentasRepository(_db.Factory);
         Caja = new CajaRepository(_db.Factory);
         Configuracion = new ConfiguracionRepository(_db.Factory);
+        Compras = new ComprasRepository(_db.Factory);
+        Stock = new StockRepository(_db.Factory);
+        Proveedores = new ProveedoresRepository(_db.Factory);
+        Clientes = new ClientesRepository(_db.Factory);
 
         using var conexion = _db.Abrir();
 
@@ -41,6 +45,10 @@ public sealed class EscenarioVentas : IDisposable
     public VentasRepository Ventas { get; }
     public CajaRepository Caja { get; }
     public ConfiguracionRepository Configuracion { get; }
+    public ComprasRepository Compras { get; }
+    public StockRepository Stock { get; }
+    public ProveedoresRepository Proveedores { get; }
+    public ClientesRepository Clientes { get; }
 
     public int MedioEfectivoId => ObtenerMedio("EFECTIVO");
     public int MedioDebitoId => ObtenerMedio("DEBITO");
@@ -54,6 +62,14 @@ public sealed class EscenarioVentas : IDisposable
 
         return conexion.ExecuteScalar<double>(
             "SELECT Stock FROM Productos WHERE ProductoId = @Id;", new { Id = productoId });
+    }
+
+    public decimal CostoDe(int productoId)
+    {
+        using var conexion = _db.Abrir();
+
+        return Money.FromCentavos(conexion.ExecuteScalar<long>(
+            "SELECT CostoCentavos FROM Productos WHERE ProductoId = @Id;", new { Id = productoId }));
     }
 
     public long ContarFilas(string tabla)

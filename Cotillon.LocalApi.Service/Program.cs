@@ -36,6 +36,15 @@ builder.Services.AddScoped<CajaRepository>();
 builder.Services.AddScoped<CajaService>();
 builder.Services.AddScoped<VentasRepository>();
 builder.Services.AddScoped<VentasService>();
+builder.Services.AddScoped<ClientesRepository>();
+builder.Services.AddScoped<ClientesService>();
+builder.Services.AddScoped<ProveedoresRepository>();
+builder.Services.AddScoped<ProveedoresService>();
+builder.Services.AddScoped<StockRepository>();
+builder.Services.AddScoped<StockService>();
+builder.Services.AddScoped<ComprasRepository>();
+builder.Services.AddScoped<ComprasService>();
+builder.Services.AddScoped<AuditoriaRepository>();
 
 var app = builder.Build();
 
