@@ -1,259 +1,208 @@
-﻿using Cotillon.LocalApi.Service.Data;
+using Cotillon.Data;
 using Cotillon.Shared.DTOs;
-using System.Data.OleDb;
+using Dapper;
 
 namespace Cotillon.LocalApi.Service.Repositories;
 
 public class ProductosRepository
 {
-    private readonly AccessDb _accessDb;
+    private readonly IDbConnectionFactory _factory;
 
-    public ProductosRepository(AccessDb accessDb)
+    public ProductosRepository(IDbConnectionFactory factory)
     {
-        _accessDb = accessDb;
+        _factory = factory;
     }
 
     public bool Insertar(ProductoDto producto)
     {
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        using var conexion = _factory.Crear();
 
-        const string sql = @"
-INSERT INTO [Productos]
-(
-    [CategoriaId],
-    [CodigoProducto],
-    [NombreProducto],
-    [Descripcion],
-    [Precio],
-    [Stock],
-    [StockMinimo],
-    [CodigoBarras],
-    [Marca],
-    [Activo],
-    [FechaAlta],
-    [Costo],
-    [ImagenUrl],
-    [UnidadMedida],
-    [PermiteVentaSinStock]
-)
-VALUES
-(
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, True, Now(), ?, ?, ?, ?
-)";
+        return conexion.Execute(
+            """
+            INSERT INTO Productos
+                (CategoriaId, CodigoProducto, NombreProducto, Descripcion, PrecioCentavos, CostoCentavos,
+                 Stock, StockMinimo, CodigoBarras, Marca, UnidadMedida, ImagenUrl, PermiteVentaSinStock, Activo)
+            VALUES
+                (@CategoriaId, @CodigoProducto, @NombreProducto, @Descripcion, @Precio, @Costo,
+                 @Stock, @StockMinimo, @CodigoBarras, @Marca, @UnidadMedida, @ImagenUrl, @PermiteVentaSinStock, 1);
+            """,
+            AParametros(producto)) > 0;
+    }
 
-        using var command = new OleDbCommand(sql, connection);
+    public bool Actualizar(ProductoDto producto)
+    {
+        using var conexion = _factory.Crear();
 
-        command.Parameters.AddWithValue("?", producto.CategoriaId);
-        command.Parameters.AddWithValue("?", string.IsNullOrWhiteSpace(producto.CodigoProducto) ? DBNull.Value : producto.CodigoProducto);
-        command.Parameters.AddWithValue("?", producto.NombreProducto);
-        command.Parameters.AddWithValue("?", string.IsNullOrWhiteSpace(producto.Descripcion) ? DBNull.Value : producto.Descripcion);
-        command.Parameters.AddWithValue("?", producto.Precio);
-        command.Parameters.AddWithValue("?", producto.Stock);
-        command.Parameters.AddWithValue("?", producto.StockMinimo);
-        command.Parameters.AddWithValue("?", string.IsNullOrWhiteSpace(producto.CodigoBarras) ? DBNull.Value : producto.CodigoBarras);
-        command.Parameters.AddWithValue("?", string.IsNullOrWhiteSpace(producto.Marca) ? DBNull.Value : producto.Marca);
-        command.Parameters.AddWithValue("?", producto.Costo);
-        command.Parameters.AddWithValue("?", string.IsNullOrWhiteSpace(producto.ImagenUrl) ? DBNull.Value : producto.ImagenUrl);
-        command.Parameters.AddWithValue("?", string.IsNullOrWhiteSpace(producto.UnidadMedida) ? DBNull.Value : producto.UnidadMedida);
-        command.Parameters.AddWithValue("?", producto.PermiteVentaSinStock);
-
-        return command.ExecuteNonQuery() > 0;
+        return conexion.Execute(
+            """
+            UPDATE Productos SET
+                CategoriaId = @CategoriaId,
+                CodigoProducto = @CodigoProducto,
+                NombreProducto = @NombreProducto,
+                Descripcion = @Descripcion,
+                PrecioCentavos = @Precio,
+                CostoCentavos = @Costo,
+                StockMinimo = @StockMinimo,
+                CodigoBarras = @CodigoBarras,
+                Marca = @Marca,
+                UnidadMedida = @UnidadMedida,
+                ImagenUrl = @ImagenUrl,
+                PermiteVentaSinStock = @PermiteVentaSinStock,
+                FechaActualizacion = datetime('now', 'localtime')
+            WHERE ProductoId = @ProductoId;
+            """,
+            AParametros(producto)) > 0;
     }
 
     public List<ProductoListadoDto> ObtenerTodos(bool incluirInactivos)
     {
-        var lista = new List<ProductoListadoDto>();
+        using var conexion = _factory.Crear();
 
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        var filas = conexion.Query<FilaListado>(
+            $"""
+            SELECT
+                p.ProductoId,
+                p.NombreProducto,
+                p.PrecioCentavos,
+                p.Stock,
+                p.Activo,
+                COALESCE(c.NombreCategoria, '(Sin categoría)') AS NombreCategoria,
+                COALESCE(s.NombreSeccion, '(Sin sección)')     AS NombreSeccion
+            FROM Productos p
+            LEFT JOIN Categorias c ON p.CategoriaId = c.CategoriaId
+            LEFT JOIN Secciones  s ON c.SeccionId   = s.SeccionId
+            {(incluirInactivos ? string.Empty : "WHERE p.Activo = 1")}
+            ORDER BY p.NombreProducto;
+            """);
 
-        var sql = @"
-SELECT
-    p.[ProductoId],
-    p.[NombreProducto],
-    p.[Precio],
-    p.[Stock],
-    p.[Activo],
-    c.[NombreCategoria],
-    s.[NombreSeccion]
-FROM
-    ([Productos] AS p
-    LEFT JOIN [Categorias] AS c ON p.[CategoriaId] = c.[CategoriaId])
-    LEFT JOIN [Secciones] AS s ON c.[SeccionId] = s.[SeccionId]";
-
-        if (!incluirInactivos)
+        return filas.Select(f => new ProductoListadoDto
         {
-            sql += " WHERE p.[Activo] = True";
-        }
-
-        sql += " ORDER BY p.[NombreProducto]";
-
-        using var command = new OleDbCommand(sql, connection);
-        using var reader = command.ExecuteReader();
-
-        while (reader != null && reader.Read())
-        {
-            lista.Add(new ProductoListadoDto
-            {
-                ProductoId = Convert.ToInt32(reader["ProductoId"]),
-                NombreProducto = reader["NombreProducto"]?.ToString() ?? string.Empty,
-                NombreSeccion = reader["NombreSeccion"] == DBNull.Value ? "(Sin sección)" : reader["NombreSeccion"]?.ToString() ?? string.Empty,
-                NombreCategoria = reader["NombreCategoria"] == DBNull.Value ? "(Sin categoría)" : reader["NombreCategoria"]?.ToString() ?? string.Empty,
-                Precio = reader["Precio"] != DBNull.Value ? Convert.ToDecimal(reader["Precio"]) : 0,
-                Stock = reader["Stock"] != DBNull.Value ? Convert.ToInt32(reader["Stock"]) : 0,
-                Activo = reader["Activo"] != DBNull.Value && Convert.ToBoolean(reader["Activo"])
-            });
-        }
-
-        return lista;
+            ProductoId = f.ProductoId,
+            NombreProducto = f.NombreProducto,
+            NombreSeccion = f.NombreSeccion,
+            NombreCategoria = f.NombreCategoria,
+            Precio = Money.FromCentavos(f.PrecioCentavos),
+            Stock = (int)f.Stock,
+            Activo = f.Activo
+        }).ToList();
     }
 
     public bool EliminarLogico(int productoId)
     {
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        using var conexion = _factory.Crear();
 
-        const string sql = @"
-UPDATE [Productos]
-SET [Activo] = False
-WHERE [ProductoId] = ?";
-
-        using var command = new OleDbCommand(sql, connection);
-        command.Parameters.AddWithValue("?", productoId);
-
-        return command.ExecuteNonQuery() > 0;
+        return conexion.Execute(
+            """
+            UPDATE Productos
+            SET Activo = 0, FechaActualizacion = datetime('now', 'localtime')
+            WHERE ProductoId = @ProductoId;
+            """,
+            new { ProductoId = productoId }) > 0;
     }
 
     public DashboardResumenDto ObtenerResumenDashboard()
     {
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        using var conexion = _factory.Crear();
 
-        var resumen = new DashboardResumenDto();
-
-        // Total productos
-        using (var cmd = new OleDbCommand("SELECT COUNT(*) FROM [Productos]", connection))
-        {
-            resumen.TotalProductos = Convert.ToInt32(cmd.ExecuteScalar());
-        }
-
-        // Activos
-        using (var cmd = new OleDbCommand("SELECT COUNT(*) FROM [Productos] WHERE [Activo] = True", connection))
-        {
-            resumen.ProductosActivos = Convert.ToInt32(cmd.ExecuteScalar());
-        }
-
-        // Inactivos
-        using (var cmd = new OleDbCommand("SELECT COUNT(*) FROM [Productos] WHERE [Activo] = False", connection))
-        {
-            resumen.ProductosInactivos = Convert.ToInt32(cmd.ExecuteScalar());
-        }
-
-        // Bajo stock
-        using (var cmd = new OleDbCommand(
-            "SELECT COUNT(*) FROM [Productos] WHERE [Activo] = True AND [Stock] <= Nz([StockMinimo], 0)", connection))
-        {
-            resumen.ProductosBajoStock = Convert.ToInt32(cmd.ExecuteScalar());
-        }
-
-        return resumen;
+        return conexion.QuerySingle<DashboardResumenDto>(
+            """
+            SELECT
+                COUNT(*)                                                                AS TotalProductos,
+                COALESCE(SUM(CASE WHEN Activo = 1 THEN 1 ELSE 0 END), 0)                AS ProductosActivos,
+                COALESCE(SUM(CASE WHEN Activo = 0 THEN 1 ELSE 0 END), 0)                AS ProductosInactivos,
+                COALESCE(SUM(CASE WHEN Activo = 1 AND Stock <= StockMinimo THEN 1 ELSE 0 END), 0) AS ProductosBajoStock
+            FROM Productos;
+            """);
     }
 
     public List<ProductoDashboardDto> ObtenerProductosBajoStock()
     {
-        var lista = new List<ProductoDashboardDto>();
+        using var conexion = _factory.Crear();
 
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
-
-        const string sql = @"
-SELECT
-    p.[ProductoId],
-    p.[NombreProducto],
-    p.[Precio],
-    p.[Stock],
-    p.[StockMinimo],
-    p.[Activo],
-    p.[FechaAlta],
-    c.[NombreCategoria],
-    s.[NombreSeccion]
-FROM
-    ([Productos] AS p
-    LEFT JOIN [Categorias] AS c ON p.[CategoriaId] = c.[CategoriaId])
-    LEFT JOIN [Secciones] AS s ON c.[SeccionId] = s.[SeccionId]
-WHERE
-    p.[Activo] = True
-    AND p.[Stock] <= Nz(p.[StockMinimo], 0)
-ORDER BY
-    p.[Stock] ASC, p.[NombreProducto] ASC";
-
-        using var command = new OleDbCommand(sql, connection);
-        using var reader = command.ExecuteReader();
-
-        while (reader != null && reader.Read())
-        {
-            lista.Add(new ProductoDashboardDto
-            {
-                ProductoId = Convert.ToInt32(reader["ProductoId"]),
-                NombreProducto = reader["NombreProducto"]?.ToString() ?? string.Empty,
-                NombreSeccion = reader["NombreSeccion"] == DBNull.Value ? "(Sin sección)" : reader["NombreSeccion"]?.ToString() ?? string.Empty,
-                NombreCategoria = reader["NombreCategoria"] == DBNull.Value ? "(Sin categoría)" : reader["NombreCategoria"]?.ToString() ?? string.Empty,
-                Precio = reader["Precio"] != DBNull.Value ? Convert.ToDecimal(reader["Precio"]) : 0,
-                Stock = reader["Stock"] != DBNull.Value ? Convert.ToInt32(reader["Stock"]) : 0,
-                StockMinimo = reader["StockMinimo"] != DBNull.Value ? Convert.ToInt32(reader["StockMinimo"]) : 0,
-                Activo = reader["Activo"] != DBNull.Value && Convert.ToBoolean(reader["Activo"]),
-                FechaAlta = reader["FechaAlta"] != DBNull.Value ? Convert.ToDateTime(reader["FechaAlta"]) : null
-            });
-        }
-
-        return lista;
+        return Mapear(conexion.Query<FilaDashboard>(
+            """
+            SELECT
+                p.ProductoId, p.NombreProducto, p.PrecioCentavos, p.Stock, p.StockMinimo, p.Activo, p.FechaAlta,
+                COALESCE(c.NombreCategoria, '(Sin categoría)') AS NombreCategoria,
+                COALESCE(s.NombreSeccion, '(Sin sección)')     AS NombreSeccion
+            FROM Productos p
+            LEFT JOIN Categorias c ON p.CategoriaId = c.CategoriaId
+            LEFT JOIN Secciones  s ON c.SeccionId   = s.SeccionId
+            WHERE p.Activo = 1 AND p.Stock <= p.StockMinimo
+            ORDER BY p.Stock ASC, p.NombreProducto ASC;
+            """));
     }
 
     public List<ProductoDashboardDto> ObtenerUltimosProductos(int cantidad = 10)
     {
-        var lista = new List<ProductoDashboardDto>();
+        using var conexion = _factory.Crear();
 
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        return Mapear(conexion.Query<FilaDashboard>(
+            """
+            SELECT
+                p.ProductoId, p.NombreProducto, p.PrecioCentavos, p.Stock, p.StockMinimo, p.Activo, p.FechaAlta,
+                COALESCE(c.NombreCategoria, '(Sin categoría)') AS NombreCategoria,
+                COALESCE(s.NombreSeccion, '(Sin sección)')     AS NombreSeccion
+            FROM Productos p
+            LEFT JOIN Categorias c ON p.CategoriaId = c.CategoriaId
+            LEFT JOIN Secciones  s ON c.SeccionId   = s.SeccionId
+            ORDER BY p.FechaAlta DESC, p.ProductoId DESC
+            LIMIT @Cantidad;
+            """,
+            new { Cantidad = cantidad }));
+    }
 
-        string sql = $@"
-SELECT TOP {cantidad}
-    p.[ProductoId],
-    p.[NombreProducto],
-    p.[Precio],
-    p.[Stock],
-    p.[StockMinimo],
-    p.[Activo],
-    p.[FechaAlta],
-    c.[NombreCategoria],
-    s.[NombreSeccion]
-FROM
-    ([Productos] AS p
-    LEFT JOIN [Categorias] AS c ON p.[CategoriaId] = c.[CategoriaId])
-    LEFT JOIN [Secciones] AS s ON c.[SeccionId] = s.[SeccionId]
-ORDER BY
-    p.[FechaAlta] DESC, p.[ProductoId] DESC";
-
-        using var command = new OleDbCommand(sql, connection);
-        using var reader = command.ExecuteReader();
-
-        while (reader != null && reader.Read())
+    private static List<ProductoDashboardDto> Mapear(IEnumerable<FilaDashboard> filas) =>
+        filas.Select(f => new ProductoDashboardDto
         {
-            lista.Add(new ProductoDashboardDto
-            {
-                ProductoId = Convert.ToInt32(reader["ProductoId"]),
-                NombreProducto = reader["NombreProducto"]?.ToString() ?? string.Empty,
-                NombreSeccion = reader["NombreSeccion"] == DBNull.Value ? "(Sin sección)" : reader["NombreSeccion"]?.ToString() ?? string.Empty,
-                NombreCategoria = reader["NombreCategoria"] == DBNull.Value ? "(Sin categoría)" : reader["NombreCategoria"]?.ToString() ?? string.Empty,
-                Precio = reader["Precio"] != DBNull.Value ? Convert.ToDecimal(reader["Precio"]) : 0,
-                Stock = reader["Stock"] != DBNull.Value ? Convert.ToInt32(reader["Stock"]) : 0,
-                StockMinimo = reader["StockMinimo"] != DBNull.Value ? Convert.ToInt32(reader["StockMinimo"]) : 0,
-                Activo = reader["Activo"] != DBNull.Value && Convert.ToBoolean(reader["Activo"]),
-                FechaAlta = reader["FechaAlta"] != DBNull.Value ? Convert.ToDateTime(reader["FechaAlta"]) : null
-            });
-        }
+            ProductoId = f.ProductoId,
+            NombreProducto = f.NombreProducto,
+            NombreSeccion = f.NombreSeccion,
+            NombreCategoria = f.NombreCategoria,
+            Precio = Money.FromCentavos(f.PrecioCentavos),
+            Stock = (int)f.Stock,
+            StockMinimo = (int)f.StockMinimo,
+            Activo = f.Activo,
+            FechaAlta = f.FechaAlta
+        }).ToList();
 
-        return lista;
+    private static object AParametros(ProductoDto producto) => new
+    {
+        producto.ProductoId,
+        producto.CategoriaId,
+        CodigoProducto = Opcional(producto.CodigoProducto),
+        producto.NombreProducto,
+        Descripcion = Opcional(producto.Descripcion),
+        Precio = Money.ToCentavos(producto.Precio),
+        Costo = Money.ToCentavos(producto.Costo),
+        producto.Stock,
+        producto.StockMinimo,
+        CodigoBarras = Opcional(producto.CodigoBarras),
+        Marca = Opcional(producto.Marca),
+        UnidadMedida = string.IsNullOrWhiteSpace(producto.UnidadMedida) ? "UNIDAD" : producto.UnidadMedida.Trim(),
+        ImagenUrl = Opcional(producto.ImagenUrl),
+        PermiteVentaSinStock = producto.PermiteVentaSinStock ? 1 : 0
+    };
+
+    // Los códigos únicos se guardan como NULL cuando vienen vacíos: el índice único
+    // parcial ignora los NULL pero rechazaría varias cadenas vacías.
+    private static string? Opcional(string? valor) =>
+        string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
+
+    private class FilaListado
+    {
+        public int ProductoId { get; init; }
+        public string NombreProducto { get; init; } = string.Empty;
+        public string NombreSeccion { get; init; } = string.Empty;
+        public string NombreCategoria { get; init; } = string.Empty;
+        public long PrecioCentavos { get; init; }
+        public double Stock { get; init; }
+        public bool Activo { get; init; }
+    }
+
+    private sealed class FilaDashboard : FilaListado
+    {
+        public double StockMinimo { get; init; }
+        public DateTime? FechaAlta { get; init; }
     }
 }

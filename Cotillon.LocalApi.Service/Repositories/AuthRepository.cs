@@ -1,49 +1,53 @@
-﻿using Cotillon.LocalApi.Service.Data;
+using Cotillon.Data;
 using Cotillon.Shared.DTOs;
-using System.Data.OleDb;
+using Dapper;
 
 namespace Cotillon.LocalApi.Service.Repositories;
 
 public class AuthRepository
 {
-    private readonly AccessDb _accessDb;
+    private readonly IDbConnectionFactory _factory;
 
-    public AuthRepository(AccessDb accessDb)
+    public AuthRepository(IDbConnectionFactory factory)
     {
-        _accessDb = accessDb;
+        _factory = factory;
     }
 
     public LoginResponseDto? Login(string username, string pin)
     {
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        using var conexion = _factory.Crear();
 
-        const string sql = @"
-SELECT 
-    [UsuarioId],
-    [NombreUsuario],
-    [NombreCompleto],
-    [Rol]
-FROM [Usuarios]
-WHERE [NombreUsuario] = ?
-  AND [Pin] = ?
-  AND [Activo] = True";
+        var usuario = conexion.QuerySingleOrDefault<UsuarioCredenciales>(
+            """
+            SELECT UsuarioId, NombreUsuario, NombreCompleto, Rol, PinHash, PinSalt
+            FROM Usuarios
+            WHERE NombreUsuario = @Usuario AND Activo = 1;
+            """,
+            new { Usuario = username });
 
-        using var command = new OleDbCommand(sql, connection);
-        command.Parameters.AddWithValue("?", username);
-        command.Parameters.AddWithValue("?", pin);
-
-        using var reader = command.ExecuteReader();
-
-        if (reader == null || !reader.Read())
+        if (usuario is null || !PinHasher.Verificar(pin, usuario.PinHash, usuario.PinSalt))
             return null;
+
+        conexion.Execute(
+            "UPDATE Usuarios SET UltimoAcceso = datetime('now', 'localtime') WHERE UsuarioId = @Id;",
+            new { Id = usuario.UsuarioId });
 
         return new LoginResponseDto
         {
-            UsuarioId = Convert.ToInt32(reader["UsuarioId"]),
-            NombreUsuario = reader["NombreUsuario"]?.ToString() ?? string.Empty,
-            NombreCompleto = reader["NombreCompleto"]?.ToString() ?? string.Empty,
-            Rol = reader["Rol"]?.ToString() ?? string.Empty
+            UsuarioId = usuario.UsuarioId,
+            NombreUsuario = usuario.NombreUsuario,
+            NombreCompleto = usuario.NombreCompleto,
+            Rol = usuario.Rol
         };
+    }
+
+    private sealed class UsuarioCredenciales
+    {
+        public int UsuarioId { get; init; }
+        public string NombreUsuario { get; init; } = string.Empty;
+        public string NombreCompleto { get; init; } = string.Empty;
+        public string Rol { get; init; } = string.Empty;
+        public string PinHash { get; init; } = string.Empty;
+        public string PinSalt { get; init; } = string.Empty;
     }
 }

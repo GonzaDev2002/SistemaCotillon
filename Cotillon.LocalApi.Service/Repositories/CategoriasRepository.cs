@@ -1,112 +1,84 @@
-﻿using Cotillon.LocalApi.Service.Data;
+using Cotillon.Data;
 using Cotillon.Shared.DTOs;
-using System.Data.OleDb;
+using Dapper;
 
 namespace Cotillon.LocalApi.Service.Repositories;
 
 public class CategoriasRepository
 {
-    private readonly AccessDb _accessDb;
+    private readonly IDbConnectionFactory _factory;
 
-    public CategoriasRepository(AccessDb accessDb)
+    public CategoriasRepository(IDbConnectionFactory factory)
     {
-        _accessDb = accessDb;
+        _factory = factory;
     }
 
     public List<CategoriaDto> ObtenerTodas()
     {
-        var lista = new List<CategoriaDto>();
+        using var conexion = _factory.Crear();
 
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
-
-        const string sql = @"
-SELECT [CategoriaId], [SeccionId], [NombreCategoria], [Activo]
-FROM [Categorias]
-ORDER BY [NombreCategoria]";
-
-        using var command = new OleDbCommand(sql, connection);
-        using var reader = command.ExecuteReader();
-
-        while (reader != null && reader.Read())
-        {
-            lista.Add(new CategoriaDto
-            {
-                CategoriaId = Convert.ToInt32(reader["CategoriaId"]),
-                SeccionId = Convert.ToInt32(reader["SeccionId"]),
-                NombreCategoria = reader["NombreCategoria"]?.ToString() ?? string.Empty,
-                Activo = reader["Activo"] != DBNull.Value && Convert.ToBoolean(reader["Activo"])
-            });
-        }
-
-        return lista;
+        return conexion.Query<CategoriaDto>(
+            """
+            SELECT CategoriaId, SeccionId, NombreCategoria, Activo
+            FROM Categorias
+            ORDER BY NombreCategoria;
+            """).ToList();
     }
 
     public List<CategoriaDto> ObtenerPorSeccion(int seccionId)
     {
-        var lista = new List<CategoriaDto>();
+        using var conexion = _factory.Crear();
 
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
-
-        const string sql = @"
-SELECT [CategoriaId], [SeccionId], [NombreCategoria], [Activo]
-FROM [Categorias]
-WHERE [SeccionId] = ?
-ORDER BY [NombreCategoria]";
-
-        using var command = new OleDbCommand(sql, connection);
-        command.Parameters.AddWithValue("?", seccionId);
-
-        using var reader = command.ExecuteReader();
-
-        while (reader != null && reader.Read())
-        {
-            lista.Add(new CategoriaDto
-            {
-                CategoriaId = Convert.ToInt32(reader["CategoriaId"]),
-                SeccionId = Convert.ToInt32(reader["SeccionId"]),
-                NombreCategoria = reader["NombreCategoria"]?.ToString() ?? string.Empty,
-                Activo = reader["Activo"] != DBNull.Value && Convert.ToBoolean(reader["Activo"])
-            });
-        }
-
-        return lista;
+        return conexion.Query<CategoriaDto>(
+            """
+            SELECT CategoriaId, SeccionId, NombreCategoria, Activo
+            FROM Categorias
+            WHERE SeccionId = @SeccionId
+            ORDER BY NombreCategoria;
+            """,
+            new { SeccionId = seccionId }).ToList();
     }
 
     public bool Insertar(CategoriaDto categoria)
     {
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        using var conexion = _factory.Crear();
 
-        const string sql = @"
-INSERT INTO [Categorias] ([SeccionId], [NombreCategoria], [Activo])
-VALUES (?, ?, ?)";
-
-        using var command = new OleDbCommand(sql, connection);
-        command.Parameters.AddWithValue("?", categoria.SeccionId);
-        command.Parameters.AddWithValue("?", categoria.NombreCategoria);
-        command.Parameters.AddWithValue("?", categoria.Activo);
-
-        return command.ExecuteNonQuery() > 0;
+        return conexion.Execute(
+            """
+            INSERT INTO Categorias (SeccionId, NombreCategoria, Activo)
+            VALUES (@SeccionId, @NombreCategoria, @Activo);
+            """,
+            new { categoria.SeccionId, categoria.NombreCategoria, Activo = categoria.Activo ? 1 : 0 }) > 0;
     }
 
     public bool Actualizar(CategoriaDto categoria)
     {
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        using var conexion = _factory.Crear();
 
-        const string sql = @"
-UPDATE [Categorias]
-SET [SeccionId] = ?, [NombreCategoria] = ?, [Activo] = ?
-WHERE [CategoriaId] = ?";
+        return conexion.Execute(
+            """
+            UPDATE Categorias
+            SET SeccionId = @SeccionId, NombreCategoria = @NombreCategoria, Activo = @Activo
+            WHERE CategoriaId = @CategoriaId;
+            """,
+            new
+            {
+                categoria.SeccionId,
+                categoria.NombreCategoria,
+                Activo = categoria.Activo ? 1 : 0,
+                categoria.CategoriaId
+            }) > 0;
+    }
 
-        using var command = new OleDbCommand(sql, connection);
-        command.Parameters.AddWithValue("?", categoria.SeccionId);
-        command.Parameters.AddWithValue("?", categoria.NombreCategoria);
-        command.Parameters.AddWithValue("?", categoria.Activo);
-        command.Parameters.AddWithValue("?", categoria.CategoriaId);
+    public bool ExisteNombreEnSeccion(int seccionId, string nombre, int excluirId = 0)
+    {
+        using var conexion = _factory.Crear();
 
-        return command.ExecuteNonQuery() > 0;
+        return conexion.ExecuteScalar<long>(
+            """
+            SELECT COUNT(*) FROM Categorias
+            WHERE SeccionId = @SeccionId AND NombreCategoria = @Nombre AND CategoriaId <> @ExcluirId;
+            """,
+            new { SeccionId = seccionId, Nombre = nombre, ExcluirId = excluirId }) > 0;
     }
 }

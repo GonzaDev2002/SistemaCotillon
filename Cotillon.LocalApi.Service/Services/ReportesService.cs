@@ -1,5 +1,6 @@
-﻿using Cotillon.LocalApi.Service.Repositories;
+using Cotillon.LocalApi.Service.Repositories;
 using Cotillon.Shared.DTOs.Reportes;
+using Cotillon.Shared.Responses;
 
 namespace Cotillon.LocalApi.Service.Services;
 
@@ -12,18 +13,20 @@ public class ReportesService
         _repository = repository;
     }
 
-    public Task<List<ReporteProductoDto>> ListarProductosAsync()
-    {
-        return _repository.ListarProductosAsync();
-    }
+    public ApiResponse<List<ReporteProductoDto>> ListarProductos() =>
+        ApiResponse<List<ReporteProductoDto>>.Ok(
+            _repository.ListarProductos(), "Reporte de productos generado correctamente.");
 
-    public Task<List<ReporteProductoDto>> ListarProductosBajoStockAsync()
-    {
-        return _repository.ListarProductosBajoStockAsync();
-    }
+    public ApiResponse<List<ReporteProductoDto>> ListarProductosBajoStock() =>
+        ApiResponse<List<ReporteProductoDto>>.Ok(
+            _repository.ListarProductosBajoStock(), "Reporte de productos bajo stock generado correctamente.");
 
-    public Task<List<ReporteVentaDto>> ListarVentasPorRangoAsync(DateTime desde, DateTime hasta)
+    public ApiResponse<List<ReporteVentaDto>> ListarVentasPorRango(DateTime desde, DateTime hasta)
     {
-        return _repository.ListarVentasPorRangoAsync(desde, hasta);
+        if (desde.Date > hasta.Date)
+            return ApiResponse<List<ReporteVentaDto>>.Fail("La fecha desde no puede ser mayor a la fecha hasta.");
+
+        return ApiResponse<List<ReporteVentaDto>>.Ok(
+            _repository.ListarVentasPorRango(desde, hasta), "Reporte de ventas generado correctamente.");
     }
 }

@@ -1,77 +1,64 @@
-﻿using Cotillon.LocalApi.Service.Data;
+using Cotillon.Data;
 using Cotillon.Shared.DTOs;
-using System.Data.OleDb;
+using Dapper;
 
 namespace Cotillon.LocalApi.Service.Repositories;
 
 public class SeccionesRepository
 {
-    private readonly AccessDb _accessDb;
+    private readonly IDbConnectionFactory _factory;
 
-    public SeccionesRepository(AccessDb accessDb)
+    public SeccionesRepository(IDbConnectionFactory factory)
     {
-        _accessDb = accessDb;
+        _factory = factory;
     }
 
     public List<SeccionDto> ObtenerTodas()
     {
-        var lista = new List<SeccionDto>();
+        using var conexion = _factory.Crear();
 
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
-
-        const string sql = @"
-SELECT [SeccionId], [NombreSeccion], [Activo]
-FROM [Secciones]
-ORDER BY [NombreSeccion]";
-
-        using var command = new OleDbCommand(sql, connection);
-        using var reader = command.ExecuteReader();
-
-        while (reader != null && reader.Read())
-        {
-            lista.Add(new SeccionDto
-            {
-                SeccionId = Convert.ToInt32(reader["SeccionId"]),
-                NombreSeccion = reader["NombreSeccion"]?.ToString() ?? string.Empty,
-                Activo = reader["Activo"] != DBNull.Value && Convert.ToBoolean(reader["Activo"])
-            });
-        }
-
-        return lista;
+        return conexion.Query<SeccionDto>(
+            """
+            SELECT SeccionId, NombreSeccion, Activo
+            FROM Secciones
+            ORDER BY NombreSeccion;
+            """).ToList();
     }
 
     public bool Insertar(SeccionDto seccion)
     {
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        using var conexion = _factory.Crear();
 
-        const string sql = @"
-INSERT INTO [Secciones] ([NombreSeccion], [Activo])
-VALUES (?, ?)";
-
-        using var command = new OleDbCommand(sql, connection);
-        command.Parameters.AddWithValue("?", seccion.NombreSeccion);
-        command.Parameters.AddWithValue("?", seccion.Activo);
-
-        return command.ExecuteNonQuery() > 0;
+        return conexion.Execute(
+            """
+            INSERT INTO Secciones (NombreSeccion, Activo)
+            VALUES (@NombreSeccion, @Activo);
+            """,
+            new { seccion.NombreSeccion, Activo = seccion.Activo ? 1 : 0 }) > 0;
     }
 
     public bool Actualizar(SeccionDto seccion)
     {
-        using var connection = (OleDbConnection)_accessDb.CreateConnection();
-        connection.Open();
+        using var conexion = _factory.Crear();
 
-        const string sql = @"
-UPDATE [Secciones]
-SET [NombreSeccion] = ?, [Activo] = ?
-WHERE [SeccionId] = ?";
+        return conexion.Execute(
+            """
+            UPDATE Secciones
+            SET NombreSeccion = @NombreSeccion, Activo = @Activo
+            WHERE SeccionId = @SeccionId;
+            """,
+            new { seccion.NombreSeccion, Activo = seccion.Activo ? 1 : 0, seccion.SeccionId }) > 0;
+    }
 
-        using var command = new OleDbCommand(sql, connection);
-        command.Parameters.AddWithValue("?", seccion.NombreSeccion);
-        command.Parameters.AddWithValue("?", seccion.Activo);
-        command.Parameters.AddWithValue("?", seccion.SeccionId);
+    public bool ExisteNombre(string nombre, int excluirId = 0)
+    {
+        using var conexion = _factory.Crear();
 
-        return command.ExecuteNonQuery() > 0;
+        return conexion.ExecuteScalar<long>(
+            """
+            SELECT COUNT(*) FROM Secciones
+            WHERE NombreSeccion = @Nombre AND SeccionId <> @ExcluirId;
+            """,
+            new { Nombre = nombre, ExcluirId = excluirId }) > 0;
     }
 }

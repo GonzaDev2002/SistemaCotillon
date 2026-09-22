@@ -24,6 +24,11 @@ public class SeccionesService
         if (string.IsNullOrWhiteSpace(seccion.NombreSeccion))
             return ApiResponse<string>.Fail("El nombre de la sección es obligatorio.");
 
+        seccion.NombreSeccion = seccion.NombreSeccion.Trim();
+
+        if (_repository.ExisteNombre(seccion.NombreSeccion))
+            return ApiResponse<string>.Fail($"Ya existe una sección llamada '{seccion.NombreSeccion}'.");
+
         var ok = _repository.Insertar(seccion);
 
         if (!ok)
@@ -39,6 +44,11 @@ public class SeccionesService
 
         if (string.IsNullOrWhiteSpace(seccion.NombreSeccion))
             return ApiResponse<string>.Fail("El nombre de la sección es obligatorio.");
+
+        seccion.NombreSeccion = seccion.NombreSeccion.Trim();
+
+        if (_repository.ExisteNombre(seccion.NombreSeccion, seccion.SeccionId))
+            return ApiResponse<string>.Fail($"Ya existe otra sección llamada '{seccion.NombreSeccion}'.");
 
         var ok = _repository.Actualizar(seccion);
 

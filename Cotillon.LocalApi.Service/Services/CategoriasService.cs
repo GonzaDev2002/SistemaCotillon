@@ -36,6 +36,12 @@ public class CategoriasService
         if (string.IsNullOrWhiteSpace(categoria.NombreCategoria))
             return ApiResponse<string>.Fail("El nombre de la categoría es obligatorio.");
 
+        categoria.NombreCategoria = categoria.NombreCategoria.Trim();
+
+        if (_repository.ExisteNombreEnSeccion(categoria.SeccionId, categoria.NombreCategoria))
+            return ApiResponse<string>.Fail(
+                $"Ya existe una categoría llamada '{categoria.NombreCategoria}' en esa sección.");
+
         var ok = _repository.Insertar(categoria);
 
         if (!ok)
@@ -54,6 +60,12 @@ public class CategoriasService
 
         if (string.IsNullOrWhiteSpace(categoria.NombreCategoria))
             return ApiResponse<string>.Fail("El nombre de la categoría es obligatorio.");
+
+        categoria.NombreCategoria = categoria.NombreCategoria.Trim();
+
+        if (_repository.ExisteNombreEnSeccion(categoria.SeccionId, categoria.NombreCategoria, categoria.CategoriaId))
+            return ApiResponse<string>.Fail(
+                $"Ya existe otra categoría llamada '{categoria.NombreCategoria}' en esa sección.");
 
         var ok = _repository.Actualizar(categoria);
 

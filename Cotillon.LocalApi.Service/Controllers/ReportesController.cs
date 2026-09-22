@@ -1,4 +1,5 @@
-﻿using Cotillon.LocalApi.Service.Services;
+using Cotillon.LocalApi.Service.Services;
+using Cotillon.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cotillon.LocalApi.Service.Controllers;
@@ -15,23 +16,46 @@ public class ReportesController : ControllerBase
     }
 
     [HttpGet("productos")]
-    public async Task<IActionResult> Productos()
+    public IActionResult Productos()
     {
-        var resultado = await _service.ListarProductosAsync();
-        return Ok(resultado);
+        try
+        {
+            return Ok(_service.ListarProductos());
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al generar el reporte: {ex.Message}"));
+        }
     }
 
     [HttpGet("productos-bajo-stock")]
-    public async Task<IActionResult> ProductosBajoStock()
+    public IActionResult ProductosBajoStock()
     {
-        var resultado = await _service.ListarProductosBajoStockAsync();
-        return Ok(resultado);
+        try
+        {
+            return Ok(_service.ListarProductosBajoStock());
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al generar el reporte: {ex.Message}"));
+        }
     }
 
     [HttpGet("ventas")]
-    public async Task<IActionResult> VentasPorRango([FromQuery] DateTime desde, [FromQuery] DateTime hasta)
+    public IActionResult VentasPorRango([FromQuery] DateTime desde, [FromQuery] DateTime hasta)
     {
-        var resultado = await _service.ListarVentasPorRangoAsync(desde, hasta);
-        return Ok(resultado);
+        try
+        {
+            var resultado = _service.ListarVentasPorRango(desde, hasta);
+
+            if (!resultado.Success)
+                return BadRequest(resultado);
+
+            return Ok(resultado);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al generar el reporte: {ex.Message}"));
+        }
     }
 }

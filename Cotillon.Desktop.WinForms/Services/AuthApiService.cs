@@ -13,7 +13,7 @@ public class AuthApiService
     {
         _httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:44355/")
+            BaseAddress = new Uri(Helpers.ApiConfig.BaseUrl)
         };
     }
 
