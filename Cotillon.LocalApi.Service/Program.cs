@@ -31,6 +31,11 @@ builder.Services.AddScoped<CategoriasRepository>();
 builder.Services.AddScoped<CategoriasService>();
 builder.Services.AddScoped<ReportesRepository>();
 builder.Services.AddScoped<ReportesService>();
+builder.Services.AddScoped<ConfiguracionRepository>();
+builder.Services.AddScoped<CajaRepository>();
+builder.Services.AddScoped<CajaService>();
+builder.Services.AddScoped<VentasRepository>();
+builder.Services.AddScoped<VentasService>();
 
 var app = builder.Build();
 

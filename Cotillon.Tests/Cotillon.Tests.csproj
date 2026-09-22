@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cotillon.Data\Cotillon.Data.csproj" />
+    <ProjectReference Include="..\Cotillon.LocalApi.Service\Cotillon.LocalApi.Service.csproj" />
   </ItemGroup>
 
 </Project>
