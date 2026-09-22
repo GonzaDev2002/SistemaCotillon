@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Base de datos SQLite generada en tiempo de ejecucion (no debe versionarse:
+# contiene datos reales del comercio y se regenera con Cotillon.Tools.Migracion)
+*.db
+*.db-wal
+*.db-shm
+*.db.*.bak
