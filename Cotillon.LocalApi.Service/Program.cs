@@ -28,6 +28,8 @@ builder.Services.AddScoped<ProductosRepository>();
 builder.Services.AddScoped<ProductosService>();
 builder.Services.AddScoped<CategoriasRepository>();
 builder.Services.AddScoped<CategoriasService>();
+builder.Services.AddScoped<ReportesRepository>();
+builder.Services.AddScoped<ReportesService>();
 
 
 

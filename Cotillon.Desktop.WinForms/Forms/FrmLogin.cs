@@ -40,9 +40,21 @@ public partial class FrmLogin : Form
 
             var result = await _authApiService.LoginAsync(username, pin);
 
+            if (result == null)
+            {
+                MessageBox.Show("No se obtuvo respuesta del servidor.", "Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtPin.SelectAll();
+                txtPin.Focus();
+                return;
+            }
+
             if (!result.Success || result.Data is null)
             {
-                MessageBox.Show(result.Message, "Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string mensaje = string.IsNullOrWhiteSpace(result.Message)
+                    ? "Usuario o PIN incorrectos."
+                    : result.Message;
+
+                MessageBox.Show(mensaje, "Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 txtPin.SelectAll();
                 txtPin.Focus();
                 return;
@@ -57,7 +69,11 @@ public partial class FrmLogin : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            string mensajeError = string.IsNullOrWhiteSpace(ex.Message)
+                ? "Ocurrió un error inesperado al iniciar sesión."
+                : ex.Message;
+
+            MessageBox.Show($"Error inesperado: {mensajeError}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
         {

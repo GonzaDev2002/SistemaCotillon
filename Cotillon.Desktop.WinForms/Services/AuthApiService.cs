@@ -39,22 +39,36 @@ public class AuthApiService
 
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<LoginResponseDto>>();
 
-            if (result is null || !result.Success || result.Data is null)
-                return ApiResponse<UsuarioSesion>.Fail("Respuesta inválida del servidor.");
+            if (result is null)
+                return ApiResponse<UsuarioSesion>.Fail("No se obtuvo respuesta del servidor.");
+
+            if (!result.Success)
+                return ApiResponse<UsuarioSesion>.Fail(result.Message ?? "Usuario o PIN incorrectos.");
+
+            if (result.Data is null)
+                return ApiResponse<UsuarioSesion>.Fail("La respuesta del servidor no contiene datos de usuario.");
 
             var usuarioSesion = new UsuarioSesion
             {
                 UsuarioId = result.Data.UsuarioId,
-                NombreUsuario = result.Data.NombreUsuario,
-                NombreCompleto = result.Data.NombreCompleto,
-                Rol = result.Data.Rol
+                NombreUsuario = result.Data.NombreUsuario ?? "",
+                NombreCompleto = result.Data.NombreCompleto ?? "",
+                Rol = result.Data.Rol ?? ""
             };
 
-            return ApiResponse<UsuarioSesion>.Ok(usuarioSesion, result.Message);
+            var mensaje = string.IsNullOrWhiteSpace(result.Message)
+                ? "Login correcto."
+                : result.Message;
+
+            return ApiResponse<UsuarioSesion>.Ok(usuarioSesion, mensaje);
         }
         catch (Exception ex)
         {
-            return ApiResponse<UsuarioSesion>.Fail($"No se pudo conectar con la API: {ex.Message}");
+            var mensajeError = string.IsNullOrWhiteSpace(ex.Message)
+                ? "No se pudo conectar con la API."
+                : ex.Message;
+
+            return ApiResponse<UsuarioSesion>.Fail($"No se pudo conectar con la API: {mensajeError}");
         }
     }
 }

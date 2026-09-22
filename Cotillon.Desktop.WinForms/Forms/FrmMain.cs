@@ -1,6 +1,7 @@
 using Cotillon.Desktop.WinForms.Models;
 using Cotillon.Desktop.WinForms.Services;
 using Cotillon.Desktop.WinForms.Helpers;
+using Cotillon.Desktop.WinForms.Forms;
 
 namespace Cotillon.Desktop.WinForms.Forms;
 
@@ -15,8 +16,34 @@ public partial class FrmMain : Form
         _usuario = usuario;
         _dashboardService = new DashboardApiService();
         AplicarTema();
+        ConfigurarGrillasDashboard();
     }
 
+    private void ConfigurarGrillasDashboard()
+    {
+        dgvBajoStock.Parent = grpBajoStock;
+        dgvBajoStock.Dock = DockStyle.Fill;
+        dgvBajoStock.AutoGenerateColumns = false;
+        dgvBajoStock.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        dgvBajoStock.RowHeadersVisible = false;
+        dgvBajoStock.ScrollBars = ScrollBars.Both;
+        dgvBajoStock.MaximumSize = Size.Empty;
+        dgvBajoStock.MinimumSize = Size.Empty;
+
+        dgvUltimosProductos.Parent = grpUltimosProductos;
+        dgvUltimosProductos.Dock = DockStyle.Fill;
+        dgvUltimosProductos.AutoGenerateColumns = false;
+        dgvUltimosProductos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        dgvUltimosProductos.RowHeadersVisible = false;
+        dgvUltimosProductos.ScrollBars = ScrollBars.Both;
+        dgvUltimosProductos.MaximumSize = Size.Empty;
+        dgvUltimosProductos.MinimumSize = Size.Empty;
+
+        grpBajoStock.PerformLayout();
+        grpUltimosProductos.PerformLayout();
+        dgvBajoStock.Refresh();
+        dgvUltimosProductos.Refresh();
+    }
 
     private async void FrmMain_Load(object sender, EventArgs e)
     {
@@ -30,6 +57,12 @@ public partial class FrmMain : Form
         var resumen = await _dashboardService.ObtenerResumenAsync();
         var bajoStock = await _dashboardService.ObtenerBajoStockAsync();
         var ultimos = await _dashboardService.ObtenerUltimosProductosAsync();
+
+        dgvBajoStock.AutoGenerateColumns = false;
+        dgvUltimosProductos.AutoGenerateColumns = false;
+
+        dgvBajoStock.DataSource = bajoStock;
+        dgvUltimosProductos.DataSource = ultimos;
 
         lstAlertas.Items.Clear();
 
@@ -119,6 +152,16 @@ public partial class FrmMain : Form
         using var frm = new FrmSecciones();
         frm.ShowDialog();
     }
+    private void reportesToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        using var frm = new FrmReportes();
+        frm.ShowDialog();
+    }
+    private void btnAccesoReportes_Click(object sender, EventArgs e)
+    {
+        FrmReportes frm = new FrmReportes();
+        frm.ShowDialog();
+    }
 
     private async void btnRecargarDashboard_Click(object sender, EventArgs e)
     {
@@ -158,8 +201,8 @@ public partial class FrmMain : Form
         AppTheme.ApplyGroupBox(grpAlertas);
         AppTheme.ApplyGroupBox(grpResumenRapido);
 
-        AppTheme.ApplyGrid(dgvBajoStock);
-        AppTheme.ApplyGrid(dgvUltimosProductos);
+        //AppTheme.ApplyGrid(dgvBajoStock);
+        //AppTheme.ApplyGrid(dgvUltimosProductos);
 
         AppTheme.ApplyPrimaryButton(btnAccesoProductos);
         AppTheme.ApplySecondaryButton(btnAccesoCategorias);
