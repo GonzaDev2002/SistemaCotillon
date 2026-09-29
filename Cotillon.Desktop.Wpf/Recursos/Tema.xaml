@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:iconos="http://metro.mahapps.com/winfx/xaml/iconpacks">
 
     <!-- Paleta -->
     <Color x:Key="ColorFondo">#F5F7FB</Color>
@@ -31,6 +32,72 @@
     <SolidColorBrush x:Key="LateralHover" Color="{StaticResource ColorLateralHover}"/>
 
     <FontFamily x:Key="Tipografia">Segoe UI</FontFamily>
+
+    <!-- ===================== Iconos =====================
+         Los iconos se dibujan sobre fichas redondeadas con degradado y sombra:
+         el degradado de claro arriba a oscuro abajo simula luz cenital y es lo
+         que les da volumen, en lugar de verse como siluetas planas. -->
+
+    <LinearGradientBrush x:Key="FichaIndigo" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#818CF8" Offset="0"/>
+        <GradientStop Color="#4F46E5" Offset="0.55"/>
+        <GradientStop Color="#3730A3" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="FichaRosa" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#F9A8D4" Offset="0"/>
+        <GradientStop Color="#EC4899" Offset="0.55"/>
+        <GradientStop Color="#BE185D" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="FichaVerde" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#6EE7B7" Offset="0"/>
+        <GradientStop Color="#10B981" Offset="0.55"/>
+        <GradientStop Color="#047857" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="FichaAmbar" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FCD34D" Offset="0"/>
+        <GradientStop Color="#F59E0B" Offset="0.55"/>
+        <GradientStop Color="#B45309" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="FichaCeleste" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#7DD3FC" Offset="0"/>
+        <GradientStop Color="#0EA5E9" Offset="0.55"/>
+        <GradientStop Color="#0369A1" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="FichaVioleta" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#C4B5FD" Offset="0"/>
+        <GradientStop Color="#8B5CF6" Offset="0.55"/>
+        <GradientStop Color="#6D28D9" Offset="1"/>
+    </LinearGradientBrush>
+
+    <DropShadowEffect x:Key="SombraFicha" BlurRadius="8" ShadowDepth="2"
+                      Direction="270" Opacity="0.38" Color="#1E1B4B"/>
+
+    <!-- Brillo superior: la franja clara de arriba refuerza la sensación de relieve. -->
+    <LinearGradientBrush x:Key="BrilloFicha" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#59FFFFFF" Offset="0"/>
+        <GradientStop Color="#00FFFFFF" Offset="0.62"/>
+    </LinearGradientBrush>
+
+    <Style x:Key="Ficha" TargetType="Border">
+        <Setter Property="Width" Value="27"/>
+        <Setter Property="Height" Value="27"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Background" Value="{StaticResource FichaIndigo}"/>
+        <Setter Property="Effect" Value="{StaticResource SombraFicha}"/>
+    </Style>
+
+    <Style x:Key="IconoFicha" TargetType="Control">
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
 
     <!-- Textos -->
     <Style x:Key="Titulo" TargetType="TextBlock">
@@ -134,17 +201,23 @@
     <!-- Navegación lateral -->
     <Style x:Key="BotonNavegacion" TargetType="RadioButton">
         <Setter Property="FontFamily" Value="{StaticResource Tipografia}"/>
-        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="#C7D2FE"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Margin" Value="8,2"/>
+        <Setter Property="Margin" Value="8,1"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="fondo" Background="Transparent" CornerRadius="8" Padding="12,10">
+                    <Border x:Name="fondo" Background="Transparent" CornerRadius="8" Padding="10,5">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{TemplateBinding Tag}" FontSize="15" Width="26"
-                                       VerticalAlignment="Center"/>
+                            <Grid Margin="0,0,11,0">
+                                <Border x:Name="ficha" Style="{StaticResource Ficha}"
+                                        Background="{TemplateBinding Background}"/>
+                                <Border Width="27" Height="27" CornerRadius="8"
+                                        Background="{StaticResource BrilloFicha}"/>
+                                <iconos:PackIconMaterial Kind="{TemplateBinding Tag}"
+                                                         Style="{StaticResource IconoFicha}"/>
+                            </Grid>
                             <ContentPresenter VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
@@ -157,6 +230,15 @@
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
                         </Trigger>
+                        <!-- Sin resaltar, las fichas van algo apagadas para que la
+                             fila activa se distinga de un vistazo. -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="False"/>
+                                <Condition Property="IsMouseOver" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="ficha" Property="Opacity" Value="0.82"/>
+                        </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -164,28 +246,60 @@
     </Style>
 
     <!-- Entradas -->
+    <!-- Halo de foco: se dibuja por fuera del borde, así resaltar el campo no
+         cambia su tamaño ni corre el texto que se está escribiendo. -->
+    <DropShadowEffect x:Key="HaloFoco" BlurRadius="7" ShadowDepth="0" Opacity="0.4" Color="#4F46E5"/>
+
+    <SolidColorBrush x:Key="Seleccion" Color="#4F46E5"/>
+    <SolidColorBrush x:Key="BordeHover" Color="#A5B4FC"/>
+    <SolidColorBrush x:Key="FondoDeshabilitado" Color="#F1F5F9"/>
+
     <Style TargetType="TextBox">
         <Setter Property="FontFamily" Value="{StaticResource Tipografia}"/>
-        <Setter Property="FontSize" Value="13"/>
-        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="MinHeight" Value="38"/>
         <Setter Property="Foreground" Value="{StaticResource TextoPrimario}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Borde}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Background" Value="White"/>
+        <Setter Property="CaretBrush" Value="{StaticResource Primario}"/>
+        <Setter Property="SelectionBrush" Value="{StaticResource Seleccion}"/>
+        <Setter Property="SelectionOpacity" Value="0.25"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
                     <Border x:Name="borde" Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="8">
-                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
-                                      VerticalAlignment="Center"/>
+                            CornerRadius="8" SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Padding="{TemplateBinding Padding}"
+                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Hidden"
+                                      Focusable="False"/>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource BordeHover}"/>
+                        </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource Primario}"/>
-                            <Setter TargetName="borde" Property="BorderThickness" Value="1.6"/>
+                            <Setter TargetName="borde" Property="Effect" Value="{StaticResource HaloFoco}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="borde" Property="Background" Value="{StaticResource FondoDeshabilitado}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextoSecundario}"/>
+                        </Trigger>
+                        <!-- En un campo de varias líneas el texto arranca arriba y
+                             necesita poder desplazarse. -->
+                        <Trigger Property="AcceptsReturn" Value="True">
+                            <Setter TargetName="PART_ContentHost" Property="VerticalContentAlignment" Value="Top"/>
+                            <Setter TargetName="PART_ContentHost" Property="VerticalScrollBarVisibility" Value="Auto"/>
+                            <Setter TargetName="PART_ContentHost" Property="Padding" Value="12,8"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -195,25 +309,42 @@
 
     <Style TargetType="PasswordBox">
         <Setter Property="FontFamily" Value="{StaticResource Tipografia}"/>
-        <Setter Property="FontSize" Value="18"/>
-        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="MinHeight" Value="38"/>
+        <Setter Property="Foreground" Value="{StaticResource TextoPrimario}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Borde}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Background" Value="White"/>
+        <Setter Property="CaretBrush" Value="{StaticResource Primario}"/>
+        <Setter Property="SelectionBrush" Value="{StaticResource Seleccion}"/>
+        <Setter Property="SelectionOpacity" Value="0.25"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="PasswordBox">
                     <Border x:Name="borde" Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="8">
-                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
-                                      VerticalAlignment="Center"/>
+                            CornerRadius="8" SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Padding="{TemplateBinding Padding}"
+                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Hidden"
+                                      Focusable="False"/>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource BordeHover}"/>
+                        </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource Primario}"/>
-                            <Setter TargetName="borde" Property="BorderThickness" Value="1.6"/>
+                            <Setter TargetName="borde" Property="Effect" Value="{StaticResource HaloFoco}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="borde" Property="Background" Value="{StaticResource FondoDeshabilitado}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

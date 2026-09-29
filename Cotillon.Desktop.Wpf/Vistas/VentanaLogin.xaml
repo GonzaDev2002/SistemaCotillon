@@ -1,7 +1,8 @@
 <Window x:Class="Cotillon.Desktop.Wpf.Vistas.VentanaLogin"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Iniciar sesión - Cotillón" Height="560" Width="900"
+        xmlns:iconos="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        Title="Iniciar sesión - Cotillón" Height="620" Width="940"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
         Background="{StaticResource Fondo}">
 
@@ -34,24 +35,50 @@
                 </Ellipse>
 
                 <StackPanel VerticalAlignment="Center" Margin="52,0">
-                    <TextBlock Text="🎉" FontSize="52"/>
-                    <TextBlock Text="Cotillón" FontFamily="Segoe UI" FontSize="40" FontWeight="Bold"
-                               Foreground="White" Margin="0,12,0,0"/>
-                    <TextBlock Text="Sistema de gestión y punto de venta"
-                               FontFamily="Segoe UI" FontSize="15" Foreground="#C7D2FE" Margin="0,4,0,28"/>
+                    <Grid Width="72" Height="72" HorizontalAlignment="Left">
+                        <Border CornerRadius="22" Background="{StaticResource FichaRosa}">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="24" ShadowDepth="6" Direction="270"
+                                                  Opacity="0.5" Color="#1E1B4B"/>
+                            </Border.Effect>
+                        </Border>
+                        <Border CornerRadius="22" Background="{StaticResource BrilloFicha}"/>
+                        <iconos:PackIconMaterial Kind="PartyPopper" Width="38" Height="38" Foreground="White"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBlock Text="🛒" FontSize="15" Width="28" Foreground="White"/>
+                    <TextBlock Text="Cotillón" FontFamily="Segoe UI" FontSize="40" FontWeight="Bold"
+                               Foreground="White" Margin="0,18,0,0"/>
+                    <TextBlock Text="Sistema de gestión y punto de venta"
+                               FontFamily="Segoe UI" FontSize="15" Foreground="#C7D2FE" Margin="0,4,0,30"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                        <Grid Width="30" Height="30" Margin="0,0,13,0">
+                            <Border CornerRadius="9" Background="{StaticResource FichaRosa}"
+                                    Effect="{StaticResource SombraFicha}"/>
+                            <Border CornerRadius="9" Background="{StaticResource BrilloFicha}"/>
+                            <iconos:PackIconMaterial Kind="CartVariant" Style="{StaticResource IconoFicha}"/>
+                        </Grid>
                         <TextBlock Text="Ventas con múltiples medios de pago" FontFamily="Segoe UI"
                                    FontSize="13.5" Foreground="#E0E7FF" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBlock Text="💵" FontSize="15" Width="28" Foreground="White"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                        <Grid Width="30" Height="30" Margin="0,0,13,0">
+                            <Border CornerRadius="9" Background="{StaticResource FichaVerde}"
+                                    Effect="{StaticResource SombraFicha}"/>
+                            <Border CornerRadius="9" Background="{StaticResource BrilloFicha}"/>
+                            <iconos:PackIconMaterial Kind="CashRegister" Style="{StaticResource IconoFicha}"/>
+                        </Grid>
                         <TextBlock Text="Caja con arqueo y control de diferencias" FontFamily="Segoe UI"
                                    FontSize="13.5" Foreground="#E0E7FF" VerticalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="📦" FontSize="15" Width="28" Foreground="White"/>
+                        <Grid Width="30" Height="30" Margin="0,0,13,0">
+                            <Border CornerRadius="9" Background="{StaticResource FichaCeleste}"
+                                    Effect="{StaticResource SombraFicha}"/>
+                            <Border CornerRadius="9" Background="{StaticResource BrilloFicha}"/>
+                            <iconos:PackIconMaterial Kind="PackageVariantClosed" Style="{StaticResource IconoFicha}"/>
+                        </Grid>
                         <TextBlock Text="Stock trazable y reportes" FontFamily="Segoe UI"
                                    FontSize="13.5" Foreground="#E0E7FF" VerticalAlignment="Center"/>
                     </StackPanel>
