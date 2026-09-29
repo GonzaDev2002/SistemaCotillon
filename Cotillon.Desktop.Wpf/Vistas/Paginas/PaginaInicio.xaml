@@ -1,0 +1,89 @@
+<UserControl x:Class="Cotillon.Desktop.Wpf.Vistas.Paginas.PaginaInicio"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="26,22">
+        <StackPanel>
+            <!-- KPIs -->
+            <UniformGrid Rows="1" Columns="4" Margin="0,0,0,20">
+                <Border Style="{StaticResource Tarjeta}" Margin="0,0,8,0">
+                    <StackPanel>
+                        <TextBlock Text="TOTAL PRODUCTOS" Style="{StaticResource Etiqueta}"/>
+                        <TextBlock x:Name="LblTotal" Text="-" FontFamily="Segoe UI" FontSize="30"
+                                   FontWeight="Bold" Foreground="{StaticResource Primario}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Tarjeta}" Margin="8,0">
+                    <StackPanel>
+                        <TextBlock Text="ACTIVOS" Style="{StaticResource Etiqueta}"/>
+                        <TextBlock x:Name="LblActivos" Text="-" FontFamily="Segoe UI" FontSize="30"
+                                   FontWeight="Bold" Foreground="{StaticResource Exito}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Tarjeta}" Margin="8,0">
+                    <StackPanel>
+                        <TextBlock Text="INACTIVOS" Style="{StaticResource Etiqueta}"/>
+                        <TextBlock x:Name="LblInactivos" Text="-" FontFamily="Segoe UI" FontSize="30"
+                                   FontWeight="Bold" Foreground="{StaticResource TextoSecundario}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Tarjeta}" Margin="8,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="BAJO STOCK" Style="{StaticResource Etiqueta}"/>
+                        <TextBlock x:Name="LblBajoStock" Text="-" FontFamily="Segoe UI" FontSize="30"
+                                   FontWeight="Bold" Foreground="{StaticResource Advertencia}"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- Accesos rápidos -->
+            <Border Style="{StaticResource Tarjeta}" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Accesos rápidos" Style="{StaticResource TituloSeccion}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="🛒   Nueva venta" Style="{StaticResource BotonPrimario}"
+                                Padding="20,12" Click="AlIrAVentas"/>
+                        <Button Content="💵   Ir a caja" Style="{StaticResource BotonSecundario}"
+                                Padding="20,12" Margin="10,0,0,0" Click="AlIrACaja"/>
+                        <Button Content="🔄   Actualizar" Style="{StaticResource BotonSecundario}"
+                                Padding="20,12" Margin="10,0,0,0" Click="AlActualizar"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,8,0">
+                    <StackPanel>
+                        <TextBlock Text="Productos con bajo stock" Style="{StaticResource TituloSeccion}"/>
+                        <DataGrid x:Name="GrillaBajoStock" Height="290">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*"/>
+                                <DataGridTextColumn Header="Categoría" Binding="{Binding NombreCategoria}" Width="130"/>
+                                <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="70"/>
+                                <DataGridTextColumn Header="Mínimo" Binding="{Binding StockMinimo}" Width="70"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Margin="8,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Últimos productos cargados" Style="{StaticResource TituloSeccion}"/>
+                        <DataGrid x:Name="GrillaUltimos" Height="290">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*"/>
+                                <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C2}" Width="110"/>
+                                <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="70"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

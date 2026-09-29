@@ -41,6 +41,43 @@ public class ProductosService
         return ApiResponse<List<ProductoListadoDto>>.Ok(lista, "Productos obtenidos correctamente.");
     }
 
+    public ApiResponse<List<ProductoListadoDto>> Buscar(string? texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+            return ApiResponse<List<ProductoListadoDto>>.Ok([], "Ingresá un texto para buscar.");
+
+        return ApiResponse<List<ProductoListadoDto>>.Ok(
+            _repository.Buscar(texto.Trim(), 50), "Productos encontrados.");
+    }
+
+    public ApiResponse<ProductoDto> ObtenerPorId(int productoId)
+    {
+        var producto = _repository.ObtenerPorId(productoId);
+
+        return producto is null
+            ? ApiResponse<ProductoDto>.Fail("No se encontró el producto.")
+            : ApiResponse<ProductoDto>.Ok(producto, "Producto obtenido correctamente.");
+    }
+
+    public ApiResponse<string> Actualizar(ProductoDto producto)
+    {
+        if (producto.ProductoId <= 0)
+            return ApiResponse<string>.Fail("El producto es inválido.");
+
+        if (producto.CategoriaId <= 0)
+            return ApiResponse<string>.Fail("La categoría es obligatoria.");
+
+        if (string.IsNullOrWhiteSpace(producto.NombreProducto))
+            return ApiResponse<string>.Fail("El nombre del producto es obligatorio.");
+
+        if (producto.Precio < 0)
+            return ApiResponse<string>.Fail("El precio no puede ser negativo.");
+
+        return _repository.Actualizar(producto)
+            ? ApiResponse<string>.Ok("OK", "Producto actualizado con éxito.")
+            : ApiResponse<string>.Fail("No se pudo actualizar el producto.");
+    }
+
     public ApiResponse<string> Eliminar(int productoId)
     {
         if (productoId <= 0)

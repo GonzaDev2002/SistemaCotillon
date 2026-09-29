@@ -1,0 +1,91 @@
+<UserControl x:Class="Cotillon.Desktop.Wpf.Vistas.Paginas.PaginaConfiguracion"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="26,22">
+        <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+
+            <Border Style="{StaticResource Tarjeta}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Datos del negocio" Style="{StaticResource TituloSeccion}"/>
+                    <TextBlock Text="Se usan en el encabezado del sistema y en los reportes."
+                               Style="{StaticResource Subtitulo}" Margin="0,0,0,14"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12">
+                            <TextBlock Text="NOMBRE DEL NEGOCIO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtNombre"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12">
+                            <TextBlock Text="CUIT" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtCuit"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12">
+                            <TextBlock Text="DIRECCIÓN" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtDireccion"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12">
+                            <TextBlock Text="TELÉFONO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtTelefono"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.ColumnSpan="2">
+                            <TextBlock Text="TEXTO AL PIE DEL TICKET" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtPieTicket"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Tarjeta}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Preferencias de venta" Style="{StaticResource TituloSeccion}"/>
+                    <CheckBox x:Name="ChkVentaSinStock" Content="Permitir vender productos sin stock disponible"/>
+                    <TextBlock Text="Si está activo, el sistema deja vender aunque el stock llegue a cero. El stock puede quedar en negativo."
+                               Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="26,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Tarjeta}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Conexión de esta terminal" Style="{StaticResource TituloSeccion}"/>
+                    <TextBlock Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="0,0,0,14"
+                               Text="En el equipo servidor dejá la dirección en localhost y marcá la casilla. En las demás terminales, poné la IP del servidor y desmarcala."/>
+
+                    <TextBlock Text="DIRECCIÓN DEL SERVIDOR" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="TxtUrlApi" Margin="0,0,0,10"/>
+
+                    <CheckBox x:Name="ChkEsServidor" Content="Esta computadora es el servidor"/>
+
+                    <TextBlock x:Name="LblReinicio" Style="{StaticResource Subtitulo}"
+                               Foreground="{StaticResource Advertencia}" TextWrapping="Wrap"
+                               Margin="0,10,0,0" Visibility="Collapsed"
+                               Text="Los cambios de conexión se aplican al reiniciar el programa."/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Tarjeta}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Base de datos" Style="{StaticResource TituloSeccion}"/>
+                    <TextBlock x:Name="LblEstadoBase" Style="{StaticResource Subtitulo}" TextWrapping="Wrap"/>
+                    <Button Content="Verificar conexión" Style="{StaticResource BotonSecundario}"
+                            HorizontalAlignment="Left" Margin="0,12,0,0" Click="AlVerificar"/>
+                </StackPanel>
+            </Border>
+
+            <Button x:Name="BtnGuardar" Content="Guardar configuración" Style="{StaticResource BotonPrimario}"
+                    HorizontalAlignment="Left" Padding="24,12" Click="AlGuardar"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

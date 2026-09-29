@@ -2,5 +2,5 @@
 
 public static class ApiConfig
 {
-    public const string BaseUrl = "https://localhost:7108/";
+    public const string BaseUrl = "http://localhost:5189/";
 }

@@ -1,0 +1,40 @@
+<UserControl x:Class="Cotillon.Desktop.Wpf.Vistas.Paginas.PaginaReportes"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Border Style="{StaticResource Tarjeta}" Margin="26,22" Padding="0">
+        <DockPanel>
+            <Border DockPanel.Dock="Top" Padding="18,14" BorderBrush="{StaticResource Borde}"
+                    BorderThickness="0,0,0,1">
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox x:Name="CboTipo" Width="230" SelectionChanged="AlCambiarTipo">
+                        <ComboBoxItem Content="Productos" IsSelected="True"/>
+                        <ComboBoxItem Content="Productos bajo stock"/>
+                        <ComboBoxItem Content="Ventas por rango"/>
+                    </ComboBox>
+
+                    <StackPanel x:Name="PanelFechas" Orientation="Horizontal" Visibility="Collapsed">
+                        <TextBlock Text="Desde" Style="{StaticResource Subtitulo}"
+                                   VerticalAlignment="Center" Margin="14,0,6,0"/>
+                        <DatePicker x:Name="FechaDesde" Width="130"/>
+                        <TextBlock Text="Hasta" Style="{StaticResource Subtitulo}"
+                                   VerticalAlignment="Center" Margin="10,0,6,0"/>
+                        <DatePicker x:Name="FechaHasta" Width="130"/>
+                    </StackPanel>
+
+                    <Button Content="Generar" Style="{StaticResource BotonPrimario}"
+                            Margin="14,0,0,0" Click="AlGenerar"/>
+                    <Button Content="Exportar CSV" Style="{StaticResource BotonSecundario}"
+                            Margin="8,0,0,0" Click="AlExportar"/>
+                </StackPanel>
+            </Border>
+
+            <Border DockPanel.Dock="Bottom" Background="#F8FAFC" Padding="18,12">
+                <TextBlock x:Name="LblResultado" Text="Generá un reporte para ver los resultados"
+                           Style="{StaticResource Subtitulo}"/>
+            </Border>
+
+            <DataGrid x:Name="Grilla" BorderThickness="0" AutoGenerateColumns="True"/>
+        </DockPanel>
+    </Border>
+</UserControl>

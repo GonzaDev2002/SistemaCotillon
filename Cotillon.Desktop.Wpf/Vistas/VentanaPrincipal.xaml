@@ -1,0 +1,111 @@
+<Window x:Class="Cotillon.Desktop.Wpf.Vistas.VentanaPrincipal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Cotillón - Sistema de gestión" Height="820" Width="1380"
+        WindowStartupLocation="CenterScreen" WindowState="Maximized"
+        Background="{StaticResource Fondo}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="238"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Navegación -->
+        <Border Grid.Column="0" Background="{StaticResource Lateral}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="20,22,20,18">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🎉" FontSize="22" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="LblNegocio" Text="Cotillón" FontFamily="Segoe UI" FontSize="19"
+                                   FontWeight="Bold" Foreground="White" Margin="9,0,0,0"
+                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Border DockPanel.Dock="Bottom" Background="#171449" Padding="16,14">
+                    <StackPanel>
+                        <TextBlock x:Name="LblUsuario" FontFamily="Segoe UI" FontSize="13"
+                                   FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="LblRol" FontFamily="Segoe UI" FontSize="11.5"
+                                   Foreground="#A5B4FC" Margin="0,1,0,10"/>
+                        <Button Content="Cerrar sesión" Style="{StaticResource BotonSecundario}"
+                                FontSize="12" Padding="10,6" Click="AlCerrarSesion"/>
+                    </StackPanel>
+                </Border>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,8">
+                    <StackPanel x:Name="PanelNavegacion">
+                        <TextBlock Text="OPERACIÓN" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
+                                   Foreground="#818CF8" Margin="20,8,0,6"/>
+                        <RadioButton x:Name="NavInicio" Style="{StaticResource BotonNavegacion}" Tag="📊"
+                                     Content="Inicio" IsChecked="True" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavVentas" Style="{StaticResource BotonNavegacion}" Tag="🛒"
+                                     Content="Ventas" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavCaja" Style="{StaticResource BotonNavegacion}" Tag="💵"
+                                     Content="Caja" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavHistorialVentas" Style="{StaticResource BotonNavegacion}" Tag="🧾"
+                                     Content="Historial de ventas" Checked="AlNavegar"/>
+
+                        <TextBlock Text="INVENTARIO" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
+                                   Foreground="#818CF8" Margin="20,16,0,6"/>
+                        <RadioButton x:Name="NavProductos" Style="{StaticResource BotonNavegacion}" Tag="📦"
+                                     Content="Productos" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavCatalogo" Style="{StaticResource BotonNavegacion}" Tag="🗂"
+                                     Content="Secciones y categorías" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavStock" Style="{StaticResource BotonNavegacion}" Tag="📥"
+                                     Content="Movimientos de stock" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavCompras" Style="{StaticResource BotonNavegacion}" Tag="🚚"
+                                     Content="Compras" Checked="AlNavegar"/>
+
+                        <TextBlock Text="GESTIÓN" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
+                                   Foreground="#818CF8" Margin="20,16,0,6"/>
+                        <RadioButton x:Name="NavClientes" Style="{StaticResource BotonNavegacion}" Tag="👥"
+                                     Content="Clientes" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavProveedores" Style="{StaticResource BotonNavegacion}" Tag="🏭"
+                                     Content="Proveedores" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavReportes" Style="{StaticResource BotonNavegacion}" Tag="📈"
+                                     Content="Reportes" Checked="AlNavegar"/>
+
+                        <TextBlock x:Name="LblAdministracion" Text="ADMINISTRACIÓN" FontFamily="Segoe UI"
+                                   FontSize="10.5" FontWeight="Bold" Foreground="#818CF8" Margin="20,16,0,6"/>
+                        <RadioButton x:Name="NavUsuarios" Style="{StaticResource BotonNavegacion}" Tag="🔑"
+                                     Content="Usuarios" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavAuditoria" Style="{StaticResource BotonNavegacion}" Tag="🛡"
+                                     Content="Auditoría" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavConfiguracion" Style="{StaticResource BotonNavegacion}" Tag="⚙"
+                                     Content="Configuración" Checked="AlNavegar"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Contenido -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{StaticResource Superficie}" Padding="26,16"
+                    BorderBrush="{StaticResource Borde}" BorderThickness="0,0,0,1">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border x:Name="ChipCaja" CornerRadius="14" Padding="12,6" Background="#FEF3C7">
+                            <TextBlock x:Name="LblEstadoCaja" Text="Caja cerrada" FontFamily="Segoe UI"
+                                       FontSize="12" FontWeight="SemiBold" Foreground="#92400E"/>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock x:Name="LblTitulo" Text="Inicio" Style="{StaticResource Titulo}" FontSize="21"/>
+                        <TextBlock x:Name="LblDescripcion" Text="Resumen del negocio"
+                                   Style="{StaticResource Subtitulo}"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <ContentControl x:Name="Contenido" Grid.Row="1" Margin="0"/>
+        </Grid>
+    </Grid>
+</Window>

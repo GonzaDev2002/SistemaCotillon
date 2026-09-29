@@ -48,6 +48,49 @@ public class ProductosController : ControllerBase
         }
     }
 
+    [HttpGet("buscar")]
+    public IActionResult Buscar([FromQuery] string? texto)
+    {
+        try
+        {
+            return Ok(_service.Buscar(texto));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al buscar productos: {ex.Message}"));
+        }
+    }
+
+    [HttpGet("{productoId}")]
+    public IActionResult Obtener(int productoId)
+    {
+        try
+        {
+            var result = _service.ObtenerPorId(productoId);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al obtener producto: {ex.Message}"));
+        }
+    }
+
+    [HttpPut]
+    public IActionResult Put([FromBody] ProductoDto producto)
+    {
+        try
+        {
+            var result = _service.Actualizar(producto);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al actualizar producto: {ex.Message}"));
+        }
+    }
+
     [HttpDelete("{productoId}")]
     public IActionResult Delete(int productoId)
     {

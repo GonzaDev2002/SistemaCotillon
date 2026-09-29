@@ -1,0 +1,25 @@
+<Window x:Class="Cotillon.Desktop.Wpf.Vistas.VentanaPin"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Restablecer PIN" Height="270" Width="380"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource Superficie}">
+
+    <StackPanel Margin="28,24">
+        <TextBlock Text="Restablecer PIN" Style="{StaticResource Titulo}" FontSize="19"/>
+        <TextBlock Text="El usuario va a entrar con este PIN nuevo" Style="{StaticResource Subtitulo}"
+                   Margin="0,4,0,20"/>
+
+        <TextBlock Text="PIN NUEVO" Style="{StaticResource Etiqueta}"/>
+        <PasswordBox x:Name="TxtPin" Height="42"/>
+
+        <TextBlock x:Name="LblError" Foreground="{StaticResource Peligro}" FontFamily="Segoe UI"
+                   FontSize="12" Margin="0,10,0,0" Visibility="Collapsed"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+            <Button Content="Cancelar" Style="{StaticResource BotonSecundario}" Click="AlCancelar"/>
+            <Button Content="Guardar" Style="{StaticResource BotonPrimario}" Margin="8,0,0,0"
+                    Click="AlGuardar" IsDefault="True"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

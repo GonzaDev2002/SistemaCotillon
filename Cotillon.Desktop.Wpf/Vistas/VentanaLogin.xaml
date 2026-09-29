@@ -1,0 +1,88 @@
+<Window x:Class="Cotillon.Desktop.Wpf.Vistas.VentanaLogin"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Iniciar sesión - Cotillón" Height="560" Width="900"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        Background="{StaticResource Fondo}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.05*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Panel de marca -->
+        <Border Grid.Column="0" Background="{StaticResource Lateral}">
+            <Grid>
+                <Ellipse Width="420" Height="420" Opacity="0.16" Margin="-120,-160,0,0"
+                         HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#EC4899" Offset="0"/>
+                            <GradientStop Color="Transparent" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+                <Ellipse Width="380" Height="380" Opacity="0.18" Margin="0,0,-140,-150"
+                         HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#6366F1" Offset="0"/>
+                            <GradientStop Color="Transparent" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+
+                <StackPanel VerticalAlignment="Center" Margin="52,0">
+                    <TextBlock Text="🎉" FontSize="52"/>
+                    <TextBlock Text="Cotillón" FontFamily="Segoe UI" FontSize="40" FontWeight="Bold"
+                               Foreground="White" Margin="0,12,0,0"/>
+                    <TextBlock Text="Sistema de gestión y punto de venta"
+                               FontFamily="Segoe UI" FontSize="15" Foreground="#C7D2FE" Margin="0,4,0,28"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="🛒" FontSize="15" Width="28" Foreground="White"/>
+                        <TextBlock Text="Ventas con múltiples medios de pago" FontFamily="Segoe UI"
+                                   FontSize="13.5" Foreground="#E0E7FF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="💵" FontSize="15" Width="28" Foreground="White"/>
+                        <TextBlock Text="Caja con arqueo y control de diferencias" FontFamily="Segoe UI"
+                                   FontSize="13.5" Foreground="#E0E7FF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📦" FontSize="15" Width="28" Foreground="White"/>
+                        <TextBlock Text="Stock trazable y reportes" FontFamily="Segoe UI"
+                                   FontSize="13.5" Foreground="#E0E7FF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Formulario -->
+        <Border Grid.Column="1" Background="{StaticResource Superficie}">
+            <StackPanel VerticalAlignment="Center" Margin="56,0">
+                <TextBlock Text="Iniciar sesión" Style="{StaticResource Titulo}"/>
+                <TextBlock Text="Ingresá con tu usuario y PIN" Style="{StaticResource Subtitulo}" Margin="0,4,0,28"/>
+
+                <TextBlock Text="USUARIO" Style="{StaticResource Etiqueta}"/>
+                <TextBox x:Name="TxtUsuario" Height="42" FontSize="14"/>
+
+                <TextBlock Text="PIN" Style="{StaticResource Etiqueta}" Margin="0,16,0,4"/>
+                <PasswordBox x:Name="TxtPin" Height="42" KeyDown="AlPresionarTecla"/>
+
+                <TextBlock x:Name="LblError" Foreground="{StaticResource Peligro}" FontFamily="Segoe UI"
+                           FontSize="12.5" TextWrapping="Wrap" Margin="0,14,0,0" Visibility="Collapsed"/>
+
+                <Button x:Name="BtnIngresar" Content="Ingresar" Style="{StaticResource BotonPrimario}"
+                        Height="44" Margin="0,24,0,0" Click="AlIngresar" IsDefault="True"/>
+
+                <Button Content="Salir" Style="{StaticResource BotonSecundario}"
+                        Height="40" Margin="0,10,0,0" Click="AlSalir"/>
+
+                <TextBlock x:Name="LblServidor" Style="{StaticResource Subtitulo}" FontSize="11"
+                           HorizontalAlignment="Center" Margin="0,22,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

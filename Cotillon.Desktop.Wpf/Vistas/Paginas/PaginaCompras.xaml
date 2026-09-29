@@ -1,0 +1,142 @@
+<UserControl x:Class="Cotillon.Desktop.Wpf.Vistas.Paginas.PaginaCompras"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <TabControl Margin="26,22" Background="Transparent" BorderThickness="0">
+        <!-- Nueva compra -->
+        <TabItem Header="Nueva compra" FontFamily="Segoe UI" FontSize="13" Padding="14,8">
+            <Grid Margin="0,14,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="380"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="0" Margin="0,0,16,0">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Padding="18,14" BorderBrush="{StaticResource Borde}"
+                                BorderThickness="0,0,0,1">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox x:Name="TxtBuscarProducto" Width="260" KeyDown="AlTeclaProducto"
+                                         ToolTip="Buscá el producto a comprar"/>
+                                <Button Content="Buscar" Style="{StaticResource BotonSecundario}" Margin="8,0,0,0"
+                                        Click="AlBuscarProducto"/>
+                            </StackPanel>
+                        </Border>
+
+                        <DataGrid x:Name="GrillaItems" BorderThickness="0" IsReadOnly="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" Width="*"
+                                                    IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Cantidad" Binding="{Binding Cantidad}" Width="100"/>
+                                <DataGridTextColumn Header="Costo unit." Binding="{Binding Costo}" Width="120"/>
+                                <DataGridTextColumn Header="Subtotal" Width="120" IsReadOnly="True"
+                                                    Binding="{Binding Subtotal, StringFormat=C2}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Bottom">
+                            <Button x:Name="BtnRegistrar" Content="Registrar compra"
+                                    Style="{StaticResource BotonPrimario}" Height="44" Click="AlRegistrar"/>
+                            <Button Content="Quitar ítem" Style="{StaticResource BotonSecundario}"
+                                    Margin="0,8,0,0" Click="AlQuitarItem"/>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <TextBlock Text="Datos de la compra" Style="{StaticResource TituloSeccion}"/>
+
+                            <TextBlock Text="PROVEEDOR" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="CboProveedor" DisplayMemberPath="NombreProveedor"
+                                      SelectedValuePath="ProveedorId" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="N° DE COMPROBANTE" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtComprobante" Margin="0,0,0,10"/>
+
+                            <CheckBox x:Name="ChkRecibir" Content="Ingresar stock ahora"
+                                      IsChecked="True" Margin="0,0,0,6"/>
+                            <CheckBox x:Name="ChkActualizarCostos" Content="Actualizar costo de los productos"
+                                      IsChecked="True" Margin="0,0,0,14"/>
+
+                            <Border Background="#F8FAFC" CornerRadius="8" Padding="14">
+                                <DockPanel>
+                                    <TextBlock Text="TOTAL" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="LblTotalCompra" Text="$ 0,00" HorizontalAlignment="Right"
+                                               FontFamily="Segoe UI" FontSize="24" FontWeight="Bold"
+                                               Foreground="{StaticResource Primario}"/>
+                                </DockPanel>
+                            </Border>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </TabItem>
+
+        <!-- Historial -->
+        <TabItem Header="Historial" FontFamily="Segoe UI" FontSize="13" Padding="14,8">
+            <Grid Margin="0,14,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="340"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="0" Margin="0,0,16,0">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Padding="18,14" BorderBrush="{StaticResource Borde}"
+                                BorderThickness="0,0,0,1">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Desde" Style="{StaticResource Subtitulo}" VerticalAlignment="Center"/>
+                                <DatePicker x:Name="FechaDesde" Width="130" Margin="8,0"/>
+                                <TextBlock Text="Hasta" Style="{StaticResource Subtitulo}" VerticalAlignment="Center"/>
+                                <DatePicker x:Name="FechaHasta" Width="130" Margin="8,0"/>
+                                <Button Content="Buscar" Style="{StaticResource BotonPrimario}"
+                                        Margin="8,0,0,0" Click="AlBuscarCompras"/>
+                            </StackPanel>
+                        </Border>
+
+                        <DataGrid x:Name="GrillaCompras" BorderThickness="0" SelectionChanged="AlSeleccionarCompra">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#" Binding="{Binding CompraId}" Width="60"/>
+                                <DataGridTextColumn Header="Fecha" Width="110"
+                                                    Binding="{Binding FechaCompra, StringFormat=dd/MM/yyyy}"/>
+                                <DataGridTextColumn Header="Proveedor" Binding="{Binding Proveedor}" Width="*"/>
+                                <DataGridTextColumn Header="Comprobante" Binding="{Binding NumeroComprobante}" Width="130"/>
+                                <DataGridTextColumn Header="Total" Width="120"
+                                                    Binding="{Binding TotalCompra, StringFormat=C2}"/>
+                                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="110"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Bottom">
+                            <Button x:Name="BtnRecibir" Content="Recibir mercadería"
+                                    Style="{StaticResource BotonExito}" Click="AlRecibir" IsEnabled="False"/>
+                            <Button x:Name="BtnAnularCompra" Content="Anular compra"
+                                    Style="{StaticResource BotonPeligro}" Margin="0,8,0,0"
+                                    Click="AlAnularCompra" IsEnabled="False"/>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <TextBlock x:Name="LblDetalleCompra" Text="Elegí una compra"
+                                       Style="{StaticResource TituloSeccion}"/>
+                            <DataGrid x:Name="GrillaDetalleCompra" Height="330">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*"/>
+                                    <DataGridTextColumn Header="Cant." Binding="{Binding Cantidad}" Width="60"/>
+                                    <DataGridTextColumn Header="Subtotal" Width="100"
+                                                        Binding="{Binding SubtotalLinea, StringFormat=C2}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</UserControl>

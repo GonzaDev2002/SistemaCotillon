@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cotillon.Tests", "Cotillon.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cotillon.Tools.Migracion", "Cotillon.Tools.Migracion\Cotillon.Tools.Migracion.csproj", "{1F0687A8-CAAF-4596-927B-E5E3211D59E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cotillon.Desktop.Wpf", "Cotillon.Desktop.Wpf\Cotillon.Desktop.Wpf.csproj", "{7CBF2878-002B-4588-B637-E9F1EC7EDC65}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,18 @@ Global
 		{1F0687A8-CAAF-4596-927B-E5E3211D59E9}.Release|x64.Build.0 = Release|Any CPU
 		{1F0687A8-CAAF-4596-927B-E5E3211D59E9}.Release|x86.ActiveCfg = Release|Any CPU
 		{1F0687A8-CAAF-4596-927B-E5E3211D59E9}.Release|x86.Build.0 = Release|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Debug|x64.Build.0 = Debug|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Debug|x86.Build.0 = Debug|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Release|x64.ActiveCfg = Release|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Release|x64.Build.0 = Release|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Release|x86.ActiveCfg = Release|Any CPU
+		{7CBF2878-002B-4588-B637-E9F1EC7EDC65}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

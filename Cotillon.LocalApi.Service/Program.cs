@@ -45,6 +45,8 @@ builder.Services.AddScoped<StockService>();
 builder.Services.AddScoped<ComprasRepository>();
 builder.Services.AddScoped<ComprasService>();
 builder.Services.AddScoped<AuditoriaRepository>();
+builder.Services.AddScoped<UsuariosRepository>();
+builder.Services.AddScoped<MediosPagoRepository>();
 
 var app = builder.Build();
 

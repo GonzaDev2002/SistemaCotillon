@@ -1,0 +1,106 @@
+<UserControl x:Class="Cotillon.Desktop.Wpf.Vistas.Paginas.PaginaProductos"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="26,22">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="380"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="0" Margin="0,0,16,0">
+            <DockPanel>
+                <Border DockPanel.Dock="Top" Padding="18,14" BorderBrush="{StaticResource Borde}"
+                        BorderThickness="0,0,0,1">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="🔄" Style="{StaticResource BotonSecundario}"
+                                Padding="12,6" Margin="8,0,0,0" Click="AlRefrescar"/>
+                        <CheckBox DockPanel.Dock="Right" x:Name="ChkInactivos" Content="Ver dados de baja"
+                                  VerticalAlignment="Center" Margin="12,0" Click="AlRefrescar"/>
+                        <TextBox x:Name="TxtFiltro" TextChanged="AlFiltrar"
+                                 ToolTip="Filtrar por nombre, sección o categoría"/>
+                    </DockPanel>
+                </Border>
+
+                <DataGrid x:Name="Grilla" BorderThickness="0" SelectionChanged="AlSeleccionar">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*"/>
+                        <DataGridTextColumn Header="Sección" Binding="{Binding NombreSeccion}" Width="130"/>
+                        <DataGridTextColumn Header="Categoría" Binding="{Binding NombreCategoria}" Width="130"/>
+                        <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C2}" Width="110"/>
+                        <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="70"/>
+                        <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Activo}" Width="60"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock x:Name="LblFormulario" Text="Nuevo producto"
+                               Style="{StaticResource TituloSeccion}"/>
+
+                    <TextBlock Text="SECCIÓN" Style="{StaticResource Etiqueta}"/>
+                    <ComboBox x:Name="CboSeccion" DisplayMemberPath="NombreSeccion" SelectedValuePath="SeccionId"
+                              SelectionChanged="AlCambiarSeccion" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="CATEGORÍA" Style="{StaticResource Etiqueta}"/>
+                    <ComboBox x:Name="CboCategoria" DisplayMemberPath="NombreCategoria"
+                              SelectedValuePath="CategoriaId" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="NOMBRE" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="TxtNombre" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="CÓDIGO DE BARRAS" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="TxtCodigoBarras" Margin="0,0,0,10"/>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="PRECIO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtPrecio" Text="0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="COSTO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtCosto" Text="0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="STOCK" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtStock" Text="0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="STOCK MÍNIMO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="TxtStockMinimo" Text="0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="MARCA" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="TxtMarca" Margin="0,0,0,10"/>
+
+                    <CheckBox x:Name="ChkSinStock" Content="Permite vender sin stock" Margin="0,4,0,14"/>
+
+                    <Button x:Name="BtnGuardar" Content="Guardar producto"
+                            Style="{StaticResource BotonPrimario}" Click="AlGuardar"/>
+                    <Button Content="Nuevo (limpiar)" Style="{StaticResource BotonSecundario}"
+                            Margin="0,8,0,0" Click="AlNuevo"/>
+                    <Button x:Name="BtnEliminar" Content="Dar de baja" Style="{StaticResource BotonPeligro}"
+                            Margin="0,8,0,0" Click="AlEliminar" IsEnabled="False"/>
+
+                    <TextBlock x:Name="LblStockAviso" Style="{StaticResource Subtitulo}" TextWrapping="Wrap"
+                               Margin="0,12,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
