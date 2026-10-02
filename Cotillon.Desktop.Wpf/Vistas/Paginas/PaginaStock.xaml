@@ -39,7 +39,7 @@
             </DockPanel>
         </Border>
 
-        <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+        <Border x:Name="PanelAjuste" Grid.Column="1" Style="{StaticResource Tarjeta}">
             <StackPanel>
                 <TextBlock Text="Ajustar stock" Style="{StaticResource TituloSeccion}"/>
                 <TextBlock Text="Todo ajuste queda registrado con su motivo y con el stock antes y después."

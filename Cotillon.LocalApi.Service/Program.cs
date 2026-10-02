@@ -44,6 +44,8 @@ builder.Services.AddScoped<StockRepository>();
 builder.Services.AddScoped<StockService>();
 builder.Services.AddScoped<ComprasRepository>();
 builder.Services.AddScoped<ComprasService>();
+builder.Services.AddScoped<PermisosRepository>();
+builder.Services.AddScoped<PermisosService>();
 builder.Services.AddScoped<AdjuntosRepository>();
 builder.Services.AddScoped<AdjuntosService>();
 builder.Services.AddScoped<AuditoriaRepository>();

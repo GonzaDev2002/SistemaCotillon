@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Cotillon.Desktop.Wpf.Servicios;
 using Cotillon.Desktop.Wpf.Vistas.Paginas;
+using Cotillon.Shared.DTOs.Permisos;
 
 namespace Cotillon.Desktop.Wpf.Vistas;
 
@@ -20,29 +21,64 @@ public partial class VentanaPrincipal : Window
         {
             await CargarNombreNegocioAsync();
             await RefrescarEstadoCajaAsync();
-            Navegar(NavInicio);
+
+            // Se entra por el primer módulo que el usuario tenga habilitado, que
+            // para un cajero suele ser Ventas y no Inicio.
+            Navegar(PrimerModuloVisible());
         };
     }
 
     /// <summary>
-    /// Oculta lo que el rol no puede usar en lugar de dejarlo visible y fallar al
-    /// entrar: el cajero no ve administración ni compras.
+    /// Cada botón del menú sabe a qué módulo corresponde. Tenerlo en un solo lugar
+    /// evita que al agregar una pantalla se olvide el permiso en alguno de los dos
+    /// lados y quede visible para todos.
+    /// </summary>
+    private IEnumerable<(RadioButton Boton, string Modulo)> BotonesPorModulo() =>
+    [
+        (NavInicio, Modulos.Inicio),
+        (NavVentas, Modulos.Ventas),
+        (NavCaja, Modulos.Caja),
+        (NavHistorialVentas, Modulos.HistorialVentas),
+        (NavProductos, Modulos.Productos),
+        (NavCatalogo, Modulos.Catalogo),
+        (NavStock, Modulos.Stock),
+        (NavCompras, Modulos.Compras),
+        (NavClientes, Modulos.Clientes),
+        (NavProveedores, Modulos.Proveedores),
+        (NavReportes, Modulos.Reportes),
+        (NavUsuarios, Modulos.Usuarios),
+        (NavAuditoria, Modulos.Auditoria),
+        (NavConfiguracion, Modulos.Configuracion)
+    ];
+
+    /// <summary>
+    /// Oculta lo que el usuario no tiene habilitado, en lugar de dejarlo visible y
+    /// fallar al entrar. Los títulos de grupo desaparecen cuando no queda ningún
+    /// módulo debajo, así el menú de un cajero no muestra secciones vacías.
     /// </summary>
     private void AplicarPermisos()
     {
-        var administracion = Sesion.PuedeAdministrar ? Visibility.Visible : Visibility.Collapsed;
+        foreach (var (boton, modulo) in BotonesPorModulo())
+            boton.Visibility = Sesion.PuedeVer(modulo) ? Visibility.Visible : Visibility.Collapsed;
 
-        LblAdministracion.Visibility = administracion;
-        NavUsuarios.Visibility = administracion;
-        NavAuditoria.Visibility = administracion;
-        NavConfiguracion.Visibility = administracion;
+        LblOperacion.Visibility = VisibilidadDeGrupo(
+            Modulos.Inicio, Modulos.Ventas, Modulos.Caja, Modulos.HistorialVentas);
 
-        var supervision = Sesion.PuedeSupervisar ? Visibility.Visible : Visibility.Collapsed;
+        LblInventario.Visibility = VisibilidadDeGrupo(
+            Modulos.Productos, Modulos.Catalogo, Modulos.Stock, Modulos.Compras);
 
-        NavCompras.Visibility = supervision;
-        NavProveedores.Visibility = supervision;
-        NavStock.Visibility = supervision;
+        LblGestion.Visibility = VisibilidadDeGrupo(
+            Modulos.Clientes, Modulos.Proveedores, Modulos.Reportes);
+
+        LblAdministracion.Visibility = VisibilidadDeGrupo(
+            Modulos.Usuarios, Modulos.Auditoria, Modulos.Configuracion);
     }
+
+    private static Visibility VisibilidadDeGrupo(params string[] modulos) =>
+        modulos.Any(Sesion.PuedeVer) ? Visibility.Visible : Visibility.Collapsed;
+
+    private RadioButton PrimerModuloVisible() =>
+        BotonesPorModulo().FirstOrDefault(b => Sesion.PuedeVer(b.Modulo)).Boton ?? NavInicio;
 
     private async Task CargarNombreNegocioAsync()
     {
@@ -85,6 +121,13 @@ public partial class VentanaPrincipal : Window
 
     private void Navegar(RadioButton origen)
     {
+        // Segunda red: ocultar el botón ya alcanza para el menú, pero a una pantalla
+        // también se llega desde los accesos del panel de inicio.
+        var modulo = BotonesPorModulo().FirstOrDefault(b => b.Boton == origen).Modulo;
+
+        if (modulo is not null && !Sesion.PuedeVer(modulo))
+            return;
+
         var (titulo, descripcion, pagina) = Resolver(origen);
 
         LblTitulo.Text = titulo;
@@ -138,12 +181,14 @@ public partial class VentanaPrincipal : Window
 
     public void IrAVentas()
     {
-        NavVentas.IsChecked = true;
+        if (Sesion.PuedeVer(Modulos.Ventas))
+            NavVentas.IsChecked = true;
     }
 
     public void IrACaja()
     {
-        NavCaja.IsChecked = true;
+        if (Sesion.PuedeVer(Modulos.Caja))
+            NavCaja.IsChecked = true;
     }
 
     private void AlCerrarSesion(object sender, RoutedEventArgs e)

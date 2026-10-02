@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Cotillon.Desktop.Wpf.Servicios;
 using Cotillon.Shared.DTOs.Compras;
+using Cotillon.Shared.DTOs.Permisos;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 
@@ -13,6 +14,7 @@ public partial class PaginaCompras : UserControl
 {
     private readonly ObservableCollection<ItemCompra> _items = [];
     private CompraResumenDto? _compraSeleccionada;
+    private bool _puedeEditar;
 
     public PaginaCompras()
     {
@@ -27,6 +29,15 @@ public partial class PaginaCompras : UserControl
         Adjuntos.Titulo = "Factura del proveedor";
         Adjuntos.AvisoSinSeleccion =
             "Elegí una compra para adjuntarle la factura o el remito del proveedor.";
+        Adjuntos.AplicarPermisos(Modulos.Compras);
+
+        _puedeEditar = Sesion.PuedeEditar(Modulos.Compras);
+
+        BtnRegistrar.Visibility = _puedeEditar ? Visibility.Visible : Visibility.Collapsed;
+        BtnRecibir.Visibility = _puedeEditar ? Visibility.Visible : Visibility.Collapsed;
+        BtnAnularCompra.Visibility = Sesion.PuedeTodo(Modulos.Compras)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
 
         Loaded += async (_, _) =>
         {
@@ -116,6 +127,9 @@ public partial class PaginaCompras : UserControl
 
     private async void AlRegistrar(object sender, RoutedEventArgs e)
     {
+        if (!_puedeEditar)
+            return;
+
         if (CboProveedor.SelectedValue is not int proveedorId)
         {
             MessageBox.Show("Elegí un proveedor. Si no hay ninguno, cargalo primero en Proveedores.",
@@ -195,8 +209,8 @@ public partial class PaginaCompras : UserControl
         LblDetalleCompra.Text = $"Compra #{respuesta.Data.CompraId} · {respuesta.Data.Estado}";
         GrillaDetalleCompra.ItemsSource = respuesta.Data.Lineas;
 
-        BtnRecibir.IsEnabled = respuesta.Data.Estado == "PENDIENTE";
-        BtnAnularCompra.IsEnabled = respuesta.Data.Estado != "ANULADA";
+        BtnRecibir.IsEnabled = respuesta.Data.Estado == "PENDIENTE" && _puedeEditar;
+        BtnAnularCompra.IsEnabled = respuesta.Data.Estado != "ANULADA" && Sesion.PuedeTodo(Modulos.Compras);
 
         var comprobante = string.IsNullOrWhiteSpace(respuesta.Data.NumeroComprobante)
             ? $"compra #{respuesta.Data.CompraId}"
@@ -208,7 +222,7 @@ public partial class PaginaCompras : UserControl
 
     private async void AlRecibir(object sender, RoutedEventArgs e)
     {
-        if (_compraSeleccionada is null)
+        if (!_puedeEditar || _compraSeleccionada is null)
             return;
 
         var respuesta = await App.Api.RecibirCompraAsync(_compraSeleccionada.CompraId, new RecibirCompraDto
@@ -226,7 +240,7 @@ public partial class PaginaCompras : UserControl
 
     private async void AlAnularCompra(object sender, RoutedEventArgs e)
     {
-        if (_compraSeleccionada is null)
+        if (!Sesion.PuedeTodo(Modulos.Compras) || _compraSeleccionada is null)
             return;
 
         var confirmar = MessageBox.Show(

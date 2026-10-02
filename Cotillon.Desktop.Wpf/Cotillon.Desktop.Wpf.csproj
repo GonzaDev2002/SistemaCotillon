@@ -14,6 +14,16 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <!-- Icono del .exe: lo que se ve en el escritorio, el explorador y la barra de tareas -->
+    <ApplicationIcon>Recursos\cotillon.ico</ApplicationIcon>
+    <AssemblyTitle>Cotillón</AssemblyTitle>
+    <Product>Cotillón</Product>
+    <Description>Sistema de gestión y punto de venta</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- El PNG va embebido para el icono de las ventanas y el logo de la barra lateral -->
+    <Resource Include="Recursos\cotillon.png" />
+  </ItemGroup>
 
 </Project>

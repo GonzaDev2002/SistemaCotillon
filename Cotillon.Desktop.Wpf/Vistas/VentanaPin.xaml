@@ -1,6 +1,7 @@
 <Window x:Class="Cotillon.Desktop.Wpf.Vistas.VentanaPin"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="/Recursos/cotillon.png"
         Title="Restablecer PIN" Height="270" Width="380"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="{StaticResource Superficie}">

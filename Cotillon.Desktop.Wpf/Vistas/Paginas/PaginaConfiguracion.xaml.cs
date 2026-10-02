@@ -1,13 +1,19 @@
 using System.Windows;
 using System.Windows.Controls;
+using Cotillon.Desktop.Wpf.Servicios;
+using Cotillon.Shared.DTOs.Permisos;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 
 public partial class PaginaConfiguracion : UserControl
 {
+    private readonly bool _puedeEditar = Sesion.PuedeEditar(Modulos.Configuracion);
+
     public PaginaConfiguracion()
     {
         InitializeComponent();
+
+        BtnGuardar.Visibility = _puedeEditar ? Visibility.Visible : Visibility.Collapsed;
 
         Loaded += async (_, _) => await CargarAsync();
     }
@@ -38,6 +44,9 @@ public partial class PaginaConfiguracion : UserControl
 
     private async void AlGuardar(object sender, RoutedEventArgs e)
     {
+        if (!_puedeEditar)
+            return;
+
         BtnGuardar.IsEnabled = false;
 
         try

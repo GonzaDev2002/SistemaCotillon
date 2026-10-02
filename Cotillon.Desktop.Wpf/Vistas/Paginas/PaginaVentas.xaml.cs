@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Cotillon.Desktop.Wpf.Servicios;
 using Cotillon.Shared.DTOs;
+using Cotillon.Shared.DTOs.Permisos;
 using Cotillon.Shared.DTOs.Terceros;
 using Cotillon.Shared.DTOs.Usuarios;
 using Cotillon.Shared.DTOs.Ventas;
@@ -16,6 +17,7 @@ public partial class PaginaVentas : UserControl
 {
     private readonly VentanaPrincipal _principal;
     private readonly ObservableCollection<ItemCarrito> _carrito = [];
+    private readonly bool _puedeCobrar;
 
     public PaginaVentas(VentanaPrincipal principal)
     {
@@ -24,6 +26,13 @@ public partial class PaginaVentas : UserControl
         _principal = principal;
         GrillaCarrito.ItemsSource = _carrito;
         _carrito.CollectionChanged += (_, _) => Recalcular();
+
+        _puedeCobrar = Sesion.PuedeEditar(Modulos.Ventas);
+
+        BtnCobrar.IsEnabled = _puedeCobrar;
+        PanelDescuento.Visibility = Sesion.PuedeTodo(Modulos.Ventas)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
 
         Loaded += async (_, _) =>
         {
@@ -217,6 +226,9 @@ public partial class PaginaVentas : UserControl
 
     private async void AlCobrar(object sender, RoutedEventArgs e)
     {
+        if (!_puedeCobrar)
+            return;
+
         if (_carrito.Count == 0)
         {
             MostrarAviso("Agregá al menos un producto antes de cobrar.");

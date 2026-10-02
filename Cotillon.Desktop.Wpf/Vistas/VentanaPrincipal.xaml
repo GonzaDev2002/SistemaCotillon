@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:iconos="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        Icon="/Recursos/cotillon.png"
         Title="Cotillón - Sistema de gestión" Height="820" Width="1380"
         WindowStartupLocation="CenterScreen" WindowState="Maximized"
         Background="{StaticResource Fondo}">
@@ -17,14 +18,9 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top" Margin="20,22,20,18">
                     <StackPanel Orientation="Horizontal">
-                        <Grid Width="38" Height="38">
-                            <Border CornerRadius="12" Background="{StaticResource FichaRosa}"
-                                    Effect="{StaticResource SombraFicha}"/>
-                            <Border CornerRadius="12" Background="{StaticResource BrilloFicha}"/>
-                            <iconos:PackIconMaterial Kind="PartyPopper" Width="21" Height="21"
-                                                     Foreground="White"
-                                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Grid>
+                        <Image Source="/Recursos/cotillon.png" Width="42" Height="42"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Effect="{StaticResource SombraFicha}"/>
                         <TextBlock x:Name="LblNegocio" Text="Cotillón" FontFamily="Segoe UI" FontSize="19"
                                    FontWeight="Bold" Foreground="White" Margin="11,0,0,0"
                                    VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
@@ -46,7 +42,7 @@
                      rueda, pero no se come ancho ni ensucia el panel. -->
                 <ScrollViewer VerticalScrollBarVisibility="Hidden" Margin="0,0,0,6">
                     <StackPanel x:Name="PanelNavegacion">
-                        <TextBlock Text="OPERACIÓN" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
+                        <TextBlock x:Name="LblOperacion" Text="OPERACIÓN" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
                                    Foreground="#818CF8" Margin="20,8,0,6"/>
                         <RadioButton x:Name="NavInicio" Style="{StaticResource BotonNavegacion}"
                                      Tag="{x:Static iconos:PackIconMaterialKind.ViewDashboard}"
@@ -65,7 +61,7 @@
                                      Background="{StaticResource FichaIndigo}"
                                      Content="Historial de ventas" Checked="AlNavegar"/>
 
-                        <TextBlock Text="INVENTARIO" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
+                        <TextBlock x:Name="LblInventario" Text="INVENTARIO" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
                                    Foreground="#818CF8" Margin="20,16,0,6"/>
                         <RadioButton x:Name="NavProductos" Style="{StaticResource BotonNavegacion}"
                                      Tag="{x:Static iconos:PackIconMaterialKind.PackageVariantClosed}"
@@ -84,7 +80,7 @@
                                      Background="{StaticResource FichaAmbar}"
                                      Content="Compras" Checked="AlNavegar"/>
 
-                        <TextBlock Text="GESTIÓN" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
+                        <TextBlock x:Name="LblGestion" Text="GESTIÓN" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
                                    Foreground="#818CF8" Margin="20,16,0,6"/>
                         <RadioButton x:Name="NavClientes" Style="{StaticResource BotonNavegacion}"
                                      Tag="{x:Static iconos:PackIconMaterialKind.AccountGroup}"

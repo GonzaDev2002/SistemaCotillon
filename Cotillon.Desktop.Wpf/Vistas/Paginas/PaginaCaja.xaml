@@ -30,8 +30,8 @@
                 <TextBlock Text="OBSERVACIONES" Style="{StaticResource Etiqueta}" Margin="0,14,0,4"/>
                 <TextBox x:Name="TxtObsApertura" Height="38"/>
 
-                <Button Content="Abrir caja" Style="{StaticResource BotonExito}" Height="46"
-                        FontSize="15" Margin="0,20,0,0" Click="AlAbrirCaja"/>
+                <Button x:Name="BtnAbrirCaja" Content="Abrir caja" Style="{StaticResource BotonExito}"
+                        Height="46" FontSize="15" Margin="0,20,0,0" Click="AlAbrirCaja"/>
             </StackPanel>
         </Border>
 
@@ -128,7 +128,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource Tarjeta}" Margin="0,0,0,14">
+                    <Border x:Name="PanelMovimientoManual" Style="{StaticResource Tarjeta}" Margin="0,0,0,14">
                         <StackPanel>
                             <TextBlock Text="Ingreso / Egreso manual" Style="{StaticResource TituloSeccion}"/>
 
@@ -150,7 +150,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource Tarjeta}">
+                    <Border x:Name="PanelCierre" Style="{StaticResource Tarjeta}">
                         <StackPanel>
                             <TextBlock Text="Cierre de caja" Style="{StaticResource TituloSeccion}"/>
 

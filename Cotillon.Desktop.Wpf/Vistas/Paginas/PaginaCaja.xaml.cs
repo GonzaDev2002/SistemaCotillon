@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Cotillon.Desktop.Wpf.Servicios;
 using Cotillon.Shared.DTOs.Caja;
+using Cotillon.Shared.DTOs.Permisos;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 
@@ -11,12 +12,21 @@ public partial class PaginaCaja : UserControl
 {
     private readonly VentanaPrincipal _principal;
     private ArqueoCajaDto? _arqueo;
+    private readonly bool _puedeOperar = Sesion.PuedeEditar(Modulos.Caja);
+    private readonly bool _puedeCerrar = Sesion.PuedeTodo(Modulos.Caja);
 
     public PaginaCaja(VentanaPrincipal principal)
     {
         InitializeComponent();
 
         _principal = principal;
+
+        // Con permiso de sólo ver, la caja queda como tablero de consulta: se ve el
+        // arqueo y los movimientos del día, pero no se abre, no se mueve plata ni
+        // se cierra. Cerrar es aparte porque es lo que fija la diferencia del turno.
+        BtnAbrirCaja.Visibility = _puedeOperar ? Visibility.Visible : Visibility.Collapsed;
+        PanelMovimientoManual.Visibility = _puedeOperar ? Visibility.Visible : Visibility.Collapsed;
+        PanelCierre.Visibility = _puedeCerrar ? Visibility.Visible : Visibility.Collapsed;
 
         Loaded += async (_, _) => await CargarAsync();
     }
@@ -62,6 +72,9 @@ public partial class PaginaCaja : UserControl
 
     private async void AlAbrirCaja(object sender, RoutedEventArgs e)
     {
+        if (!_puedeOperar)
+            return;
+
         var respuesta = await App.Api.AbrirCajaAsync(new AbrirCajaDto
         {
             UsuarioId = Sesion.UsuarioId,
@@ -81,6 +94,9 @@ public partial class PaginaCaja : UserControl
 
     private async void AlRegistrarMovimiento(object sender, RoutedEventArgs e)
     {
+        if (!_puedeOperar)
+            return;
+
         var tipo = (CboTipoMovimiento.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "INGRESO";
 
         var respuesta = await App.Api.MovimientoCajaAsync(new RegistrarMovimientoCajaDto
@@ -131,6 +147,9 @@ public partial class PaginaCaja : UserControl
 
     private async void AlCerrarCaja(object sender, RoutedEventArgs e)
     {
+        if (!_puedeCerrar)
+            return;
+
         var contado = Numero(TxtMontoContado.Text);
         var diferencia = contado - (_arqueo?.EfectivoEsperado ?? 0);
 

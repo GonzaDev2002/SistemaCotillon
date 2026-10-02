@@ -51,7 +51,7 @@
                         <CheckBox x:Name="ChkSeccionActiva" Content="Se ofrece al cargar productos"
                                   IsChecked="True" Margin="0,10,0,0"/>
                         <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                            <Button Content="Agregar" Style="{StaticResource BotonPrimario}"
+                            <Button x:Name="BtnAgregarSeccion" Content="Agregar" Style="{StaticResource BotonPrimario}"
                                     Click="AlAgregarSeccion"/>
                             <Button x:Name="BtnActualizarSeccion" Content="Guardar cambios"
                                     Style="{StaticResource BotonSecundario}" Margin="8,0,0,0"
@@ -103,7 +103,7 @@
                         <CheckBox x:Name="ChkCategoriaActiva" Content="Se ofrece al cargar productos"
                                   IsChecked="True" Margin="0,10,0,0"/>
                         <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                            <Button Content="Agregar" Style="{StaticResource BotonPrimario}"
+                            <Button x:Name="BtnAgregarCategoria" Content="Agregar" Style="{StaticResource BotonPrimario}"
                                     Click="AlAgregarCategoria"/>
                             <Button x:Name="BtnActualizarCategoria" Content="Guardar cambios"
                                     Style="{StaticResource BotonSecundario}" Margin="8,0,0,0"

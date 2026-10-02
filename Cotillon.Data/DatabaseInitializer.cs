@@ -133,5 +133,51 @@ public class DatabaseInitializer
                 VALUES ('admin', 'Administrador', @Hash, @Salt, 'Admin', 1);
                 """, new { Hash = hash, Salt = salt });
         }
+
+        SembrarPermisosFaltantes(conexion);
+    }
+
+    /// <summary>
+    /// Le da los permisos de su rol a todo usuario que no tenga ninguno.
+    ///
+    /// Cubre los dos casos de una sola vez: la instalación nueva, donde el usuario
+    /// administrador se crea recién acá, y la que se actualiza desde una versión
+    /// sin permisos, donde ya hay usuarios cargados. Toca sólo a los que no tienen
+    /// ni una fila, así que lo que el dueño haya configurado nunca se pisa.
+    /// </summary>
+    private static void SembrarPermisosFaltantes(IDbConnection conexion)
+    {
+        conexion.Execute(
+            """
+            INSERT INTO PermisosUsuario (UsuarioId, Modulo, Nivel)
+            SELECT u.UsuarioId, m.Modulo,
+                   CASE
+                       WHEN u.Rol = 'Admin' THEN 'TOTAL'
+
+                       WHEN u.Rol = 'Supervisor' THEN
+                           CASE WHEN m.Modulo IN ('USUARIOS', 'CONFIGURACION') THEN 'NINGUNO'
+                                WHEN m.Modulo = 'AUDITORIA'                    THEN 'VER'
+                                ELSE 'TOTAL' END
+
+                       -- Cajero: vende y maneja la caja del día, sin ver costos
+                       -- ni administración.
+                       ELSE
+                           CASE WHEN m.Modulo IN ('VENTAS', 'CAJA', 'CLIENTES')              THEN 'EDITAR'
+                                WHEN m.Modulo IN ('INICIO', 'HISTORIAL_VENTAS', 'PRODUCTOS') THEN 'VER'
+                                ELSE 'NINGUNO' END
+                   END
+            FROM Usuarios u
+            CROSS JOIN (
+                SELECT 'INICIO' AS Modulo      UNION ALL SELECT 'VENTAS'           UNION ALL
+                SELECT 'CAJA'                  UNION ALL SELECT 'HISTORIAL_VENTAS' UNION ALL
+                SELECT 'PRODUCTOS'             UNION ALL SELECT 'CATALOGO'         UNION ALL
+                SELECT 'STOCK'                 UNION ALL SELECT 'COMPRAS'          UNION ALL
+                SELECT 'CLIENTES'              UNION ALL SELECT 'PROVEEDORES'      UNION ALL
+                SELECT 'REPORTES'              UNION ALL SELECT 'USUARIOS'         UNION ALL
+                SELECT 'AUDITORIA'             UNION ALL SELECT 'CONFIGURACION'
+            ) m
+            WHERE NOT EXISTS (
+                SELECT 1 FROM PermisosUsuario p WHERE p.UsuarioId = u.UsuarioId);
+            """);
     }
 }

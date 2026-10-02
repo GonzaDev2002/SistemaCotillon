@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Cotillon.Desktop.Wpf.Servicios;
 using Cotillon.Shared.DTOs;
+using Cotillon.Shared.DTOs.Permisos;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 
@@ -9,10 +11,26 @@ public partial class PaginaCatalogo : UserControl
 {
     private int _seccionSeleccionada;
     private int _categoriaSeleccionada;
+    private bool _puedeEditar;
+    private bool _puedeBorrar;
 
     public PaginaCatalogo()
     {
         InitializeComponent();
+
+        _puedeEditar = Sesion.PuedeEditar(Modulos.Catalogo);
+        _puedeBorrar = Sesion.PuedeTodo(Modulos.Catalogo);
+
+        var edicion = _puedeEditar ? Visibility.Visible : Visibility.Collapsed;
+        var borrado = _puedeBorrar ? Visibility.Visible : Visibility.Collapsed;
+
+        BtnAgregarSeccion.Visibility = edicion;
+        BtnActualizarSeccion.Visibility = edicion;
+        BtnAgregarCategoria.Visibility = edicion;
+        BtnActualizarCategoria.Visibility = edicion;
+
+        BtnBorrarSeccion.Visibility = borrado;
+        BtnBorrarCategoria.Visibility = borrado;
 
         Loaded += async (_, _) => await CargarSeccionesAsync();
     }
@@ -88,6 +106,9 @@ public partial class PaginaCatalogo : UserControl
 
     private async void AlAgregarSeccion(object sender, RoutedEventArgs e)
     {
+        if (!_puedeEditar)
+            return;
+
         if (!Validar(TxtSeccion.Text, "el nombre de la sección"))
             return;
 
@@ -108,6 +129,9 @@ public partial class PaginaCatalogo : UserControl
 
     private async void AlActualizarSeccion(object sender, RoutedEventArgs e)
     {
+        if (!_puedeEditar)
+            return;
+
         if (_seccionSeleccionada <= 0)
         {
             MessageBox.Show("Elegí una sección de la lista.", "Cotillón",
@@ -136,7 +160,7 @@ public partial class PaginaCatalogo : UserControl
 
     private async void AlBorrarSeccion(object sender, RoutedEventArgs e)
     {
-        if (_seccionSeleccionada <= 0)
+        if (!_puedeBorrar || _seccionSeleccionada <= 0)
             return;
 
         var confirmar = MessageBox.Show(
@@ -193,6 +217,9 @@ public partial class PaginaCatalogo : UserControl
 
     private async void AlAgregarCategoria(object sender, RoutedEventArgs e)
     {
+        if (!_puedeEditar)
+            return;
+
         if (CboSeccionCategoria.SelectedValue is not int seccionId)
         {
             MessageBox.Show("Elegí la sección a la que pertenece.", "Cotillón",
@@ -218,6 +245,9 @@ public partial class PaginaCatalogo : UserControl
 
     private async void AlActualizarCategoria(object sender, RoutedEventArgs e)
     {
+        if (!_puedeEditar)
+            return;
+
         if (_categoriaSeleccionada <= 0)
         {
             MessageBox.Show("Elegí una categoría de la lista.", "Cotillón",
@@ -251,7 +281,7 @@ public partial class PaginaCatalogo : UserControl
 
     private async void AlBorrarCategoria(object sender, RoutedEventArgs e)
     {
-        if (_categoriaSeleccionada <= 0)
+        if (!_puedeBorrar || _categoriaSeleccionada <= 0)
             return;
 
         var confirmar = MessageBox.Show(

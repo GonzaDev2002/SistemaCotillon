@@ -3,6 +3,7 @@ using Cotillon.Shared.DTOs.Adjuntos;
 using Cotillon.Shared.DTOs.Auditoria;
 using Cotillon.Shared.DTOs.Caja;
 using Cotillon.Shared.DTOs.Compras;
+using Cotillon.Shared.DTOs.Permisos;
 using Cotillon.Shared.DTOs.Reportes;
 using Cotillon.Shared.DTOs.Stock;
 using Cotillon.Shared.DTOs.Terceros;
@@ -234,6 +235,17 @@ public class ServiciosApi
     public Task<ApiResponse<string>> CambiarPinAsync(CambiarPinDto datos, bool comoAdmin) =>
         _cliente.PublicarAsync<string>(
             $"api/Usuarios/cambiar-pin?esAdmin={comoAdmin.ToString().ToLowerInvariant()}", datos);
+
+    public Task<ApiResponse<Dictionary<string, NivelAcceso>>> PermisosDeUsuarioAsync(int usuarioId) =>
+        _cliente.ObtenerAsync<Dictionary<string, NivelAcceso>>($"api/Usuarios/{usuarioId}/permisos");
+
+    public Task<ApiResponse<Dictionary<string, NivelAcceso>>> PlantillaPermisosAsync(string rol) =>
+        _cliente.ObtenerAsync<Dictionary<string, NivelAcceso>>($"api/Usuarios/plantilla-permisos/{rol}");
+
+    public Task<ApiResponse<string>> GuardarPermisosAsync(
+        int usuarioId, Dictionary<string, NivelAcceso> permisos) =>
+        _cliente.ActualizarAsync<string>(
+            $"api/Usuarios/{usuarioId}/permisos?usuarioEjecutor={Sesion.UsuarioId}", permisos);
 
     public Task<ApiResponse<List<MedioPagoDto>>> MediosPagoAsync() =>
         _cliente.ObtenerAsync<List<MedioPagoDto>>("api/MediosPago");

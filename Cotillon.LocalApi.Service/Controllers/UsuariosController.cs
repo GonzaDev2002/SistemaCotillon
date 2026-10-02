@@ -1,4 +1,6 @@
 using Cotillon.LocalApi.Service.Repositories;
+using Cotillon.LocalApi.Service.Services;
+using Cotillon.Shared.DTOs.Permisos;
 using Cotillon.Shared.DTOs.Usuarios;
 using Cotillon.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +14,12 @@ public class UsuariosController : ControllerBase
     private static readonly string[] Roles = ["Admin", "Supervisor", "Cajero"];
 
     private readonly UsuariosRepository _repository;
+    private readonly PermisosService _permisos;
 
-    public UsuariosController(UsuariosRepository repository)
+    public UsuariosController(UsuariosRepository repository, PermisosService permisos)
     {
         _repository = repository;
+        _permisos = permisos;
     }
 
     [HttpGet]
@@ -41,6 +45,10 @@ public class UsuariosController : ControllerBase
                 return BadRequest(ApiResponse<string>.Fail("El rol debe ser Admin, Supervisor o Cajero."));
 
             var id = _repository.Crear(usuario, usuarioEjecutor);
+
+            // Que nunca exista un usuario sin permisos: entraría y no vería nada.
+            // Después el administrador los ajusta desde la pantalla de usuarios.
+            _permisos.SembrarSegunRol(id, usuario.Rol, usuarioEjecutor);
 
             return Ok(ApiResponse<UsuarioDto>.Ok(_repository.ObtenerPorId(id), "Usuario creado con éxito."));
         });
@@ -68,6 +76,26 @@ public class UsuariosController : ControllerBase
         });
     }
 
+    // ---------------------------------------------------------------- Permisos --
+
+    [HttpGet("{usuarioId:int}/permisos")]
+    public IActionResult Permisos(int usuarioId) =>
+        Ejecutar(() => Responder(_permisos.ObtenerDe(usuarioId)));
+
+    /// <summary>Permisos sugeridos para un rol, sin guardarlos todavía.</summary>
+    [HttpGet("plantilla-permisos/{rol}")]
+    public IActionResult PlantillaPermisos(string rol) =>
+        Ejecutar(() => !Roles.Contains(rol)
+            ? BadRequest(ApiResponse<string>.Fail("El rol debe ser Admin, Supervisor o Cajero."))
+            : Responder(_permisos.Plantilla(rol)));
+
+    [HttpPut("{usuarioId:int}/permisos")]
+    public IActionResult GuardarPermisos(
+        int usuarioId,
+        [FromBody] Dictionary<string, NivelAcceso> permisos,
+        [FromQuery] int usuarioEjecutor) =>
+        Ejecutar(() => Responder(_permisos.Guardar(usuarioId, permisos, usuarioEjecutor)));
+
     [HttpPost("cambiar-pin")]
     public IActionResult CambiarPin([FromBody] CambiarPinDto datos, [FromQuery] bool esAdmin = false)
     {
@@ -82,6 +110,9 @@ public class UsuariosController : ControllerBase
             return Ok(ApiResponse<string>.Ok("OK", "PIN actualizado con éxito."));
         });
     }
+
+    private IActionResult Responder<T>(ApiResponse<T> resultado) =>
+        resultado.Success ? Ok(resultado) : BadRequest(resultado);
 
     private IActionResult Ejecutar(Func<IActionResult> accion)
     {

@@ -20,7 +20,7 @@ public class EsquemaTests
             "Usuarios", "Secciones", "Categorias", "Productos", "Clientes", "Proveedores",
             "MediosPago", "SesionesCaja", "MovimientosCaja", "Ventas", "DetalleVentas",
             "PagosVenta", "Compras", "DetalleCompras", "StockMovimientos", "Auditoria", "Configuracion",
-            "Adjuntos"
+            "Adjuntos", "PermisosUsuario"
         ];
 
         Assert.All(esperadas, tabla => Assert.Contains(tabla, tablas));

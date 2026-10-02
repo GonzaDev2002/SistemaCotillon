@@ -65,6 +65,17 @@ public partial class VentanaLogin : Window
 
             Sesion.Iniciar(respuesta.Data);
 
+            // Mejor frenarlo acá con un motivo que dejarlo entrar a una ventana
+            // sin un solo módulo, donde no tendría forma de entender qué pasó.
+            if (!Sesion.TieneAlgunModulo)
+            {
+                Sesion.Cerrar();
+                MostrarError("Tu usuario no tiene ningún módulo habilitado. Pedile acceso al administrador.");
+                TxtPin.Clear();
+                TxtPin.Focus();
+                return;
+            }
+
             DialogResult = true;
             Close();
         }

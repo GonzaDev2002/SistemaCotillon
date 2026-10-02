@@ -4,7 +4,9 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using Cotillon.Desktop.Wpf.Servicios;
 using Cotillon.Shared.DTOs;
+using Cotillon.Shared.DTOs.Permisos;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 
@@ -12,6 +14,7 @@ public partial class PaginaProductos : UserControl
 {
     private List<ProductoListadoDto> _productos = [];
     private int _productoSeleccionado;
+    private bool _puedeEditar;
 
     public PaginaProductos()
     {
@@ -20,6 +23,17 @@ public partial class PaginaProductos : UserControl
         Adjuntos.Titulo = "Fotos del producto";
         Adjuntos.AvisoSinSeleccion =
             "Elegí o escaneá un producto para agregarle fotos o su ficha del proveedor.";
+        Adjuntos.AplicarPermisos(Modulos.Productos);
+
+        // Con permiso de sólo ver, el lector sigue sirviendo para consultar precio
+        // y stock de una etiqueta, pero el formulario no guarda.
+        _puedeEditar = Sesion.PuedeEditar(Modulos.Productos);
+
+        BtnGuardar.IsEnabled = _puedeEditar;
+        BtnGuardar.Visibility = _puedeEditar ? Visibility.Visible : Visibility.Collapsed;
+
+        var acciones = Sesion.PuedeTodo(Modulos.Productos) ? Visibility.Visible : Visibility.Collapsed;
+        BtnEliminar.Visibility = acciones;
 
         Loaded += async (_, _) =>
         {
@@ -182,8 +196,10 @@ public partial class PaginaProductos : UserControl
         LblStockAviso.Text = "El stock se modifica desde Movimientos de stock, así queda registrado el motivo.";
         LblStockAviso.Visibility = Visibility.Visible;
 
-        BtnEliminar.IsEnabled = producto.Activo;
-        BtnReactivar.Visibility = producto.Activo ? Visibility.Collapsed : Visibility.Visible;
+        var acciones = Sesion.PuedeTodo(Modulos.Productos);
+
+        BtnEliminar.IsEnabled = producto.Activo && acciones;
+        BtnReactivar.Visibility = !producto.Activo && acciones ? Visibility.Visible : Visibility.Collapsed;
 
         ActualizarMargen();
 
@@ -246,6 +262,9 @@ public partial class PaginaProductos : UserControl
 
     private async void AlGuardar(object sender, RoutedEventArgs e)
     {
+        if (!_puedeEditar)
+            return;
+
         if (CboCategoria.SelectedValue is not int categoriaId)
         {
             MessageBox.Show("Elegí una sección y una categoría.", "Cotillón",
@@ -383,6 +402,7 @@ public partial class PaginaProductos : UserControl
         TxtStock.IsEnabled = true;
         LblStockAviso.Visibility = Visibility.Collapsed;
         PanelMargen.Visibility = Visibility.Collapsed;
+        BtnGuardar.IsEnabled = _puedeEditar;
         BtnEliminar.IsEnabled = false;
         BtnReactivar.Visibility = Visibility.Collapsed;
 

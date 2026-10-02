@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Cotillon.Desktop.Wpf.Servicios;
 using Cotillon.Shared.DTOs.Adjuntos;
 using MahApps.Metro.IconPacks;
 using Microsoft.Win32;
@@ -38,6 +39,21 @@ public partial class PanelAdjuntos : UserControl
     public string AvisoSinSeleccion { get; set; } =
         "Elegí un registro de la lista para ver o agregar sus archivos.";
 
+    private bool _puedeAdjuntar = true;
+    private bool _puedeQuitar = true;
+
+    /// <summary>
+    /// Ata los botones al permiso del módulo donde está el panel: adjuntar necesita
+    /// Editar y quitar necesita Total, porque borrar una factura no tiene vuelta.
+    /// </summary>
+    public void AplicarPermisos(string modulo)
+    {
+        _puedeAdjuntar = Sesion.PuedeEditar(modulo);
+        _puedeQuitar = Sesion.PuedeTodo(modulo);
+
+        AllowDrop = _puedeAdjuntar;
+    }
+
     /// <summary>
     /// Muestra los archivos del registro indicado. Con id 0 queda en blanco, que es
     /// el estado mientras no hay nada seleccionado o se está dando un alta nueva.
@@ -45,7 +61,7 @@ public partial class PanelAdjuntos : UserControl
     public async Task CargarAsync(int entidadId)
     {
         _entidadId = entidadId;
-        BtnAgregar.IsEnabled = entidadId > 0;
+        BtnAgregar.IsEnabled = entidadId > 0 && _puedeAdjuntar;
 
         if (entidadId <= 0)
         {
@@ -66,7 +82,7 @@ public partial class PanelAdjuntos : UserControl
 
         var archivos = respuesta.Data ?? [];
 
-        Lista.ItemsSource = archivos.Select(a => new Fila(a)).ToList();
+        Lista.ItemsSource = archivos.Select(a => new Fila(a, _puedeQuitar)).ToList();
 
         ChipCantidad.Visibility = archivos.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         LblCantidad.Text = archivos.Count == 1 ? "1 archivo" : $"{archivos.Count} archivos";
@@ -239,9 +255,10 @@ public partial class PanelAdjuntos : UserControl
     /// </summary>
     private sealed class Fila
     {
-        public Fila(AdjuntoDto dato)
+        public Fila(AdjuntoDto dato, bool puedeQuitar)
         {
             Dato = dato;
+            VisibilidadQuitar = puedeQuitar ? Visibility.Visible : Visibility.Collapsed;
 
             var esPdf = dato.Extension == "PDF";
 
@@ -263,5 +280,6 @@ public partial class PanelAdjuntos : UserControl
         public PackIconMaterialKind Icono { get; }
         public Brush Ficha { get; }
         public string Detalle { get; }
+        public Visibility VisibilidadQuitar { get; }
     }
 }

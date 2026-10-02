@@ -95,7 +95,8 @@
                                 <iconos:PackIconMaterial Kind="ContentSaveOutline" Width="14" Height="14"/>
                             </Button>
                             <Button Style="{StaticResource BotonPeligro}" Padding="8,5" Margin="5,0,0,0"
-                                    Click="AlQuitar" Tag="{Binding}" ToolTip="Quitar">
+                                    Click="AlQuitar" Tag="{Binding}" ToolTip="Quitar"
+                                    Visibility="{Binding VisibilidadQuitar}">
                                 <iconos:PackIconMaterial Kind="TrashCanOutline" Width="14" Height="14"/>
                             </Button>
                         </StackPanel>

@@ -105,9 +105,13 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Text="Descuento general" Style="{StaticResource Etiqueta}"/>
-                    <TextBox x:Name="TxtDescuentoGeneral" Text="0" TextChanged="AlCambiarDescuento"
-                             Margin="0,0,0,14"/>
+                    <!-- El descuento sobre el total es la vía más fácil de regalar
+                         plata del negocio, así que va con el permiso más alto -->
+                    <StackPanel x:Name="PanelDescuento">
+                        <TextBlock Text="Descuento general" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="TxtDescuentoGeneral" Text="0" TextChanged="AlCambiarDescuento"
+                                 Margin="0,0,0,14"/>
+                    </StackPanel>
 
                     <TextBlock Text="Medio de pago" Style="{StaticResource Etiqueta}"/>
                     <ComboBox x:Name="CboMedioPago" DisplayMemberPath="NombreMedioPago"

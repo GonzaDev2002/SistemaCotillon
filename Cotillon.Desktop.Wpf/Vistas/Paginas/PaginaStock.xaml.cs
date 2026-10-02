@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Cotillon.Desktop.Wpf.Servicios;
+using Cotillon.Shared.DTOs.Permisos;
 using Cotillon.Shared.DTOs.Stock;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
@@ -10,10 +11,15 @@ namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 public partial class PaginaStock : UserControl
 {
     private int _productoSeleccionado;
+    private readonly bool _puedeAjustar = Sesion.PuedeEditar(Modulos.Stock);
 
     public PaginaStock()
     {
         InitializeComponent();
+
+        // Con permiso de sólo ver queda la trazabilidad: se consulta qué pasó con
+        // el stock, pero no se puede tocar.
+        PanelAjuste.Visibility = _puedeAjustar ? Visibility.Visible : Visibility.Collapsed;
 
         FechaDesde.SelectedDate = DateTime.Today.AddDays(-7);
         FechaHasta.SelectedDate = DateTime.Today;
@@ -67,7 +73,7 @@ public partial class PaginaStock : UserControl
 
     private async void AlAjustar(object sender, RoutedEventArgs e)
     {
-        if (_productoSeleccionado <= 0)
+        if (!_puedeAjustar || _productoSeleccionado <= 0)
             return;
 
         var tipo = (CboTipo.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "AJUSTE";

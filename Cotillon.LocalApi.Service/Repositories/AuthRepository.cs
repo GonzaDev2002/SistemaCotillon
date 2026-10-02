@@ -7,10 +7,12 @@ namespace Cotillon.LocalApi.Service.Repositories;
 public class AuthRepository
 {
     private readonly IDbConnectionFactory _factory;
+    private readonly PermisosRepository _permisos;
 
-    public AuthRepository(IDbConnectionFactory factory)
+    public AuthRepository(IDbConnectionFactory factory, PermisosRepository permisos)
     {
         _factory = factory;
+        _permisos = permisos;
     }
 
     public LoginResponseDto? Login(string username, string pin)
@@ -37,7 +39,8 @@ public class AuthRepository
             UsuarioId = usuario.UsuarioId,
             NombreUsuario = usuario.NombreUsuario,
             NombreCompleto = usuario.NombreCompleto,
-            Rol = usuario.Rol
+            Rol = usuario.Rol,
+            Permisos = _permisos.ObtenerDe(usuario.UsuarioId)
         };
     }
 

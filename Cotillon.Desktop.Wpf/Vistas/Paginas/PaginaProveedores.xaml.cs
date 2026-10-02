@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Cotillon.Desktop.Wpf.Servicios;
+using Cotillon.Shared.DTOs.Permisos;
 using Cotillon.Shared.DTOs.Terceros;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
@@ -8,6 +10,7 @@ namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 public partial class PaginaProveedores : UserControl
 {
     private int _proveedorSeleccionado;
+    private bool _puedeEditar;
 
     public PaginaProveedores()
     {
@@ -16,6 +19,15 @@ public partial class PaginaProveedores : UserControl
         Adjuntos.Titulo = "Archivos del proveedor";
         Adjuntos.AvisoSinSeleccion =
             "Elegí un proveedor de la lista para ver sus facturas, remitos o listas de precios.";
+        Adjuntos.AplicarPermisos(Modulos.Proveedores);
+
+        // Sin permiso de edición queda de sólo consulta: se ve la lista y los
+        // archivos, pero el formulario no deja guardar.
+        _puedeEditar = Sesion.PuedeEditar(Modulos.Proveedores);
+
+        BtnGuardar.IsEnabled = _puedeEditar;
+        BtnGuardar.Visibility = _puedeEditar ? Visibility.Visible : Visibility.Collapsed;
+        BtnBaja.Visibility = Sesion.PuedeTodo(Modulos.Proveedores) ? Visibility.Visible : Visibility.Collapsed;
 
         Loaded += async (_, _) => await BuscarAsync();
     }
@@ -54,11 +66,14 @@ public partial class PaginaProveedores : UserControl
         TxtObservaciones.Text = proveedor.Observaciones;
         ChkActivo.IsChecked = proveedor.Activo;
 
-        BtnBaja.IsEnabled = proveedor.Activo;
+        BtnBaja.IsEnabled = proveedor.Activo && Sesion.PuedeTodo(Modulos.Proveedores);
     }
 
     private async void AlGuardar(object sender, RoutedEventArgs e)
     {
+        if (!_puedeEditar)
+            return;
+
         if (string.IsNullOrWhiteSpace(TxtNombre.Text))
         {
             MessageBox.Show("El nombre del proveedor es obligatorio.", "Cotillón",
@@ -139,6 +154,7 @@ public partial class PaginaProveedores : UserControl
         TxtObservaciones.Clear();
         ChkActivo.IsChecked = true;
 
+        BtnGuardar.IsEnabled = _puedeEditar;
         BtnBaja.IsEnabled = false;
         Grilla.SelectedItem = null;
 

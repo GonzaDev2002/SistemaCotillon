@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using Cotillon.Desktop.Wpf.Servicios;
+using Cotillon.Shared.DTOs.Permisos;
 using Cotillon.Shared.DTOs.Ventas;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
@@ -20,6 +21,7 @@ public partial class PaginaHistorialVentas : UserControl
         Adjuntos.Titulo = "Comprobantes";
         Adjuntos.AvisoSinSeleccion =
             "Elegí una venta para adjuntarle la factura, el remito o el comprobante de pago.";
+        Adjuntos.AplicarPermisos(Modulos.HistorialVentas);
 
         Loaded += async (_, _) => await BuscarAsync();
     }
@@ -65,9 +67,9 @@ public partial class PaginaHistorialVentas : UserControl
         LblDescuento.Text = venta.DescuentoTotal.ToString("C2", CultureInfo.CurrentCulture);
         LblTotalVenta.Text = venta.TotalVenta.ToString("C2", CultureInfo.CurrentCulture);
 
-        // Anular es una operación de supervisión y sólo tiene sentido sobre una
+        // Anular es la acción delicada del módulo y sólo tiene sentido sobre una
         // venta que siga vigente.
-        PanelAnular.Visibility = venta.Estado == "COMPLETADA" && Sesion.PuedeSupervisar
+        PanelAnular.Visibility = venta.Estado == "COMPLETADA" && Sesion.PuedeTodo(Modulos.HistorialVentas)
             ? Visibility.Visible
             : Visibility.Collapsed;
 
