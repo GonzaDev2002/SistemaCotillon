@@ -24,6 +24,10 @@ public partial class PaginaCompras : UserControl
         FechaDesde.SelectedDate = DateTime.Today.AddDays(-30);
         FechaHasta.SelectedDate = DateTime.Today;
 
+        Adjuntos.Titulo = "Factura del proveedor";
+        Adjuntos.AvisoSinSeleccion =
+            "Elegí una compra para adjuntarle la factura o el remito del proveedor.";
+
         Loaded += async (_, _) =>
         {
             await CargarProveedoresAsync();
@@ -193,6 +197,13 @@ public partial class PaginaCompras : UserControl
 
         BtnRecibir.IsEnabled = respuesta.Data.Estado == "PENDIENTE";
         BtnAnularCompra.IsEnabled = respuesta.Data.Estado != "ANULADA";
+
+        var comprobante = string.IsNullOrWhiteSpace(respuesta.Data.NumeroComprobante)
+            ? $"compra #{respuesta.Data.CompraId}"
+            : respuesta.Data.NumeroComprobante;
+
+        Adjuntos.Titulo = $"Factura de la {comprobante}";
+        await Adjuntos.CargarAsync(respuesta.Data.CompraId);
     }
 
     private async void AlRecibir(object sender, RoutedEventArgs e)

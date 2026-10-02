@@ -57,4 +57,26 @@ public class SeccionesService
 
         return ApiResponse<string>.Ok("OK", "Sección actualizada con éxito.");
     }
+
+    /// <summary>
+    /// Borra la sección sólo si está vacía. Una sección con categorías se desactiva
+    /// en lugar de borrarse: sus productos siguen existiendo en ventas históricas
+    /// y perder el nombre dejaría reportes viejos sin explicación.
+    /// </summary>
+    public ApiResponse<string> Eliminar(int seccionId)
+    {
+        if (seccionId <= 0)
+            return ApiResponse<string>.Fail("La sección es inválida.");
+
+        var categorias = _repository.ContarCategorias(seccionId);
+
+        if (categorias > 0)
+            return ApiResponse<string>.Fail(
+                $"La sección tiene {categorias} categoría(s). Movelas o borralas primero, " +
+                "o desactivá la sección para que deje de aparecer al cargar productos.");
+
+        return _repository.Eliminar(seccionId)
+            ? ApiResponse<string>.Ok("OK", "Sección borrada.")
+            : ApiResponse<string>.Fail("No se encontró la sección.");
+    }
 }

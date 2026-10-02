@@ -17,6 +17,10 @@ public partial class PaginaHistorialVentas : UserControl
         FechaDesde.SelectedDate = DateTime.Today;
         FechaHasta.SelectedDate = DateTime.Today;
 
+        Adjuntos.Titulo = "Comprobantes";
+        Adjuntos.AvisoSinSeleccion =
+            "Elegí una venta para adjuntarle la factura, el remito o el comprobante de pago.";
+
         Loaded += async (_, _) => await BuscarAsync();
     }
 
@@ -66,6 +70,9 @@ public partial class PaginaHistorialVentas : UserControl
         PanelAnular.Visibility = venta.Estado == "COMPLETADA" && Sesion.PuedeSupervisar
             ? Visibility.Visible
             : Visibility.Collapsed;
+
+        Adjuntos.Titulo = $"Comprobantes de la venta #{venta.VentaId}";
+        await Adjuntos.CargarAsync(venta.VentaId);
     }
 
     private async void AlAnular(object sender, RoutedEventArgs e)

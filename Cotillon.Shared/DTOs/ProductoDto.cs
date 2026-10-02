@@ -16,4 +16,10 @@ public class ProductoDto
     public string ImagenUrl { get; set; } = string.Empty;
     public string UnidadMedida { get; set; } = string.Empty;
     public bool PermiteVentaSinStock { get; set; }
+
+    /// <summary>
+    /// Sólo informativo al leer: el alta y la modificación no lo tocan, la baja
+    /// lógica va por su propio endpoint.
+    /// </summary>
+    public bool Activo { get; set; } = true;
 }

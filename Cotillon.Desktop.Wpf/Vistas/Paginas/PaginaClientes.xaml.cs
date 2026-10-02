@@ -13,6 +13,10 @@ public partial class PaginaClientes : UserControl
     {
         InitializeComponent();
 
+        Adjuntos.Titulo = "Archivos del cliente";
+        Adjuntos.AvisoSinSeleccion =
+            "Elegí un cliente de la lista para ver sus facturas, comprobantes o fotos.";
+
         Loaded += async (_, _) => await BuscarAsync();
     }
 
@@ -31,13 +35,16 @@ public partial class PaginaClientes : UserControl
         Grilla.ItemsSource = respuesta.Data;
     }
 
-    private void AlSeleccionar(object sender, SelectionChangedEventArgs e)
+    private async void AlSeleccionar(object sender, SelectionChangedEventArgs e)
     {
         if (Grilla.SelectedItem is not ClienteDto cliente)
             return;
 
         _clienteSeleccionado = cliente.ClienteId;
         LblFormulario.Text = $"Editando: {cliente.NombreCompleto}";
+
+        Adjuntos.Titulo = $"Archivos de {cliente.NombreCompleto}";
+        await Adjuntos.CargarAsync(cliente.ClienteId);
 
         TxtNombre.Text = cliente.NombreCompleto;
         TxtDocumento.Text = cliente.Documento;
@@ -134,5 +141,10 @@ public partial class PaginaClientes : UserControl
 
         BtnBaja.IsEnabled = false;
         Grilla.SelectedItem = null;
+
+        // Sin cliente elegido no hay archivos que mostrar. Con id 0 el panel no
+        // consulta la API, así que no hace falta esperar la tarea.
+        Adjuntos.Titulo = "Archivos del cliente";
+        _ = Adjuntos.LimpiarAsync();
     }
 }

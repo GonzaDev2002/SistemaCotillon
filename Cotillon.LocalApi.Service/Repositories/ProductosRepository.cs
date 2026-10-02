@@ -137,48 +137,85 @@ public class ProductosRepository
         using var conexion = _factory.Crear();
 
         var fila = conexion.QuerySingleOrDefault<FilaProducto>(
-            """
-            SELECT ProductoId, CategoriaId, CodigoProducto, NombreProducto, Descripcion,
-                   PrecioCentavos, CostoCentavos, Stock, StockMinimo, CodigoBarras, Marca,
-                   UnidadMedida, ImagenUrl, PermiteVentaSinStock
-            FROM Productos
+            $"""
+            {ColumnasProducto}
             WHERE ProductoId = @Id;
             """,
             new { Id = productoId });
 
-        if (fila is null)
-            return null;
-
-        return new ProductoDto
-        {
-            ProductoId = fila.ProductoId,
-            CategoriaId = fila.CategoriaId,
-            CodigoProducto = fila.CodigoProducto ?? string.Empty,
-            NombreProducto = fila.NombreProducto,
-            Descripcion = fila.Descripcion ?? string.Empty,
-            Precio = Money.FromCentavos(fila.PrecioCentavos),
-            Costo = Money.FromCentavos(fila.CostoCentavos),
-            Stock = (int)fila.Stock,
-            StockMinimo = (int)fila.StockMinimo,
-            CodigoBarras = fila.CodigoBarras ?? string.Empty,
-            Marca = fila.Marca ?? string.Empty,
-            UnidadMedida = fila.UnidadMedida,
-            ImagenUrl = fila.ImagenUrl ?? string.Empty,
-            PermiteVentaSinStock = fila.PermiteVentaSinStock
-        };
+        return fila is null ? null : Mapear(fila);
     }
 
-    public bool EliminarLogico(int productoId)
+    /// <summary>
+    /// Trae el producto por su código exacto. Es lo que necesita el lector de código
+    /// de barras en la pantalla de alta: con un disparo quedan cargados todos los
+    /// campos del producto, en vez de tener que buscarlo a mano en la lista.
+    /// Incluye los dados de baja, porque si el código ya existe hay que editar ese
+    /// producto y no crear un duplicado que el índice único rechazaría igual.
+    /// </summary>
+    public ProductoDto? ObtenerPorCodigo(string codigo)
+    {
+        using var conexion = _factory.Crear();
+
+        var fila = conexion.QueryFirstOrDefault<FilaProducto>(
+            $"""
+            {ColumnasProducto}
+            WHERE CodigoBarras = @Codigo OR CodigoProducto = @Codigo
+            ORDER BY CASE WHEN CodigoBarras = @Codigo THEN 0 ELSE 1 END
+            LIMIT 1;
+            """,
+            new { Codigo = codigo });
+
+        return fila is null ? null : Mapear(fila);
+    }
+
+    private const string ColumnasProducto =
+        """
+        SELECT ProductoId, CategoriaId, CodigoProducto, NombreProducto, Descripcion,
+               PrecioCentavos, CostoCentavos, Stock, StockMinimo, CodigoBarras, Marca,
+               UnidadMedida, ImagenUrl, PermiteVentaSinStock, Activo
+        FROM Productos
+        """;
+
+    private static ProductoDto Mapear(FilaProducto fila) => new()
+    {
+        ProductoId = fila.ProductoId,
+        CategoriaId = fila.CategoriaId,
+        CodigoProducto = fila.CodigoProducto ?? string.Empty,
+        NombreProducto = fila.NombreProducto,
+        Descripcion = fila.Descripcion ?? string.Empty,
+        Precio = Money.FromCentavos(fila.PrecioCentavos),
+        Costo = Money.FromCentavos(fila.CostoCentavos),
+        Stock = (int)fila.Stock,
+        StockMinimo = (int)fila.StockMinimo,
+        CodigoBarras = fila.CodigoBarras ?? string.Empty,
+        Marca = fila.Marca ?? string.Empty,
+        UnidadMedida = fila.UnidadMedida,
+        ImagenUrl = fila.ImagenUrl ?? string.Empty,
+        PermiteVentaSinStock = fila.PermiteVentaSinStock,
+        Activo = fila.Activo
+    };
+
+    public bool EliminarLogico(int productoId) => CambiarActivo(productoId, false);
+
+    /// <summary>
+    /// Vuelve a poner en venta un producto dado de baja. Hace falta porque al
+    /// escanear una etiqueta aparece también lo dado de baja, y sin esto el
+    /// producto quedaría editable pero invisible en la pantalla de ventas.
+    /// </summary>
+    public bool Reactivar(int productoId) => CambiarActivo(productoId, true);
+
+    private bool CambiarActivo(int productoId, bool activo)
     {
         using var conexion = _factory.Crear();
 
         return conexion.Execute(
             """
             UPDATE Productos
-            SET Activo = 0, FechaActualizacion = datetime('now', 'localtime')
+            SET Activo = @Activo, FechaActualizacion = datetime('now', 'localtime')
             WHERE ProductoId = @ProductoId;
             """,
-            new { ProductoId = productoId }) > 0;
+            new { ProductoId = productoId, Activo = activo ? 1 : 0 }) > 0;
     }
 
     public DashboardResumenDto ObtenerResumenDashboard()
@@ -303,5 +340,6 @@ public class ProductosRepository
         public string UnidadMedida { get; init; } = "UNIDAD";
         public string? ImagenUrl { get; init; }
         public bool PermiteVentaSinStock { get; init; }
+        public bool Activo { get; init; }
     }
 }

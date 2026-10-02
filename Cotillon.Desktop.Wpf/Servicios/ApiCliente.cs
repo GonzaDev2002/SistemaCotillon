@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -90,6 +91,62 @@ public class ApiCliente
         catch (Exception ex)
         {
             return Falla<T>(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sube un archivo del disco local como multipart. Se transmite por streaming
+    /// para no cargar en memoria una factura escaneada entera.
+    /// </summary>
+    public async Task<ApiResponse<T>> SubirArchivoAsync<T>(string url, string rutaArchivo, string? descripcion)
+    {
+        try
+        {
+            using var contenido = new MultipartFormDataContent();
+            await using var archivo = File.OpenRead(rutaArchivo);
+
+            contenido.Add(new StreamContent(archivo), "archivo", Path.GetFileName(rutaArchivo));
+
+            if (!string.IsNullOrWhiteSpace(descripcion))
+                contenido.Add(new StringContent(descripcion), "descripcion");
+
+            var respuesta = await _http.PostAsync(url, contenido);
+
+            return await LeerAsync<T>(respuesta);
+        }
+        catch (Exception ex)
+        {
+            return Falla<T>(ex);
+        }
+    }
+
+    /// <summary>
+    /// Descarga un archivo al destino indicado. Devuelve el mensaje de error de la
+    /// API si la respuesta no fue un archivo.
+    /// </summary>
+    public async Task<ApiResponse<string>> DescargarArchivoAsync(string url, string rutaDestino)
+    {
+        try
+        {
+            using var respuesta = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!respuesta.IsSuccessStatusCode)
+            {
+                // Cuando falla, la API responde el envoltorio ApiResponse de siempre.
+                var error = await LeerAsync<string>(respuesta);
+
+                return error.Success ? ApiResponse<string>.Fail("No se pudo descargar el archivo.") : error;
+            }
+
+            await using (var origen = await respuesta.Content.ReadAsStreamAsync())
+            await using (var destino = File.Create(rutaDestino))
+                await origen.CopyToAsync(destino);
+
+            return ApiResponse<string>.Ok(rutaDestino, "Archivo descargado.");
+        }
+        catch (Exception ex)
+        {
+            return Falla<string>(ex);
         }
     }
 

@@ -74,4 +74,26 @@ public class CategoriasService
 
         return ApiResponse<string>.Ok("OK", "Categoría actualizada con éxito.");
     }
+
+    /// <summary>
+    /// Borra la categoría sólo si no tiene productos, incluidos los dados de baja:
+    /// esos productos siguen apareciendo en el historial de ventas y necesitan su
+    /// categoría para mostrarse.
+    /// </summary>
+    public ApiResponse<string> Eliminar(int categoriaId)
+    {
+        if (categoriaId <= 0)
+            return ApiResponse<string>.Fail("La categoría es inválida.");
+
+        var productos = _repository.ContarProductos(categoriaId);
+
+        if (productos > 0)
+            return ApiResponse<string>.Fail(
+                $"La categoría tiene {productos} producto(s). Pasalos a otra categoría primero, " +
+                "o desactivala para que deje de ofrecerse al cargar productos nuevos.");
+
+        return _repository.Eliminar(categoriaId)
+            ? ApiResponse<string>.Ok("OK", "Categoría borrada.")
+            : ApiResponse<string>.Fail("No se encontró la categoría.");
+    }
 }

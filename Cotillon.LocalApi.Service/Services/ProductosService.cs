@@ -59,6 +59,23 @@ public class ProductosService
             : ApiResponse<ProductoDto>.Ok(producto, "Producto obtenido correctamente.");
     }
 
+    /// <summary>
+    /// Busca por código exacto para la carga con lector. No encontrarlo no es un
+    /// error: significa que el código es nuevo y hay que dar de alta el producto,
+    /// así que responde Ok con Data en null y la pantalla decide qué hacer.
+    /// </summary>
+    public ApiResponse<ProductoDto> ObtenerPorCodigo(string? codigo)
+    {
+        if (string.IsNullOrWhiteSpace(codigo))
+            return ApiResponse<ProductoDto>.Fail("Escaneá o escribí un código.");
+
+        var producto = _repository.ObtenerPorCodigo(codigo.Trim());
+
+        return producto is null
+            ? ApiResponse<ProductoDto>.Ok(null, "El código no está cargado todavía.")
+            : ApiResponse<ProductoDto>.Ok(producto, "Producto encontrado.");
+    }
+
     public ApiResponse<string> Actualizar(ProductoDto producto)
     {
         if (producto.ProductoId <= 0)
@@ -89,6 +106,16 @@ public class ProductosService
             return ApiResponse<string>.Fail("No se pudo eliminar el producto.");
 
         return ApiResponse<string>.Ok("OK", "Producto eliminado con éxito.");
+    }
+
+    public ApiResponse<string> Reactivar(int productoId)
+    {
+        if (productoId <= 0)
+            return ApiResponse<string>.Fail("El producto es inválido.");
+
+        return _repository.Reactivar(productoId)
+            ? ApiResponse<string>.Ok("OK", "Producto puesto nuevamente en venta.")
+            : ApiResponse<string>.Fail("No se encontró el producto.");
     }
     public ApiResponse<DashboardResumenDto> ObtenerResumenDashboard()
     {

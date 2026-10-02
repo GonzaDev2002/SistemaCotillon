@@ -19,7 +19,8 @@ public class EsquemaTests
         [
             "Usuarios", "Secciones", "Categorias", "Productos", "Clientes", "Proveedores",
             "MediosPago", "SesionesCaja", "MovimientosCaja", "Ventas", "DetalleVentas",
-            "PagosVenta", "Compras", "DetalleCompras", "StockMovimientos", "Auditoria", "Configuracion"
+            "PagosVenta", "Compras", "DetalleCompras", "StockMovimientos", "Auditoria", "Configuracion",
+            "Adjuntos"
         ];
 
         Assert.All(esperadas, tabla => Assert.Contains(tabla, tablas));

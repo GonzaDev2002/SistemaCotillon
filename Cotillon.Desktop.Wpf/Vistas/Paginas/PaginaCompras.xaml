@@ -1,6 +1,7 @@
 <UserControl x:Class="Cotillon.Desktop.Wpf.Vistas.Paginas.PaginaCompras"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controles="clr-namespace:Cotillon.Desktop.Wpf.Controles">
 
     <TabControl Margin="26,22" Background="Transparent" BorderThickness="0">
         <!-- Nueva compra -->
@@ -122,10 +123,17 @@
                                     Click="AlAnularCompra" IsEnabled="False"/>
                         </StackPanel>
 
+                        <!-- Factura del proveedor: queda guardada junto a la compra -->
+                        <Border DockPanel.Dock="Bottom" Height="230" Margin="0,14,0,14"
+                                BorderBrush="{StaticResource Borde}" BorderThickness="0,1,0,0"
+                                Padding="0,14,0,0">
+                            <controles:PanelAdjuntos x:Name="Adjuntos" EntidadTipo="COMPRA"/>
+                        </Border>
+
                         <StackPanel>
                             <TextBlock x:Name="LblDetalleCompra" Text="Elegí una compra"
                                        Style="{StaticResource TituloSeccion}"/>
-                            <DataGrid x:Name="GrillaDetalleCompra" Height="330">
+                            <DataGrid x:Name="GrillaDetalleCompra" Height="200">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*"/>
                                     <DataGridTextColumn Header="Cant." Binding="{Binding Cantidad}" Width="60"/>

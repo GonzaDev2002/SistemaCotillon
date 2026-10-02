@@ -1,4 +1,5 @@
 using Cotillon.Shared.DTOs;
+using Cotillon.Shared.DTOs.Adjuntos;
 using Cotillon.Shared.DTOs.Auditoria;
 using Cotillon.Shared.DTOs.Caja;
 using Cotillon.Shared.DTOs.Compras;
@@ -55,6 +56,9 @@ public class ServiciosApi
     public Task<ApiResponse<string>> ActualizarSeccionAsync(SeccionDto seccion) =>
         _cliente.ActualizarAsync<string>("api/Secciones", seccion);
 
+    public Task<ApiResponse<string>> EliminarSeccionAsync(int seccionId) =>
+        _cliente.EliminarAsync<string>($"api/Secciones/{seccionId}");
+
     public Task<ApiResponse<List<CategoriaDto>>> CategoriasAsync() =>
         _cliente.ObtenerAsync<List<CategoriaDto>>("api/Categorias");
 
@@ -66,6 +70,9 @@ public class ServiciosApi
 
     public Task<ApiResponse<string>> ActualizarCategoriaAsync(CategoriaDto categoria) =>
         _cliente.ActualizarAsync<string>("api/Categorias", categoria);
+
+    public Task<ApiResponse<string>> EliminarCategoriaAsync(int categoriaId) =>
+        _cliente.EliminarAsync<string>($"api/Categorias/{categoriaId}");
 
     // -------------------------------------------------------------- Productos --
 
@@ -79,6 +86,13 @@ public class ServiciosApi
     public Task<ApiResponse<ProductoDto>> ProductoAsync(int productoId) =>
         _cliente.ObtenerAsync<ProductoDto>($"api/Productos/{productoId}");
 
+    /// <summary>
+    /// Producto por código exacto, para la carga con lector de código de barras.
+    /// Si el código no existe la respuesta es exitosa con Data en null.
+    /// </summary>
+    public Task<ApiResponse<ProductoDto>> ProductoPorCodigoAsync(string codigo) =>
+        _cliente.ObtenerAsync<ProductoDto>($"api/Productos/por-codigo/{Uri.EscapeDataString(codigo)}");
+
     public Task<ApiResponse<string>> CrearProductoAsync(ProductoDto producto) =>
         _cliente.PublicarAsync<string>("api/Productos", producto);
 
@@ -87,6 +101,9 @@ public class ServiciosApi
 
     public Task<ApiResponse<string>> EliminarProductoAsync(int productoId) =>
         _cliente.EliminarAsync<string>($"api/Productos/{productoId}");
+
+    public Task<ApiResponse<string>> ReactivarProductoAsync(int productoId) =>
+        _cliente.PublicarAsync<string>($"api/Productos/{productoId}/reactivar");
 
     // ------------------------------------------------------------------- Caja --
 
@@ -227,4 +244,20 @@ public class ServiciosApi
     public Task<ApiResponse<string>> GuardarConfiguracionAsync(string clave, string? valor) =>
         _cliente.ActualizarAsync<string>($"api/Configuracion?usuarioId={Sesion.UsuarioId}",
             new ConfiguracionItemDto { Clave = clave, Valor = valor });
+
+    // --------------------------------------------------------------- Adjuntos --
+
+    public Task<ApiResponse<List<AdjuntoDto>>> AdjuntosAsync(string entidadTipo, int entidadId) =>
+        _cliente.ObtenerAsync<List<AdjuntoDto>>($"api/Adjuntos/{entidadTipo}/{entidadId}");
+
+    public Task<ApiResponse<AdjuntoDto>> SubirAdjuntoAsync(
+        string entidadTipo, int entidadId, string rutaArchivo, string? descripcion) =>
+        _cliente.SubirArchivoAsync<AdjuntoDto>(
+            $"api/Adjuntos/{entidadTipo}/{entidadId}?usuarioId={Sesion.UsuarioId}", rutaArchivo, descripcion);
+
+    public Task<ApiResponse<string>> DescargarAdjuntoAsync(int adjuntoId, string rutaDestino) =>
+        _cliente.DescargarArchivoAsync($"api/Adjuntos/archivo/{adjuntoId}", rutaDestino);
+
+    public Task<ApiResponse<string>> EliminarAdjuntoAsync(int adjuntoId) =>
+        _cliente.EliminarAsync<string>($"api/Adjuntos/{adjuntoId}?usuarioId={Sesion.UsuarioId}");
 }

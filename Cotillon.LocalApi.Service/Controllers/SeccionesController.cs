@@ -65,4 +65,19 @@ public class SeccionesController : ControllerBase
             return StatusCode(500, ApiResponse<string>.Fail($"Error interno al actualizar sección: {ex.Message}"));
         }
     }
+
+    [HttpDelete("{seccionId:int}")]
+    public IActionResult Delete(int seccionId)
+    {
+        try
+        {
+            var result = _service.Eliminar(seccionId);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al borrar sección: {ex.Message}"));
+        }
+    }
 }

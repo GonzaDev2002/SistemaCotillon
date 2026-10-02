@@ -61,7 +61,23 @@ public class ProductosController : ControllerBase
         }
     }
 
-    [HttpGet("{productoId}")]
+    /// <summary>
+    /// Producto por código exacto: lo usa el lector de código de barras en el alta.
+    /// </summary>
+    [HttpGet("por-codigo/{codigo}")]
+    public IActionResult ObtenerPorCodigo(string codigo)
+    {
+        try
+        {
+            return Ok(_service.ObtenerPorCodigo(codigo));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al buscar el código: {ex.Message}"));
+        }
+    }
+
+    [HttpGet("{productoId:int}")]
     public IActionResult Obtener(int productoId)
     {
         try
@@ -91,7 +107,22 @@ public class ProductosController : ControllerBase
         }
     }
 
-    [HttpDelete("{productoId}")]
+    [HttpPost("{productoId:int}/reactivar")]
+    public IActionResult Reactivar(int productoId)
+    {
+        try
+        {
+            var result = _service.Reactivar(productoId);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al reactivar producto: {ex.Message}"));
+        }
+    }
+
+    [HttpDelete("{productoId:int}")]
     public IActionResult Delete(int productoId)
     {
         try

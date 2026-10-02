@@ -18,10 +18,9 @@ public class CategoriasRepository
         using var conexion = _factory.Crear();
 
         return conexion.Query<CategoriaDto>(
-            """
-            SELECT CategoriaId, SeccionId, NombreCategoria, Activo
-            FROM Categorias
-            ORDER BY NombreCategoria;
+            $"""
+            {Consulta}
+            ORDER BY s.NombreSeccion, c.NombreCategoria;
             """).ToList();
     }
 
@@ -30,13 +29,48 @@ public class CategoriasRepository
         using var conexion = _factory.Crear();
 
         return conexion.Query<CategoriaDto>(
-            """
-            SELECT CategoriaId, SeccionId, NombreCategoria, Activo
-            FROM Categorias
-            WHERE SeccionId = @SeccionId
-            ORDER BY NombreCategoria;
+            $"""
+            {Consulta}
+            WHERE c.SeccionId = @SeccionId
+            ORDER BY c.NombreCategoria;
             """,
             new { SeccionId = seccionId }).ToList();
+    }
+
+    private const string Consulta =
+        """
+        SELECT
+            c.CategoriaId,
+            c.SeccionId,
+            c.NombreCategoria,
+            c.Activo,
+            COALESCE(s.NombreSeccion, '(Sin sección)') AS NombreSeccion,
+            (SELECT COUNT(*) FROM Productos p
+             WHERE p.CategoriaId = c.CategoriaId AND p.Activo = 1) AS CantidadProductos
+        FROM Categorias c
+        LEFT JOIN Secciones s ON c.SeccionId = s.SeccionId
+        """;
+
+    /// <summary>
+    /// Igual que en secciones: se borra sólo si no tiene productos, para poder dar
+    /// un mensaje claro en lugar del error de clave foránea.
+    /// </summary>
+    public bool Eliminar(int categoriaId)
+    {
+        using var conexion = _factory.Crear();
+
+        return conexion.Execute(
+            "DELETE FROM Categorias WHERE CategoriaId = @CategoriaId;",
+            new { CategoriaId = categoriaId }) > 0;
+    }
+
+    public int ContarProductos(int categoriaId)
+    {
+        using var conexion = _factory.Crear();
+
+        return (int)conexion.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM Productos WHERE CategoriaId = @CategoriaId;",
+            new { CategoriaId = categoriaId });
     }
 
     public bool Insertar(CategoriaDto categoria)

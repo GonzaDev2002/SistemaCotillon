@@ -83,4 +83,19 @@ public class CategoriasController : ControllerBase
             return StatusCode(500, ApiResponse<string>.Fail($"Error interno al actualizar categoría: {ex.Message}"));
         }
     }
+
+    [HttpDelete("{categoriaId:int}")]
+    public IActionResult Delete(int categoriaId)
+    {
+        try
+        {
+            var result = _service.Eliminar(categoriaId);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al borrar categoría: {ex.Message}"));
+        }
+    }
 }

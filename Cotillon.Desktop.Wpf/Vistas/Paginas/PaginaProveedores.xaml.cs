@@ -13,6 +13,10 @@ public partial class PaginaProveedores : UserControl
     {
         InitializeComponent();
 
+        Adjuntos.Titulo = "Archivos del proveedor";
+        Adjuntos.AvisoSinSeleccion =
+            "Elegí un proveedor de la lista para ver sus facturas, remitos o listas de precios.";
+
         Loaded += async (_, _) => await BuscarAsync();
     }
 
@@ -31,13 +35,16 @@ public partial class PaginaProveedores : UserControl
         Grilla.ItemsSource = respuesta.Data;
     }
 
-    private void AlSeleccionar(object sender, SelectionChangedEventArgs e)
+    private async void AlSeleccionar(object sender, SelectionChangedEventArgs e)
     {
         if (Grilla.SelectedItem is not ProveedorDto proveedor)
             return;
 
         _proveedorSeleccionado = proveedor.ProveedorId;
         LblFormulario.Text = $"Editando: {proveedor.NombreProveedor}";
+
+        Adjuntos.Titulo = $"Archivos de {proveedor.NombreProveedor}";
+        await Adjuntos.CargarAsync(proveedor.ProveedorId);
 
         TxtNombre.Text = proveedor.NombreProveedor;
         TxtCuit.Text = proveedor.Cuit;
@@ -134,5 +141,8 @@ public partial class PaginaProveedores : UserControl
 
         BtnBaja.IsEnabled = false;
         Grilla.SelectedItem = null;
+
+        Adjuntos.Titulo = "Archivos del proveedor";
+        _ = Adjuntos.LimpiarAsync();
     }
 }

@@ -1,0 +1,116 @@
+<UserControl x:Class="Cotillon.Desktop.Wpf.Controles.PanelAdjuntos"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:iconos="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             AllowDrop="True" Drop="AlSoltarArchivos" DragOver="AlArrastrarSobre">
+
+    <DockPanel>
+        <!-- Encabezado -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <Button x:Name="BtnAgregar" DockPanel.Dock="Right" Style="{StaticResource BotonPrimario}"
+                    Padding="12,7" Click="AlAgregar" IsEnabled="False"
+                    ToolTip="Adjuntar una factura, un comprobante o una foto">
+                <StackPanel Orientation="Horizontal">
+                    <iconos:PackIconMaterial Kind="Paperclip" Width="14" Height="14"
+                                             VerticalAlignment="Center"/>
+                    <TextBlock Text="Adjuntar" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock x:Name="LblTitulo" Text="Archivos" Style="{StaticResource TituloSeccion}"
+                           Margin="0" VerticalAlignment="Center"/>
+                <Border x:Name="ChipCantidad" CornerRadius="9" Padding="7,2" Margin="8,0,0,0"
+                        Background="{StaticResource Fondo}" VerticalAlignment="Center"
+                        Visibility="Collapsed">
+                    <TextBlock x:Name="LblCantidad" FontFamily="Segoe UI" FontSize="11"
+                               FontWeight="SemiBold" Foreground="{StaticResource TextoSecundario}"/>
+                </Border>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Aviso: sin registro elegido, sin archivos, o resultado de la última acción.
+             Va arriba, junto al título: abajo del todo quedaba suelto en el aire
+             cuando la lista está vacía, que es justo cuando hay que leerlo. -->
+        <TextBlock x:Name="LblAviso" DockPanel.Dock="Top" Style="{StaticResource Subtitulo}"
+                   TextWrapping="Wrap" Margin="0,0,0,10"
+                   Text="Elegí un registro de la lista para ver o agregar sus archivos."/>
+
+        <ListBox x:Name="Lista" BorderThickness="0" Background="Transparent"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 HorizontalContentAlignment="Stretch"
+                 MouseDoubleClick="AlAbrirSeleccionado">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="0,0,0,6"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <Border x:Name="borde" CornerRadius="10" Padding="10,8"
+                                        Background="{StaticResource Fondo}"
+                                        BorderBrush="Transparent" BorderThickness="1.5">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="borde" Property="Background" Value="#EEF2FF"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="borde" Property="Background" Value="#EEF2FF"/>
+                                        <Setter TargetName="borde" Property="BorderBrush"
+                                                Value="{StaticResource Primario}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListBox.ItemContainerStyle>
+
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel LastChildFill="True">
+                        <!-- Ficha con el icono del formato, mismo relieve que el resto -->
+                        <Grid DockPanel.Dock="Left" Width="34" Height="34" VerticalAlignment="Center"
+                              Margin="0,0,11,0">
+                            <Border CornerRadius="10" Background="{Binding Ficha}"
+                                    Effect="{StaticResource SombraFicha}"/>
+                            <Border CornerRadius="10" Background="{StaticResource BrilloFicha}"/>
+                            <iconos:PackIconMaterial Kind="{Binding Icono}" Width="17" Height="17"
+                                                     Foreground="White"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"
+                                    Margin="8,0,0,0">
+                            <Button Style="{StaticResource BotonSecundario}" Padding="8,5"
+                                    Click="AlAbrir" Tag="{Binding}" ToolTip="Abrir">
+                                <iconos:PackIconMaterial Kind="OpenInNew" Width="14" Height="14"/>
+                            </Button>
+                            <Button Style="{StaticResource BotonSecundario}" Padding="8,5" Margin="5,0,0,0"
+                                    Click="AlGuardarComo" Tag="{Binding}" ToolTip="Guardar una copia">
+                                <iconos:PackIconMaterial Kind="ContentSaveOutline" Width="14" Height="14"/>
+                            </Button>
+                            <Button Style="{StaticResource BotonPeligro}" Padding="8,5" Margin="5,0,0,0"
+                                    Click="AlQuitar" Tag="{Binding}" ToolTip="Quitar">
+                                <iconos:PackIconMaterial Kind="TrashCanOutline" Width="14" Height="14"/>
+                            </Button>
+                        </StackPanel>
+
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Dato.NombreArchivo}" FontFamily="Segoe UI" FontSize="13"
+                                       FontWeight="SemiBold" Foreground="{StaticResource TextoPrimario}"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Detalle}" FontFamily="Segoe UI" FontSize="11.5"
+                                       Foreground="{StaticResource TextoSecundario}"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</UserControl>
