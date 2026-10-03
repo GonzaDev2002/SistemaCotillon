@@ -47,14 +47,58 @@ public partial class PaginaProductos : UserControl
             // enfocado, disparar sobre una etiqueta ya carga el producto.
             TxtCodigoBarras.Focus();
         };
+
+        PreviewKeyDown += AlTeclaFormulario;
+    }
+
+    /// <summary>
+    /// Carga en cadena: Enter baja al campo siguiente y F12 guarda. Cargar una caja
+    /// de mercadería es disparar el lector, tipear nombre, precio, costo y stock
+    /// bajando con Enter, apretar F12 y disparar el lector otra vez. La mano no se
+    /// va del teclado y no se toca el mouse en ningún momento.
+    /// </summary>
+    private void AlTeclaFormulario(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.F12)
+        {
+            AlGuardar(this, new RoutedEventArgs());
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key != Key.Enter)
+            return;
+
+        // El campo del lector tiene su propio Enter: busca el código. Y en la
+        // descripción Enter es un salto de línea, porque admite varias.
+        if (Keyboard.FocusedElement is not TextBox campo ||
+            ReferenceEquals(campo, TxtCodigoBarras) ||
+            ReferenceEquals(campo, TxtDescripcion))
+            return;
+
+        campo.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+
+        // El siguiente campo queda seleccionado: se sobreescribe tipeando, sin
+        // tener que borrar el 0 que trae.
+        if (Keyboard.FocusedElement is TextBox siguiente)
+            siguiente.SelectAll();
+
+        e.Handled = true;
     }
 
     private async Task CargarSeccionesAsync()
     {
         var secciones = await App.Api.SeccionesAsync();
 
-        if (secciones.Success && secciones.Data is not null)
-            CboSeccion.ItemsSource = secciones.Data;
+        if (!secciones.Success || secciones.Data is null)
+            return;
+
+        CboSeccion.ItemsSource = secciones.Data;
+
+        // Arranca con una sección elegida: cargar el primer producto del día no
+        // tiene por qué empezar pasando por los dos combos.
+        if (secciones.Data.Count > 0 && CboSeccion.SelectedIndex < 0)
+            CboSeccion.SelectedIndex = 0;
     }
 
     private async Task CargarProductosAsync()
@@ -75,6 +119,11 @@ public partial class PaginaProductos : UserControl
         var categorias = await App.Api.CategoriasPorSeccionAsync(seccionId);
 
         CboCategoria.ItemsSource = categorias.Data;
+
+        // En un alta se deja elegida la primera categoría de la sección. Al editar
+        // no, porque la categoría que corresponde la pone el producto cargado.
+        if (_productoSeleccionado == 0 && categorias.Data?.Count > 0)
+            CboCategoria.SelectedIndex = 0;
     }
 
     /// <summary>
@@ -426,7 +475,9 @@ public partial class PaginaProductos : UserControl
         BtnEliminar.IsEnabled = false;
         BtnReactivar.Visibility = Visibility.Collapsed;
 
-        CboCategoria.SelectedIndex = -1;
+        // La sección y la categoría NO se limpian: la mercadería entra por cajas
+        // del mismo rubro, así que el que acaba de cargar diez globos va a cargar
+        // el once en el mismo lugar. Se elige una vez por caja, no una por producto.
         Grilla.SelectedItem = null;
 
         Adjuntos.Titulo = "Fotos del producto";
