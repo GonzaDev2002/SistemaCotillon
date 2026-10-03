@@ -38,7 +38,7 @@ public class EsquemaTests
 
         Assert.Equal(1, conexion.ExecuteScalar<long>("SELECT COUNT(*) FROM Usuarios;"));
         Assert.Equal(5, conexion.ExecuteScalar<long>("SELECT COUNT(*) FROM MediosPago;"));
-        Assert.Equal(6, conexion.ExecuteScalar<long>("SELECT COUNT(*) FROM Configuracion;"));
+        Assert.Equal(7, conexion.ExecuteScalar<long>("SELECT COUNT(*) FROM Configuracion;"));
     }
 
     [Fact]

@@ -23,6 +23,9 @@ public partial class PaginaVentas : UserControl
     /// <summary>Multiplicador tipeado antes de buscar, mientras se elige de la lista.</summary>
     private decimal? _cantidadPendiente;
 
+    /// <summary>Formato de las etiquetas de la balanza. Vacío si el negocio no las usa.</summary>
+    private string? _mascaraBalanza;
+
     public PaginaVentas(VentanaPrincipal principal)
     {
         InitializeComponent();
@@ -127,6 +130,11 @@ public partial class PaginaVentas : UserControl
 
         CboCliente.ItemsSource = lista;
         CboCliente.SelectedIndex = 0;
+
+        var configuracion = await App.Api.ConfiguracionAsync();
+
+        if (configuracion.Success && configuracion.Data is not null)
+            _mascaraBalanza = configuracion.Data.GetValueOrDefault(EtiquetaBalanza.Clave);
     }
 
     // ------------------------------------------------------------- Búsqueda --
@@ -153,6 +161,14 @@ public partial class PaginaVentas : UserControl
 
         if (string.IsNullOrWhiteSpace(texto))
             return;
+
+        // La etiqueta de la balanza se mira primero: trae el peso adentro del
+        // código, así que no hay nada que preguntar ni que multiplicar.
+        if (EtiquetaBalanza.Leer(texto, _mascaraBalanza) is { } etiqueta)
+        {
+            await AgregarDesdeBalanzaAsync(etiqueta);
+            return;
+        }
 
         decimal? cantidad = null;
 
@@ -205,6 +221,52 @@ public partial class PaginaVentas : UserControl
         // El foco pasa a la lista para elegir con las flechas y Enter.
         GrillaResultados.SelectedIndex = 0;
         GrillaResultados.Focus();
+    }
+
+    /// <summary>
+    /// Carga una pesada ya hecha en la balanza. Es el camino más corto que hay:
+    /// se pesa, se pega la etiqueta y se escanea, sin tipear el peso ni confirmar
+    /// nada. Si la etiqueta trae el importe en lugar del peso, se deduce la
+    /// cantidad con el precio del sistema, para que el stock siga descontándose
+    /// en kilos y el ticket no dependa de la lista de precios de la balanza.
+    /// </summary>
+    private async Task AgregarDesdeBalanzaAsync(LecturaBalanza etiqueta)
+    {
+        TxtBuscar.Clear();
+        PanelResultados.Visibility = Visibility.Collapsed;
+
+        var respuesta = await App.Api.BuscarProductosAsync(etiqueta.Codigo);
+
+        if (!respuesta.Success || respuesta.Data is null || respuesta.Data.Count != 1)
+        {
+            MostrarAviso(
+                $"La etiqueta es del artículo {etiqueta.Codigo} de la balanza y no hay " +
+                "un producto con ese código. Cargalo en el código de barras del producto.");
+
+            TxtBuscar.Focus();
+            return;
+        }
+
+        var producto = respuesta.Data[0];
+        var cantidad = etiqueta.Peso;
+
+        if (cantidad is null)
+        {
+            if (producto.Precio <= 0)
+            {
+                MostrarAviso(
+                    $"La etiqueta trae el importe y '{producto.NombreProducto}' no tiene precio cargado.");
+
+                TxtBuscar.Focus();
+                return;
+            }
+
+            cantidad = Math.Round(etiqueta.Importe!.Value / producto.Precio, 3);
+        }
+
+        OcultarAviso();
+        Agregar(producto, cantidad);
+        TxtBuscar.Focus();
     }
 
     private void AlElegirResultado(object sender, MouseButtonEventArgs e) => TomarResultado();

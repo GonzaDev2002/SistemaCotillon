@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using Cotillon.Desktop.Wpf.Servicios;
+using Cotillon.Shared.DTOs;
 using Cotillon.Shared.DTOs.Permisos;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
@@ -34,6 +35,7 @@ public partial class PaginaConfiguracion : UserControl
             TxtPieTicket.Text = Valor(respuesta.Data, "TICKET_PIE");
             ChkVentaSinStock.IsChecked =
                 bool.TryParse(Valor(respuesta.Data, "VENTA_PERMITE_SIN_STOCK"), out var permitir) && permitir;
+            TxtMascaraBalanza.Text = Valor(respuesta.Data, EtiquetaBalanza.Clave);
         }
 
         await VerificarAsync();
@@ -58,7 +60,8 @@ public partial class PaginaConfiguracion : UserControl
                 ["NEGOCIO_DIRECCION"] = TxtDireccion.Text.Trim(),
                 ["NEGOCIO_TELEFONO"] = TxtTelefono.Text.Trim(),
                 ["TICKET_PIE"] = TxtPieTicket.Text.Trim(),
-                ["VENTA_PERMITE_SIN_STOCK"] = (ChkVentaSinStock.IsChecked == true).ToString().ToLowerInvariant()
+                ["VENTA_PERMITE_SIN_STOCK"] = (ChkVentaSinStock.IsChecked == true).ToString().ToLowerInvariant(),
+                [EtiquetaBalanza.Clave] = TxtMascaraBalanza.Text.Trim().ToUpperInvariant()
             };
 
             foreach (var (clave, valor) in claves)

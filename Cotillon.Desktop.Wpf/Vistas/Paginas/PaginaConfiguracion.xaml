@@ -54,6 +54,16 @@
                     <CheckBox x:Name="ChkVentaSinStock" Content="Permitir vender productos sin stock disponible"/>
                     <TextBlock Text="Si está activo, el sistema deja vender aunque el stock llegue a cero. El stock puede quedar en negativo."
                                Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="26,4,0,0"/>
+
+                    <TextBlock Text="ETIQUETAS DE LA BALANZA" Style="{StaticResource Etiqueta}" Margin="0,16,0,0"/>
+                    <TextBox x:Name="TxtMascaraBalanza"/>
+                    <TextBlock Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="0,4,0,0">
+                        Sólo si la balanza imprime etiquetas con código de barras. Al escanearlas, el peso
+                        entra solo y no hay que tipearlo. Se describe el formato con una máscara: cada
+                        dígito fijo es el prefijo de la balanza, C es el código del artículo, P el peso en
+                        gramos, I el importe en centavos, y D el dígito verificador.
+                        Lo más habitual es 20CCCCCPPPPPD. Vacío = apagado.
+                    </TextBlock>
                 </StackPanel>
             </Border>
 
