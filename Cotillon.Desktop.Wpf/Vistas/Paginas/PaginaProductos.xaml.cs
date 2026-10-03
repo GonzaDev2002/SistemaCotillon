@@ -35,6 +35,10 @@ public partial class PaginaProductos : UserControl
         var acciones = Sesion.PuedeTodo(Modulos.Productos) ? Visibility.Visible : Visibility.Collapsed;
         BtnEliminar.Visibility = acciones;
 
+        // El alta masiva pide permiso total: es la pantalla desde la que se crean
+        // doscientos productos de un saque y conviene que sea cosa del dueño.
+        BtnImportar.Visibility = acciones;
+
         CboUnidad.ItemsSource = UnidadesMedida.Todas;
         CboUnidad.SelectedValue = UnidadesMedida.Unidad;
 
@@ -434,6 +438,14 @@ public partial class PaginaProductos : UserControl
         BtnEliminar.IsEnabled = true;
 
         await CargarProductosAsync();
+    }
+
+    private async void AlImportar(object sender, RoutedEventArgs e)
+    {
+        var ventana = new VentanaImportarProductos { Owner = Window.GetWindow(this) };
+
+        if (ventana.ShowDialog() == true)
+            await CargarProductosAsync();
     }
 
     private void AlNuevo(object sender, RoutedEventArgs e)
