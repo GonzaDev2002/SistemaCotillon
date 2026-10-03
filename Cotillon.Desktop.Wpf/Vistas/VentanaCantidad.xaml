@@ -1,0 +1,58 @@
+<Window x:Class="Cotillon.Desktop.Wpf.Vistas.VentanaCantidad"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:iconos="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        Icon="/Recursos/cotillon.png"
+        Title="Cantidad" SizeToContent="Height" Width="440"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Background="{StaticResource Superficie}">
+
+    <StackPanel Margin="24">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+            <Grid Width="34" Height="34" VerticalAlignment="Center" Margin="0,0,12,0">
+                <Border CornerRadius="10" Background="{StaticResource FichaVerde}"
+                        Effect="{StaticResource SombraFicha}"/>
+                <Border CornerRadius="10" Background="{StaticResource BrilloFicha}"/>
+                <iconos:PackIconMaterial x:Name="Icono" Kind="ScaleBalance" Width="17" Height="17"
+                                         Foreground="White"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock x:Name="LblProducto" Style="{StaticResource TituloSeccion}" Margin="0"
+                           TextTrimming="CharacterEllipsis"/>
+                <TextBlock x:Name="LblPrecio" Style="{StaticResource Subtitulo}"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Atajos: lo que más se pide, a un solo tecleo -->
+        <UniformGrid x:Name="PanelAtajos" Rows="1" Margin="0,14,0,0"/>
+
+        <TextBlock x:Name="LblCampo" Style="{StaticResource Etiqueta}" Margin="0,14,0,4"/>
+        <TextBox x:Name="TxtCantidad" FontSize="26" MinHeight="58" TextAlignment="Center"
+                 FontWeight="SemiBold" TextChanged="AlCambiarCantidad" KeyDown="AlTeclaCantidad"/>
+
+        <Border Background="{StaticResource Fondo}" CornerRadius="10" Padding="14,11" Margin="0,12,0,0">
+            <DockPanel>
+                <TextBlock x:Name="LblEquivalencia" Style="{StaticResource Subtitulo}"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="LblImporte" Text="$ 0,00" HorizontalAlignment="Right"
+                           FontFamily="Segoe UI" FontSize="24" FontWeight="Bold"
+                           Foreground="{StaticResource Primario}"/>
+            </DockPanel>
+        </Border>
+
+        <TextBlock x:Name="LblStock" Style="{StaticResource Subtitulo}" TextWrapping="Wrap"
+                   Margin="0,10,0,0"/>
+
+        <Grid Margin="0,18,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="Cancelar  (Esc)" Style="{StaticResource BotonSecundario}"
+                    Height="44" Margin="0,0,5,0" Click="AlCancelar"/>
+            <Button x:Name="BtnAceptar" Grid.Column="1" Content="Agregar  (Enter)"
+                    Style="{StaticResource BotonExito}" Height="44" Margin="5,0,0,0" Click="AlAceptar"/>
+        </Grid>
+    </StackPanel>
+</Window>

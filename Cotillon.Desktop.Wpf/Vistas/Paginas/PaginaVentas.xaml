@@ -20,22 +20,32 @@
                 <DockPanel>
                     <Button DockPanel.Dock="Right" Content="Buscar" Style="{StaticResource BotonPrimario}"
                             Margin="10,0,0,0" Click="AlBuscar"/>
-                    <TextBox x:Name="TxtBuscar" Height="42" FontSize="15"
-                             KeyDown="AlTeclaBuscar" ToolTip="Escaneá el código de barras o escribí el nombre"/>
+                    <StackPanel>
+                        <TextBox x:Name="TxtBuscar" Height="42" FontSize="15" KeyDown="AlTeclaBuscar"
+                                 ToolTip="Escaneá el código de barras o escribí el nombre"/>
+                        <TextBlock Style="{StaticResource Subtitulo}" FontSize="11.5" Margin="2,5,0,0"
+                                   Text="Escaneá o escribí y Enter.  Para varias unidades: 3*código o 3* y escaneá."/>
+                    </StackPanel>
                 </DockPanel>
             </Border>
 
             <Border Grid.Row="1" x:Name="PanelResultados" Style="{StaticResource Tarjeta}"
                     Padding="0" Margin="0,0,0,12" Visibility="Collapsed">
-                <DataGrid x:Name="GrillaResultados" MaxHeight="210" BorderThickness="0"
-                          MouseDoubleClick="AlElegirResultado">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*"/>
-                        <DataGridTextColumn Header="Categoría" Binding="{Binding NombreCategoria}" Width="150"/>
-                        <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C2}" Width="110"/>
-                        <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="70"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <DockPanel>
+                    <Border DockPanel.Dock="Bottom" Background="#F8FAFC" Padding="14,7">
+                        <TextBlock Style="{StaticResource Subtitulo}" FontSize="11.5"
+                                   Text="↑ ↓ para elegir  ·  Enter agrega  ·  Esc vuelve al buscador"/>
+                    </Border>
+                    <DataGrid x:Name="GrillaResultados" MaxHeight="210" BorderThickness="0"
+                              MouseDoubleClick="AlElegirResultado" KeyDown="AlTeclaResultados">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*"/>
+                            <DataGridTextColumn Header="Categoría" Binding="{Binding NombreCategoria}" Width="150"/>
+                            <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C2}" Width="110"/>
+                            <DataGridTextColumn Header="Stock" Binding="{Binding StockFormateado}" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
             </Border>
 
             <Border Grid.Row="2" Style="{StaticResource Tarjeta}" Padding="0">
@@ -51,12 +61,20 @@
                         </DockPanel>
                     </Border>
 
+                    <!-- Atajos a la vista: es lo que hace que se dejen de usar los
+                         botones. Si no están escritos, nadie los aprende. -->
+                    <Border DockPanel.Dock="Bottom" Background="#F8FAFC" Padding="16,9"
+                            BorderBrush="{StaticResource Borde}" BorderThickness="0,1,0,0">
+                        <TextBlock Style="{StaticResource Subtitulo}" FontSize="11.5" TextWrapping="Wrap"
+                                   Text="F2 cantidad  ·  F3 cliente  ·  F4 medio de pago  ·  F5 paga con  ·  Supr quita el ítem  ·  F12 cobra  ·  Esc cancela"/>
+                    </Border>
+
                     <DataGrid x:Name="GrillaCarrito" BorderThickness="0" IsReadOnly="False"
-                              CellEditEnding="AlEditarCantidad">
+                              CellEditEnding="AlEditarCantidad" KeyDown="AlTeclaCarrito">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" Width="*" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C2}"
-                                                Width="110" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Precio" Binding="{Binding PrecioConUnidad}"
+                                                Width="130" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Cantidad" Binding="{Binding Cantidad}" Width="90"/>
                             <DataGridTextColumn Header="Desc." Binding="{Binding Descuento, StringFormat=C2}" Width="90"/>
                             <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat=C2}"

@@ -38,7 +38,8 @@
                             <DataGridTextColumn Header="Sección" Binding="{Binding NombreSeccion}" Width="130"/>
                             <DataGridTextColumn Header="Categoría" Binding="{Binding NombreCategoria}" Width="130"/>
                             <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat=C2}" Width="110"/>
-                            <DataGridTextColumn Header="Stock" Binding="{Binding Stock}" Width="70"/>
+                            <!-- Con la unidad al lado: "2,5 kg" se lee distinto que "2,5" -->
+                            <DataGridTextColumn Header="Stock" Binding="{Binding StockFormateado}" Width="90"/>
                             <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Activo}" Width="60"/>
                         </DataGrid.Columns>
                     </DataGrid>
@@ -103,17 +104,23 @@
                     <TextBox x:Name="TxtCodigoProducto" Margin="0,0,0,10"
                              ToolTip="Para los artículos sin código de barras: el que le pone el negocio"/>
 
+                    <!-- Define si al vender se agrega de a uno o se pregunta el peso -->
+                    <TextBlock Text="CÓMO SE VENDE" Style="{StaticResource Etiqueta}"/>
+                    <ComboBox x:Name="CboUnidad" DisplayMemberPath="Nombre" SelectedValuePath="Codigo"
+                              SelectionChanged="AlCambiarUnidad" Margin="0,0,0,10"/>
+
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                            <TextBlock Text="PRECIO" Style="{StaticResource Etiqueta}"/>
+                            <TextBlock x:Name="LblPrecio" Text="PRECIO POR UNIDAD"
+                                       Style="{StaticResource Etiqueta}"/>
                             <TextBox x:Name="TxtPrecio" Text="0" TextChanged="AlCambiarPrecioOCosto"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                            <TextBlock Text="COSTO" Style="{StaticResource Etiqueta}"/>
+                            <TextBlock x:Name="LblCosto" Text="COSTO" Style="{StaticResource Etiqueta}"/>
                             <TextBox x:Name="TxtCosto" Text="0" TextChanged="AlCambiarPrecioOCosto"/>
                         </StackPanel>
                     </Grid>
@@ -135,11 +142,12 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                            <TextBlock Text="STOCK" Style="{StaticResource Etiqueta}"/>
+                            <TextBlock x:Name="LblStock" Text="STOCK" Style="{StaticResource Etiqueta}"/>
                             <TextBox x:Name="TxtStock" Text="0"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                            <TextBlock Text="STOCK MÍNIMO" Style="{StaticResource Etiqueta}"/>
+                            <TextBlock x:Name="LblStockMinimo" Text="STOCK MÍNIMO"
+                                       Style="{StaticResource Etiqueta}"/>
                             <TextBox x:Name="TxtStockMinimo" Text="0"/>
                         </StackPanel>
                     </Grid>

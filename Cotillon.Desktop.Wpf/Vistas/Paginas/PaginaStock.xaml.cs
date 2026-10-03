@@ -67,7 +67,7 @@ public partial class PaginaStock : UserControl
         var producto = respuesta.Data[0];
 
         _productoSeleccionado = producto.ProductoId;
-        LblProducto.Text = $"{producto.NombreProducto} · stock actual: {producto.Stock}";
+        LblProducto.Text = $"{producto.NombreProducto} · stock actual: {producto.StockFormateado}";
         BtnAjustar.IsEnabled = true;
     }
 

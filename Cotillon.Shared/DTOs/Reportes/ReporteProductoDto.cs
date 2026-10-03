@@ -7,7 +7,7 @@ public class ReporteProductoDto
     public string Seccion { get; set; } = string.Empty;
     public string Categoria { get; set; } = string.Empty;
     public decimal Precio { get; set; }
-    public int Stock { get; set; }
-    public int StockMinimo { get; set; }
+    public decimal Stock { get; set; }
+    public decimal StockMinimo { get; set; }
     public bool Activo { get; set; }
 }

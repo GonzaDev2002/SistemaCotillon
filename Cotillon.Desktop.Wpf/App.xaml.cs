@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Windows;
+using System.Windows.Markup;
 using System.Windows.Threading;
 using Cotillon.Desktop.Wpf.Servicios;
 using Cotillon.Desktop.Wpf.Vistas;
@@ -14,6 +16,14 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // WPF formatea los enlaces de las grillas en inglés aunque la máquina esté
+        // en español: sin esto, el total del panel dice "$ 2.250,00" y la misma
+        // cifra en la grilla de al lado dice "$2,250.00".
+        FrameworkElement.LanguageProperty.OverrideMetadata(
+            typeof(FrameworkElement),
+            new FrameworkPropertyMetadata(
+                XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
 
         DispatcherUnhandledException += AlFallar;
 

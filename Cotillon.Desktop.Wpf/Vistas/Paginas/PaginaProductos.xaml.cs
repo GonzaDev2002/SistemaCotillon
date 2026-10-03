@@ -35,6 +35,9 @@ public partial class PaginaProductos : UserControl
         var acciones = Sesion.PuedeTodo(Modulos.Productos) ? Visibility.Visible : Visibility.Collapsed;
         BtnEliminar.Visibility = acciones;
 
+        CboUnidad.ItemsSource = UnidadesMedida.Todas;
+        CboUnidad.SelectedValue = UnidadesMedida.Unidad;
+
         Loaded += async (_, _) =>
         {
             await CargarSeccionesAsync();
@@ -72,6 +75,21 @@ public partial class PaginaProductos : UserControl
         var categorias = await App.Api.CategoriasPorSeccionAsync(seccionId);
 
         CboCategoria.ItemsSource = categorias.Data;
+    }
+
+    /// <summary>
+    /// Las etiquetas siguen a la unidad elegida: "PRECIO POR KILO" deja claro que
+    /// el número que se carga es el del kilo y no el del paquete.
+    /// </summary>
+    private void AlCambiarUnidad(object sender, SelectionChangedEventArgs e)
+    {
+        if (CboUnidad.SelectedItem is not UnidadMedida unidad || LblPrecio is null)
+            return;
+
+        LblPrecio.Text = unidad.PrecioPor;
+        LblCosto.Text = unidad.Fraccionada ? $"COSTO POR {unidad.Simbolo.ToUpperInvariant()}" : "COSTO";
+        LblStock.Text = $"STOCK ({unidad.Simbolo})";
+        LblStockMinimo.Text = $"STOCK MÍNIMO ({unidad.Simbolo})";
     }
 
     private async void AlRefrescar(object sender, RoutedEventArgs e) => await CargarProductosAsync();
@@ -184,8 +202,9 @@ public partial class PaginaProductos : UserControl
         TxtCodigoProducto.Text = producto.CodigoProducto;
         TxtPrecio.Text = producto.Precio.ToString(CultureInfo.CurrentCulture);
         TxtCosto.Text = producto.Costo.ToString(CultureInfo.CurrentCulture);
-        TxtStock.Text = producto.Stock.ToString();
-        TxtStockMinimo.Text = producto.StockMinimo.ToString();
+        TxtStock.Text = producto.Stock.ToString("0.###", CultureInfo.CurrentCulture);
+        TxtStockMinimo.Text = producto.StockMinimo.ToString("0.###", CultureInfo.CurrentCulture);
+        CboUnidad.SelectedValue = UnidadesMedida.De(producto.UnidadMedida).Codigo;
         TxtMarca.Text = producto.Marca;
         TxtDescripcion.Text = producto.Descripcion;
         ChkSinStock.IsChecked = producto.PermiteVentaSinStock;
@@ -289,10 +308,10 @@ public partial class PaginaProductos : UserControl
             Descripcion = TxtDescripcion.Text.Trim(),
             Precio = Numero(TxtPrecio.Text),
             Costo = Numero(TxtCosto.Text),
-            Stock = (int)Numero(TxtStock.Text),
-            StockMinimo = (int)Numero(TxtStockMinimo.Text),
+            Stock = Numero(TxtStock.Text),
+            StockMinimo = Numero(TxtStockMinimo.Text),
             Marca = TxtMarca.Text.Trim(),
-            UnidadMedida = "UNIDAD",
+            UnidadMedida = CboUnidad.SelectedValue as string ?? UnidadesMedida.Unidad,
             PermiteVentaSinStock = ChkSinStock.IsChecked == true
         };
 
@@ -395,6 +414,7 @@ public partial class PaginaProductos : UserControl
         TxtCosto.Text = "0";
         TxtStock.Text = "0";
         TxtStockMinimo.Text = "0";
+        CboUnidad.SelectedValue = UnidadesMedida.Unidad;
         TxtMarca.Clear();
         TxtDescripcion.Clear();
         ChkSinStock.IsChecked = false;

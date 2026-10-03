@@ -1,3 +1,4 @@
+using System.Data;
 using Cotillon.Data;
 using Cotillon.LocalApi.Service.Repositories;
 using Cotillon.Shared.DTOs.Caja;
@@ -56,12 +57,40 @@ public sealed class EscenarioVentas : IDisposable
     public int AbrirCaja(decimal montoInicial = 1000m) =>
         Caja.Abrir(UsuarioId, montoInicial, "Apertura de prueba");
 
+    public IDbConnection Abrir() => _db.Abrir();
+
     public double StockDe(int productoId)
     {
         using var conexion = _db.Abrir();
 
         return conexion.ExecuteScalar<double>(
             "SELECT Stock FROM Productos WHERE ProductoId = @Id;", new { Id = productoId });
+    }
+
+    /// <summary>
+    /// Registra una venta pagada justa en efectivo y devuelve la guardada. El
+    /// importe sale de los precios de la base, igual que en la venta real.
+    /// </summary>
+    public VentaDto Vender(params (int ProductoId, decimal Cantidad)[] lineas)
+    {
+        var venta = NuevaVenta([.. lineas.Select(l => Linea(l.ProductoId, l.Cantidad))]);
+
+        var total = lineas.Sum(l => PrecioDe(l.ProductoId) * l.Cantidad);
+
+        venta.Pagos = [PagoEfectivo(total)];
+
+        return Ventas.ObtenerPorId(Ventas.Crear(venta, permitirVentaSinStockGlobal: false))!;
+    }
+
+    public void Anular(int ventaId) =>
+        Ventas.Anular(ventaId, new AnularVentaDto { UsuarioId = UsuarioId, Motivo = "Prueba" });
+
+    public decimal PrecioDe(int productoId)
+    {
+        using var conexion = _db.Abrir();
+
+        return Money.FromCentavos(conexion.ExecuteScalar<long>(
+            "SELECT PrecioCentavos FROM Productos WHERE ProductoId = @Id;", new { Id = productoId }));
     }
 
     public decimal CostoDe(int productoId)

@@ -1,5 +1,6 @@
 using System.Data;
 using Cotillon.Data;
+using Cotillon.Shared.DTOs;
 using Cotillon.Shared.DTOs.Ventas;
 using Dapper;
 
@@ -236,7 +237,7 @@ public partial class VentasRepository
             var producto = conexion.QuerySingleOrDefault<FilaProducto>(
                 """
                 SELECT ProductoId, NombreProducto, PrecioCentavos, CostoCentavos,
-                       Stock, PermiteVentaSinStock, Activo
+                       Stock, UnidadMedida, PermiteVentaSinStock, Activo
                 FROM Productos
                 WHERE ProductoId = @Id;
                 """,
@@ -249,8 +250,15 @@ public partial class VentasRepository
             var permiteSinStock = producto.PermiteVentaSinStock || permitirSinStockGlobal;
 
             if (!permiteSinStock && producto.Stock < (double)linea.Cantidad)
+            {
+                // Con la unidad en el mensaje: "Disponible: 0,3 kg" se entiende,
+                // "Disponible: 0,3" al lado de un pedido de 500 no.
+                var unidad = UnidadesMedida.De(producto.UnidadMedida);
+
                 throw new VentaInvalidaException(
-                    $"Stock insuficiente de '{producto.NombreProducto}'. Disponible: {producto.Stock}.");
+                    $"Stock insuficiente de '{producto.NombreProducto}'. " +
+                    $"Pediste {unidad.Formatear(linea.Cantidad)} y hay {unidad.Formatear((decimal)producto.Stock)}.");
+            }
 
             var brutoCentavos = Money.ToCentavos(Money.FromCentavos(producto.PrecioCentavos) * linea.Cantidad);
             var descuentoCentavos = Money.ToCentavos(linea.DescuentoLinea);
@@ -431,6 +439,7 @@ public partial class VentasRepository
         public long PrecioCentavos { get; init; }
         public long CostoCentavos { get; init; }
         public double Stock { get; init; }
+        public string UnidadMedida { get; init; } = "UNIDAD";
         public bool PermiteVentaSinStock { get; init; }
         public bool Activo { get; init; }
     }

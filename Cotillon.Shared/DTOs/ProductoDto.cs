@@ -8,8 +8,9 @@ public class ProductoDto
     public string NombreProducto { get; set; } = string.Empty;
     public string Descripcion { get; set; } = string.Empty;
     public decimal Precio { get; set; }
-    public int Stock { get; set; }
-    public int StockMinimo { get; set; }
+    // Decimal: lo que se vende por peso o por metro deja fracciones en stock.
+    public decimal Stock { get; set; }
+    public decimal StockMinimo { get; set; }
     public string CodigoBarras { get; set; } = string.Empty;
     public string Marca { get; set; } = string.Empty;
     public decimal Costo { get; set; }

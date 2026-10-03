@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -18,6 +19,9 @@ public partial class PaginaVentas : UserControl
     private readonly VentanaPrincipal _principal;
     private readonly ObservableCollection<ItemCarrito> _carrito = [];
     private readonly bool _puedeCobrar;
+
+    /// <summary>Multiplicador tipeado antes de buscar, mientras se elige de la lista.</summary>
+    private decimal? _cantidadPendiente;
 
     public PaginaVentas(VentanaPrincipal principal)
     {
@@ -40,15 +44,66 @@ public partial class PaginaVentas : UserControl
             TxtBuscar.Focus();
         };
 
-        // F12 cobra desde cualquier parte de la pantalla, como en un POS real.
-        PreviewKeyDown += (_, e) =>
+        // Los atajos se escuchan en toda la pantalla, como en un POS real: el
+        // vendedor no tiene que estar parado en el control correcto para usarlos.
+        PreviewKeyDown += AlTeclaGlobal;
+    }
+
+    /// <summary>
+    /// Atajos de la venta. Están pensados para cobrar sin soltar el teclado: la
+    /// mano no se va del lector ni del teclado numérico entre cliente y cliente.
+    /// </summary>
+    private void AlTeclaGlobal(object sender, KeyEventArgs e)
+    {
+        switch (e.Key)
         {
-            if (e.Key == Key.F12)
-            {
+            case Key.F12:
                 AlCobrar(this, new RoutedEventArgs());
-                e.Handled = true;
-            }
-        };
+                break;
+
+            case Key.F2:
+                EditarCantidadDelSeleccionado();
+                break;
+
+            case Key.F3:
+                CboCliente.Focus();
+                CboCliente.IsDropDownOpen = true;
+                break;
+
+            case Key.F4:
+                CboMedioPago.Focus();
+                CboMedioPago.IsDropDownOpen = true;
+                break;
+
+            case Key.F5:
+                TxtPagaCon.Focus();
+                TxtPagaCon.SelectAll();
+                break;
+
+            // Supr sólo borra la línea cuando el foco no está en un campo de texto,
+            // para no comerse la tecla mientras se corrige un importe.
+            case Key.Delete when Keyboard.FocusedElement is not TextBox:
+                AlQuitarItem(this, new RoutedEventArgs());
+                break;
+
+            case Key.Escape:
+                if (PanelResultados.Visibility == Visibility.Visible)
+                {
+                    PanelResultados.Visibility = Visibility.Collapsed;
+                    TxtBuscar.Focus();
+                }
+                else
+                {
+                    AlCancelar(this, new RoutedEventArgs());
+                }
+
+                break;
+
+            default:
+                return;
+        }
+
+        e.Handled = true;
     }
 
     private async Task CargarCombosAsync()
@@ -84,12 +139,35 @@ public partial class PaginaVentas : UserControl
             await BuscarAsync();
     }
 
+    /// <summary>
+    /// Separa el multiplicador del código: "3*7791234" o "3*" y después el disparo
+    /// del lector. Es el atajo clásico de caja para llevar varios iguales sin
+    /// tener que escanear el mismo producto tres veces.
+    /// </summary>
+    private static readonly Regex Multiplicador =
+        new(@"^\s*(\d+(?:[.,]\d+)?)\s*[*xX]\s*(.*)$", RegexOptions.Compiled);
+
     private async Task BuscarAsync()
     {
         var texto = TxtBuscar.Text.Trim();
 
         if (string.IsNullOrWhiteSpace(texto))
             return;
+
+        decimal? cantidad = null;
+
+        if (Multiplicador.Match(texto) is { Success: true } m)
+        {
+            cantidad = Numero(m.Groups[1].Value);
+            texto = m.Groups[2].Value.Trim();
+
+            // "3*" solo: queda esperando el disparo del lector, sin ir a buscar.
+            if (texto.Length == 0)
+            {
+                MostrarAviso($"Listo para {cantidad:0.##}: escaneá o escribí el producto.");
+                return;
+            }
+        }
 
         var respuesta = await App.Api.BuscarProductosAsync(texto);
 
@@ -106,34 +184,84 @@ public partial class PaginaVentas : UserControl
         // código de barras, donde parar a elegir rompería el ritmo de la caja.
         if (respuesta.Data.Count == 1)
         {
-            Agregar(respuesta.Data[0]);
+            // Se limpia ANTES de agregar. Si el producto abre el cuadro de cantidad,
+            // el Enter que lo confirma se filtra al buscador cuando el cuadro se
+            // cierra; con el campo ya vacío esa búsqueda de más no encuentra nada
+            // en vez de volver a pedir el peso del mismo producto.
             TxtBuscar.Clear();
+
+            Agregar(respuesta.Data[0], cantidad);
+
+            TxtBuscar.Focus();
             PanelResultados.Visibility = Visibility.Collapsed;
             return;
         }
 
+        _cantidadPendiente = cantidad;
+
         GrillaResultados.ItemsSource = respuesta.Data;
         PanelResultados.Visibility = Visibility.Visible;
+
+        // El foco pasa a la lista para elegir con las flechas y Enter.
+        GrillaResultados.SelectedIndex = 0;
+        GrillaResultados.Focus();
     }
 
-    private void AlElegirResultado(object sender, MouseButtonEventArgs e)
+    private void AlElegirResultado(object sender, MouseButtonEventArgs e) => TomarResultado();
+
+    private void AlTeclaResultados(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+            return;
+
+        TomarResultado();
+        e.Handled = true;
+    }
+
+    private void TomarResultado()
     {
         if (GrillaResultados.SelectedItem is not ProductoListadoDto producto)
             return;
 
-        Agregar(producto);
+        // Igual que al escanear: el campo se limpia antes de abrir el cuadro de
+        // cantidad, para que el Enter que lo confirma no dispare otra búsqueda.
         TxtBuscar.Clear();
-        TxtBuscar.Focus();
         PanelResultados.Visibility = Visibility.Collapsed;
+
+        Agregar(producto, _cantidadPendiente);
+
+        _cantidadPendiente = null;
+
+        TxtBuscar.Focus();
     }
 
-    private void Agregar(ProductoListadoDto producto)
+    /// <summary>
+    /// Agrega el producto al carrito. Si se vende por peso o por metro y no vino
+    /// una cantidad explícita, se pregunta: sumar "1" sería un kilo, que casi
+    /// nunca es lo que el cliente pidió.
+    /// </summary>
+    private void Agregar(ProductoListadoDto producto, decimal? cantidad = null)
     {
+        var unidad = UnidadesMedida.De(producto.UnidadMedida);
+
+        if (cantidad is null && unidad.Fraccionada)
+        {
+            cantidad = PreguntarCantidad(
+                producto.NombreProducto, producto.UnidadMedida, producto.Precio,
+                stock: producto.Stock);
+
+            if (cantidad is null)
+            {
+                TxtBuscar.Focus();
+                return;
+            }
+        }
+
         var existente = _carrito.FirstOrDefault(i => i.ProductoId == producto.ProductoId);
 
         if (existente is not null)
         {
-            existente.Cantidad += 1;
+            existente.Cantidad += cantidad ?? 1;
             GrillaCarrito.Items.Refresh();
             Recalcular();
             return;
@@ -144,7 +272,8 @@ public partial class PaginaVentas : UserControl
             ProductoId = producto.ProductoId,
             Nombre = producto.NombreProducto,
             Precio = producto.Precio,
-            Cantidad = 1
+            UnidadMedida = producto.UnidadMedida,
+            Cantidad = cantidad ?? 1
         };
 
         item.PropertyChanged += (_, _) => Recalcular();
@@ -152,10 +281,55 @@ public partial class PaginaVentas : UserControl
         _carrito.Add(item);
     }
 
+    private decimal? PreguntarCantidad(
+        string producto, string unidad, decimal precio, decimal? actual = null, decimal? stock = null)
+    {
+        var ventana = new VentanaCantidad(producto, unidad, precio, actual, stock)
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        return ventana.ShowDialog() == true ? ventana.Cantidad : null;
+    }
+
+    /// <summary>
+    /// F2 sobre la línea elegida: corrige el peso mal tipeado o cambia la cantidad
+    /// sin tener que borrar la línea y volver a escanear.
+    /// </summary>
+    private void EditarCantidadDelSeleccionado()
+    {
+        if (GrillaCarrito.SelectedItem is not ItemCarrito item)
+        {
+            MostrarAviso("Elegí primero una línea del detalle.");
+            return;
+        }
+
+        var cantidad = PreguntarCantidad(item.Nombre, item.UnidadMedida, item.Precio, item.Cantidad);
+
+        if (cantidad is null)
+            return;
+
+        item.Cantidad = cantidad.Value;
+
+        GrillaCarrito.Items.Refresh();
+        Recalcular();
+        OcultarAviso();
+    }
+
     private void AlQuitarItem(object sender, RoutedEventArgs e)
     {
         if (GrillaCarrito.SelectedItem is ItemCarrito item)
             _carrito.Remove(item);
+    }
+
+    /// <summary>Enter sobre una línea abre el mismo cuadro que F2.</summary>
+    private void AlTeclaCarrito(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter || GrillaCarrito.CurrentColumn?.IsReadOnly == false)
+            return;
+
+        EditarCantidadDelSeleccionado();
+        e.Handled = true;
     }
 
     private void AlEditarCantidad(object sender, DataGridCellEditEndingEventArgs e)
@@ -318,6 +492,7 @@ public partial class PaginaVentas : UserControl
     private void Limpiar()
     {
         _carrito.Clear();
+        _cantidadPendiente = null;
         TxtBuscar.Clear();
         TxtPagaCon.Clear();
         TxtDescuentoGeneral.Text = "0";
@@ -344,6 +519,11 @@ public partial class PaginaVentas : UserControl
         public int ProductoId { get; init; }
         public string Nombre { get; init; } = string.Empty;
         public decimal Precio { get; init; }
+        public string UnidadMedida { get; init; } = UnidadesMedida.Unidad;
+
+        /// <summary>"$ 4.500,00 / kg": sin esto el precio del kilo parece el del paquete.</summary>
+        public string PrecioConUnidad =>
+            $"{Precio.ToString("C2", CultureInfo.CurrentCulture)} / {UnidadesMedida.De(UnidadMedida).Simbolo}";
 
         public decimal Cantidad
         {

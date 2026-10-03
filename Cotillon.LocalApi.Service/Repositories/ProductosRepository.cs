@@ -66,6 +66,7 @@ public class ProductosRepository
                 p.PrecioCentavos,
                 p.Stock,
                 p.Activo,
+                p.UnidadMedida,
                 COALESCE(c.NombreCategoria, '(Sin categoría)') AS NombreCategoria,
                 COALESCE(s.NombreSeccion, '(Sin sección)')     AS NombreSeccion
             FROM Productos p
@@ -82,8 +83,9 @@ public class ProductosRepository
             NombreSeccion = f.NombreSeccion,
             NombreCategoria = f.NombreCategoria,
             Precio = Money.FromCentavos(f.PrecioCentavos),
-            Stock = (int)f.Stock,
-            Activo = f.Activo
+            Stock = (decimal)f.Stock,
+            Activo = f.Activo,
+            UnidadMedida = f.UnidadMedida
         }).ToList();
     }
 
@@ -103,6 +105,7 @@ public class ProductosRepository
                 p.PrecioCentavos,
                 p.Stock,
                 p.Activo,
+                p.UnidadMedida,
                 COALESCE(c.NombreCategoria, '(Sin categoría)') AS NombreCategoria,
                 COALESCE(s.NombreSeccion, '(Sin sección)')     AS NombreSeccion
             FROM Productos p
@@ -127,8 +130,9 @@ public class ProductosRepository
             NombreSeccion = f.NombreSeccion,
             NombreCategoria = f.NombreCategoria,
             Precio = Money.FromCentavos(f.PrecioCentavos),
-            Stock = (int)f.Stock,
-            Activo = f.Activo
+            Stock = (decimal)f.Stock,
+            Activo = f.Activo,
+            UnidadMedida = f.UnidadMedida
         }).ToList();
     }
 
@@ -186,8 +190,8 @@ public class ProductosRepository
         Descripcion = fila.Descripcion ?? string.Empty,
         Precio = Money.FromCentavos(fila.PrecioCentavos),
         Costo = Money.FromCentavos(fila.CostoCentavos),
-        Stock = (int)fila.Stock,
-        StockMinimo = (int)fila.StockMinimo,
+        Stock = (decimal)fila.Stock,
+        StockMinimo = (decimal)fila.StockMinimo,
         CodigoBarras = fila.CodigoBarras ?? string.Empty,
         Marca = fila.Marca ?? string.Empty,
         UnidadMedida = fila.UnidadMedida,
@@ -278,8 +282,8 @@ public class ProductosRepository
             NombreSeccion = f.NombreSeccion,
             NombreCategoria = f.NombreCategoria,
             Precio = Money.FromCentavos(f.PrecioCentavos),
-            Stock = (int)f.Stock,
-            StockMinimo = (int)f.StockMinimo,
+            Stock = (decimal)f.Stock,
+            StockMinimo = (decimal)f.StockMinimo,
             Activo = f.Activo,
             FechaAlta = f.FechaAlta
         }).ToList();
@@ -316,6 +320,7 @@ public class ProductosRepository
         public long PrecioCentavos { get; init; }
         public double Stock { get; init; }
         public bool Activo { get; init; }
+        public string UnidadMedida { get; init; } = "UNIDAD";
     }
 
     private sealed class FilaDashboard : FilaListado
