@@ -24,6 +24,15 @@ public partial class PaginaHistorialVentas : UserControl
         Adjuntos.AplicarPermisos(Modulos.HistorialVentas);
 
         Loaded += async (_, _) => await BuscarAsync();
+
+        // Las ventas del día entran solas mientras la pantalla está abierta, pero
+        // no mientras se está mirando una: recargar la grilla le sacaría al usuario
+        // la venta que tiene elegida junto con sus comprobantes adjuntos.
+        Refresco.Automatico(this, async () =>
+        {
+            if (_ventaSeleccionada == 0)
+                await BuscarAsync();
+        });
     }
 
     private async void AlBuscar(object sender, RoutedEventArgs e) => await BuscarAsync();

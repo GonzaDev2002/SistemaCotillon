@@ -26,6 +26,10 @@ public partial class VentanaPrincipal : Window
             // para un cajero suele ser Ventas y no Inicio.
             Navegar(PrimerModuloVisible());
         };
+
+        // El estado de la caja está en la barra de arriba de todas las pantallas:
+        // si otro puesto la abre o la cierra, acá se ve sin salir de donde se está.
+        Refresco.Automatico(this, RefrescarEstadoCajaAsync);
     }
 
     /// <summary>

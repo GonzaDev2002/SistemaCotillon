@@ -96,6 +96,40 @@
                 </StackPanel>
 
                 <StackPanel>
+                    <!-- Confirmación de la última venta. Reemplaza al cartel modal:
+                         el vuelto queda a la vista mientras el cajero cuenta la plata
+                         y la venta siguiente puede empezar con un disparo del lector,
+                         sin que nadie tenga que apretar Aceptar primero. -->
+                    <Border x:Name="PanelVentaHecha" Background="#D1FAE5" CornerRadius="10"
+                            BorderBrush="{StaticResource Exito}" BorderThickness="1.5"
+                            Padding="14,12" Margin="0,0,0,14" Visibility="Collapsed">
+                        <StackPanel>
+                            <DockPanel>
+                                <TextBlock x:Name="LblVentaHecha" FontFamily="Segoe UI" FontSize="13"
+                                           FontWeight="SemiBold" Foreground="#065F46"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock x:Name="LblTotalHecho" HorizontalAlignment="Right"
+                                           FontFamily="Segoe UI" FontSize="15" FontWeight="Bold"
+                                           Foreground="#065F46"/>
+                            </DockPanel>
+
+                            <Border x:Name="PanelVueltoHecho" Margin="0,9,0,0" Visibility="Collapsed">
+                                <DockPanel>
+                                    <TextBlock Text="VUELTO" FontFamily="Segoe UI" FontSize="14"
+                                               FontWeight="Bold" Foreground="#065F46"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="LblVueltoHecho" HorizontalAlignment="Right"
+                                               FontFamily="Segoe UI" FontSize="34" FontWeight="Bold"
+                                               Foreground="#065F46"/>
+                                </DockPanel>
+                            </Border>
+
+                            <TextBlock Text="Escaneá el primer producto de la venta siguiente, o apretá Enter."
+                                       FontFamily="Segoe UI" FontSize="11" Foreground="#047857"
+                                       TextWrapping="Wrap" Margin="0,9,0,0"/>
+                        </StackPanel>
+                    </Border>
+
                     <TextBlock Text="Cliente" Style="{StaticResource Etiqueta}"/>
                     <ComboBox x:Name="CboCliente" DisplayMemberPath="NombreCompleto"
                               SelectedValuePath="ClienteId" Margin="0,0,0,14"/>

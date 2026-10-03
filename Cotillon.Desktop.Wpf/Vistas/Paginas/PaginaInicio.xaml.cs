@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using Cotillon.Desktop.Wpf.Servicios;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 
@@ -14,6 +15,14 @@ public partial class PaginaInicio : UserControl
         _principal = principal;
 
         Loaded += async (_, _) => await CargarAsync();
+
+        // El tablero es la pantalla que el dueño deja abierta: tiene que mostrar
+        // lo que la cajera vende y lo que baja de stock sin que él haga nada.
+        Refresco.Automatico(this, async () =>
+        {
+            await CargarAsync();
+            await _principal.RefrescarEstadoCajaAsync();
+        });
     }
 
     private async Task CargarAsync()

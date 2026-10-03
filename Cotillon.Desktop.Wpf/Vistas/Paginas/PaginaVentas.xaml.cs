@@ -160,7 +160,19 @@ public partial class PaginaVentas : UserControl
         var texto = TxtBuscar.Text.Trim();
 
         if (string.IsNullOrWhiteSpace(texto))
+        {
+            // Enter con el buscador vacío y sin nada cargado arranca la venta
+            // siguiente. Es la tecla que el cajero ya tiene debajo del dedo
+            // cuando termina de cobrar.
+            if (_carrito.Count == 0)
+                Limpiar();
+
             return;
+        }
+
+        // Cualquier producto nuevo ya es la venta siguiente: el cartel de la
+        // anterior se va solo, sin que nadie lo cierre.
+        PanelVentaHecha.Visibility = Visibility.Collapsed;
 
         // La etiqueta de la balanza se mira primero: trae el peso adentro del
         // código, así que no hay nada que preguntar ni que multiplicar.
@@ -522,13 +534,22 @@ public partial class PaginaVentas : UserControl
 
             var registrada = respuesta.Data;
 
-            MessageBox.Show(
-                $"Venta #{registrada.VentaId} registrada.\n\n" +
-                $"Total: {registrada.TotalVenta:C2}\n" +
-                $"Vuelto: {registrada.Vuelto:C2}",
-                "Venta completada", MessageBoxButton.OK, MessageBoxImage.Information);
-
+            // Limpiar primero y mostrar el cartel después: la pantalla ya queda
+            // lista para la venta siguiente mientras el cajero lee el vuelto.
             Limpiar();
+
+            LblVentaHecha.Text = $"Venta #{registrada.VentaId} registrada";
+            LblTotalHecho.Text = registrada.TotalVenta.ToString("C2", CultureInfo.CurrentCulture);
+            LblVueltoHecho.Text = registrada.Vuelto.ToString("C2", CultureInfo.CurrentCulture);
+
+            // Con tarjeta o pago justo no hay vuelto: mostrar "$ 0,00" en grande
+            // sólo hace ruido al lado del que sí importa.
+            PanelVueltoHecho.Visibility = registrada.Vuelto > 0
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
+            PanelVentaHecha.Visibility = Visibility.Visible;
+
             await _principal.RefrescarEstadoCajaAsync();
         }
         finally
@@ -560,6 +581,7 @@ public partial class PaginaVentas : UserControl
         TxtDescuentoGeneral.Text = "0";
         CboCliente.SelectedIndex = 0;
         PanelResultados.Visibility = Visibility.Collapsed;
+        PanelVentaHecha.Visibility = Visibility.Collapsed;
         OcultarAviso();
         Recalcular();
         TxtBuscar.Focus();
