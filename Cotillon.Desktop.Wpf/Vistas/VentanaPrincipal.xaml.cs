@@ -48,6 +48,8 @@ public partial class VentanaPrincipal : Window
         (NavStock, Modulos.Stock),
         (NavCompras, Modulos.Compras),
         (NavClientes, Modulos.Clientes),
+        (NavCuentaCorriente, Modulos.CuentaCorriente),
+        (NavEncargues, Modulos.Encargues),
         (NavProveedores, Modulos.Proveedores),
         (NavReportes, Modulos.Reportes),
         (NavUsuarios, Modulos.Usuarios),
@@ -164,6 +166,12 @@ public partial class VentanaPrincipal : Window
 
         if (origen == NavClientes)
             return ("Clientes", "Base de clientes del negocio", new PaginaClientes());
+
+        if (origen == NavCuentaCorriente)
+            return ("Cuenta corriente", "Quién debe y cuánto", new PaginaCuentaCorriente());
+
+        if (origen == NavEncargues)
+            return ("Encargues", "Pedidos con seña y entregas", new PaginaEncargues());
 
         if (origen == NavProveedores)
             return ("Proveedores", "Proveedores y datos de contacto", new PaginaProveedores());

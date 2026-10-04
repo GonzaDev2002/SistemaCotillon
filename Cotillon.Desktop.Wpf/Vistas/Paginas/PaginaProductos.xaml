@@ -228,6 +228,9 @@
                     <Button x:Name="BtnImportar" Content="Importar lista desde Excel"
                             Style="{StaticResource BotonSecundario}" Margin="0,8,0,0"
                             Click="AlImportar" Visibility="Collapsed"/>
+                    <Button x:Name="BtnPrecios" Content="Ajustar precios en masa"
+                            Style="{StaticResource BotonSecundario}" Margin="0,8,0,0"
+                            Click="AlAjustarPrecios" Visibility="Collapsed"/>
                     <Button x:Name="BtnEliminar" Content="Dar de baja" Style="{StaticResource BotonPeligro}"
                             Margin="0,8,0,0" Click="AlEliminar" IsEnabled="False"/>
                     <!-- Aparece sólo con un producto dado de baja cargado: al escanear

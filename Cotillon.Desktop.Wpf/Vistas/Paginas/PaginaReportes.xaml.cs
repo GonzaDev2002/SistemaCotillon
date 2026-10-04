@@ -1,4 +1,5 @@
 using System.Globalization;
+using Cotillon.Shared.DTOs;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -9,6 +10,8 @@ namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 
 public partial class PaginaReportes : UserControl
 {
+    private const string TipoTemporada = "Temporada contra el año pasado";
+
     private string _titulo = "Reporte";
 
     public PaginaReportes()
@@ -17,6 +20,12 @@ public partial class PaginaReportes : UserControl
 
         FechaDesde.SelectedDate = DateTime.Today.AddDays(-30);
         FechaHasta.SelectedDate = DateTime.Today;
+
+        CboTemporada.ItemsSource = Temporadas.Todas
+            .Select(t => new { t.Codigo, Nombre = t.Codigo.Length == 0 ? "(Todas)" : t.Nombre })
+            .ToList();
+
+        CboTemporada.SelectedIndex = 0;
     }
 
     private void AlCambiarTipo(object sender, SelectionChangedEventArgs e)
@@ -24,9 +33,15 @@ public partial class PaginaReportes : UserControl
         if (PanelFechas is null)
             return;
 
-        PanelFechas.Visibility = TipoSeleccionado() == "Ventas por rango"
+        var tipo = TipoSeleccionado();
+
+        // La temporada tambien necesita el rango: la comparacion es contra la
+        // misma franja de dias del ano anterior.
+        PanelFechas.Visibility = tipo is "Ventas por rango" or TipoTemporada
             ? Visibility.Visible
             : Visibility.Collapsed;
+
+        CboTemporada.Visibility = tipo == TipoTemporada ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private string TipoSeleccionado() =>
@@ -44,6 +59,29 @@ public partial class PaginaReportes : UserControl
                 Grilla.ItemsSource = respuesta.Data;
                 _titulo = "Productos bajo stock";
                 LblResultado.Text = $"{respuesta.Data?.Count ?? 0} producto(s) por debajo del stock mínimo";
+                break;
+            }
+
+            case TipoTemporada:
+            {
+                var desde = FechaDesde.SelectedDate ?? DateTime.Today;
+                var hasta = FechaHasta.SelectedDate ?? DateTime.Today;
+
+                var respuesta = await App.Api.ReporteTemporadaAsync(
+                    CboTemporada.SelectedValue as string, desde, hasta);
+
+                Grilla.ItemsSource = respuesta.Data;
+                _titulo = "Temporada";
+
+                var esteAno = respuesta.Data?.Sum(t => t.ImporteEsteAno) ?? 0;
+                var anoPasado = respuesta.Data?.Sum(t => t.ImporteAnoPasado) ?? 0;
+
+                LblResultado.Text = anoPasado > 0
+                    ? $"{esteAno.ToString("C2", CultureInfo.CurrentCulture)} contra " +
+                      $"{anoPasado.ToString("C2", CultureInfo.CurrentCulture)} del año pasado " +
+                      $"({(esteAno - anoPasado) / anoPasado * 100:+0.#;-0.#;0} %)"
+                    : $"{esteAno.ToString("C2", CultureInfo.CurrentCulture)}. " +
+                      "El año pasado no hay ventas en esta franja para comparar.";
                 break;
             }
 

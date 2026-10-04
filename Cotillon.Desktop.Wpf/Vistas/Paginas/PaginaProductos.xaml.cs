@@ -42,6 +42,9 @@ public partial class PaginaProductos : UserControl
         // doscientos productos de un saque y conviene que sea cosa del dueño.
         BtnImportar.Visibility = acciones;
 
+        // Cambiar el precio de media lista de un saque es cosa del dueno.
+        BtnPrecios.Visibility = acciones;
+
         CboUnidad.ItemsSource = UnidadesMedida.Todas;
         CboUnidad.SelectedValue = UnidadesMedida.Unidad;
 
@@ -601,6 +604,14 @@ public partial class PaginaProductos : UserControl
         LblCostoCombo.Text =
             $"Con el stock de hoy se pueden armar {armables:0} combos. " +
             $"El costo de armar uno es {_componentes.Sum(c => c.CostoLinea):C2}.";
+    }
+
+    private async void AlAjustarPrecios(object sender, RoutedEventArgs e)
+    {
+        var ventana = new VentanaAumentoPrecios { Owner = Window.GetWindow(this) };
+
+        if (ventana.ShowDialog() == true)
+            await CargarProductosAsync();
     }
 
     private async void AlImportar(object sender, RoutedEventArgs e)

@@ -86,6 +86,14 @@
                                      Tag="{x:Static iconos:PackIconMaterialKind.AccountGroup}"
                                      Background="{StaticResource FichaVerde}"
                                      Content="Clientes" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavCuentaCorriente" Style="{StaticResource BotonNavegacion}"
+                                     Tag="{x:Static iconos:PackIconMaterialKind.AccountCash}"
+                                     Background="{StaticResource FichaVerde}"
+                                     Content="Cuenta corriente" Checked="AlNavegar"/>
+                        <RadioButton x:Name="NavEncargues" Style="{StaticResource BotonNavegacion}"
+                                     Tag="{x:Static iconos:PackIconMaterialKind.CalendarClock}"
+                                     Background="{StaticResource FichaRosa}"
+                                     Content="Encargues" Checked="AlNavegar"/>
                         <RadioButton x:Name="NavProveedores" Style="{StaticResource BotonNavegacion}"
                                      Tag="{x:Static iconos:PackIconMaterialKind.Storefront}"
                                      Background="{StaticResource FichaVerde}"

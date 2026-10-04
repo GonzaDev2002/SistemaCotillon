@@ -46,23 +46,23 @@ a la mañana, alguien tiene que saber qué ejecutable abrir.
 
 ## Lo que va a doler el primer mes
 
-### 4. Aumento masivo de precios — 1 día
+### 4. Aumento masivo de precios — HECHO
 
-- [ ] "+X %" a una categoría, una sección o un proveedor
-- [ ] Vista previa de qué queda en cuánto, antes de aplicar
-- [ ] Redondeo configurable (a $10, a $100)
-- [ ] Queda registrado en Auditoría qué se cambió y cuándo
+- [x] "+X %" por sección, categoría, marca o temporada
+- [x] Vista previa de qué queda en cuánto, antes de aplicar
+- [x] Redondeo configurable (a $10, a $100)
+- [x] Queda registrado en Auditoría qué se cambió y cuándo
 
 El proveedor aumenta 12 % y hay 400 productos: hoy son 400 formularios. De las
 grandes es la más barata de hacer y la que más tiempo devuelve por semana.
 
-### 5. Cuenta corriente de clientes — 2 a 3 días
+### 5. Cuenta corriente de clientes — HECHO (salvo imprimir el resumen)
 
-- [ ] Saldo por cliente (la tabla de clientes hoy no tiene saldo)
-- [ ] Venta a cuenta corriente como medio de pago
-- [ ] Registrar pagos y imputarlos
-- [ ] Resumen de cuenta imprimible
-- [ ] Reporte de quién debe y desde cuándo
+- [x] Saldo por cliente (la tabla de clientes hoy no tiene saldo)
+- [x] Venta a cuenta corriente como medio de pago
+- [x] Registrar pagos y imputarlos
+- [ ] Resumen de cuenta imprimible (se ve en pantalla; falta el ticket)
+- [x] Reporte de quién debe y desde cuándo
 
 Jardines, salones y organizadoras compran en el mes y pagan a fin de mes. Hoy
 eso se anota en un cuaderno.
@@ -78,42 +78,43 @@ Puede ir de "no hace falta nada" a varias semanas.
 
 ## Lo que lo hace *para cotillón* y no un POS genérico
 
-### 7. Combos y bolsitas — 3 a 4 días
+### 7. Combos y bolsitas — HECHO
 
-- [ ] Un producto que se compone de otros productos
-- [ ] Al venderlo descuenta el stock de cada componente
-- [ ] Costo y margen del combo calculados desde los componentes
-- [ ] Avisar si no se puede armar por falta de un componente
+- [x] Un producto que se compone de otros productos
+- [x] Al venderlo descuenta el stock de cada componente
+- [x] Costo y margen del combo calculados desde los componentes
+- [x] Avisar si no se puede armar por falta de un componente
 
 La bolsita sorpresa son 8 cosas distintas que se venden como una. Es *la*
 función de cotillón y hoy no se puede representar.
 
-**Pregunta abierta:** ¿las bolsitas se arman antes y se cargan como un producto
-con su propio stock, o se arman en el momento según lo que pide el cliente? La
-respuesta cambia el diseño.
+**Decidido:** se arman en el momento. El combo no tiene stock propio y su
+disponible sale de los componentes. Si en la práctica las armás con
+anticipación y querés que tengan stock propio, hay que agregar una operación
+de "armar N combos" que convierta componentes en stock del combo.
 
-### 8. Bulto y unidad — 2 días
+### 8. Bulto y unidad — HECHO
 
-- [ ] Conversión por producto (1 bulto = 50 unidades)
-- [ ] Comprar por bulto y vender por unidad sin que el stock se desarme
-- [ ] Precio por bulto y precio por unidad
+- [x] Conversión por producto (1 bulto = 50 unidades)
+- [x] Comprar por bulto y vender por unidad sin que el stock se desarme
+- [x] Precio por bulto y precio por unidad
 
 Los globos vienen en bolsa de 50 y se vende la bolsa **y** el globo suelto. Es
 hermano de lo que ya está hecho con kilo/gramos: la mitad del camino existe.
 
-### 9. Encargues con seña — 3 días
+### 9. Encargues con seña — HECHO
 
-- [ ] Pedido con fecha de entrega
-- [ ] Seña cobrada y saldo pendiente
-- [ ] Lista de "qué hay que entregar esta semana"
-- [ ] Al entregar se convierte en venta y descuenta stock
+- [x] Pedido con fecha de entrega
+- [x] Seña cobrada y saldo pendiente
+- [x] Lista de "qué hay que entregar esta semana"
+- [x] Al entregar se convierte en venta y descuenta stock
 
 "Me preparás 60 bolsitas para el 15, te dejo seña." En cotillón es diario.
 
-### 10. Temporadas — 2 días
+### 10. Temporadas — HECHO
 
-- [ ] Marca de temporada en el producto (Halloween, Navidad, Día del Niño, carnaval)
-- [ ] Reporte comparando contra la misma temporada del año anterior
+- [x] Marca de temporada en el producto (Halloween, Navidad, Día del Niño, carnaval)
+- [x] Reporte comparando contra la misma temporada del año anterior
 
 Es la comparación que importa en un negocio estacional, y los reportes de hoy
 no la tienen.
@@ -155,6 +156,8 @@ etiquetas de balanza · caja · historial y anulación · productos con alta en
 cadena · importación de lista desde Excel · secciones y categorías · stock con
 trazabilidad · compras · clientes · proveedores · reportes · usuarios con
 permisos por módulo · auditoría · adjuntos (PDF e imágenes) · refresco en vivo
-de las pantallas de mirar.
+de las pantallas de mirar · ticket y cierre de caja impresos · combos · bulto ·
+temporadas · cuenta corriente · encargues con seña · aumento masivo de precios ·
+color de pantalla según el rol.
 
-137 tests automáticos.
+203 tests automáticos.

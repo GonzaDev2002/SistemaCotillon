@@ -87,6 +87,10 @@ public partial class PaginaVentas : UserControl
                 TxtPagaCon.SelectAll();
                 break;
 
+            case Key.F6:
+                _ = AgregarBultoAsync();
+                break;
+
             // Supr sólo borra la línea cuando el foco no está en un campo de texto,
             // para no comerse la tecla mientras se corrige un importe.
             case Key.Delete when Keyboard.FocusedElement is not TextBox:
@@ -290,6 +294,56 @@ public partial class PaginaVentas : UserControl
         TxtBuscar.Focus();
     }
 
+    /// <summary>
+    /// F6: lo que esta en el buscador entra como bulto cerrado. Es el pedido del
+    /// mayorista, que no compra tres globos sino la bolsa de cincuenta.
+    /// </summary>
+    private async Task AgregarBultoAsync()
+    {
+        var texto = TxtBuscar.Text.Trim();
+
+        if (texto.Length == 0)
+        {
+            MostrarAviso("Escaneá o escribí el producto y apretá F6 para llevar el bulto cerrado.");
+            return;
+        }
+
+        var cantidad = 1m;
+
+        if (Multiplicador.Match(texto) is { Success: true } m)
+        {
+            cantidad = Numero(m.Groups[1].Value);
+            texto = m.Groups[2].Value.Trim();
+        }
+
+        var respuesta = await App.Api.BuscarProductosAsync(texto);
+
+        if (!respuesta.Success || respuesta.Data is null || respuesta.Data.Count == 0)
+        {
+            MostrarAviso("No se encontró ningún producto con ese código o nombre.");
+            return;
+        }
+
+        var producto = respuesta.Data[0];
+
+        if (!producto.SeVendePorBulto)
+        {
+            MostrarAviso(
+                $"«{producto.NombreProducto}» no tiene cargadas las unidades por bulto. " +
+                "Cargalas en Productos y después vendelo por bulto.");
+
+            return;
+        }
+
+        TxtBuscar.Clear();
+        PanelResultados.Visibility = Visibility.Collapsed;
+        OcultarAviso();
+
+        Agregar(producto, cantidad, porBulto: true);
+
+        TxtBuscar.Focus();
+    }
+
     private void AlElegirResultado(object sender, MouseButtonEventArgs e) => TomarResultado();
 
     private void AlTeclaResultados(object sender, KeyEventArgs e)
@@ -323,9 +377,22 @@ public partial class PaginaVentas : UserControl
     /// una cantidad explícita, se pregunta: sumar "1" sería un kilo, que casi
     /// nunca es lo que el cliente pidió.
     /// </summary>
-    private void Agregar(ProductoListadoDto producto, decimal? cantidad = null)
+    private void Agregar(ProductoListadoDto producto, decimal? cantidad = null, bool porBulto = false)
     {
         var unidad = UnidadesMedida.De(producto.UnidadMedida);
+
+        // Bulto cerrado: se llevan sus unidades y, si tiene precio propio, se
+        // cobra ése. El stock se sigue descontando en unidades sueltas.
+        if (porBulto && producto.SeVendePorBulto)
+        {
+            var unidades = (cantidad ?? 1) * producto.UnidadesPorBulto;
+
+            AgregarAlCarrito(producto, unidades, producto.PrecioBulto > 0
+                ? producto.PrecioBulto / producto.UnidadesPorBulto
+                : producto.Precio);
+
+            return;
+        }
 
         if (cantidad is null && unidad.Fraccionada)
         {
@@ -340,11 +407,21 @@ public partial class PaginaVentas : UserControl
             }
         }
 
-        var existente = _carrito.FirstOrDefault(i => i.ProductoId == producto.ProductoId);
+        AgregarAlCarrito(producto, cantidad ?? 1, producto.Precio);
+    }
+
+    /// <summary>
+    /// Pone la línea en el carrito. El precio viaja aparte del producto porque un
+    /// bulto cerrado puede tener el suyo, más barato que la suma de las sueltas.
+    /// </summary>
+    private void AgregarAlCarrito(ProductoListadoDto producto, decimal cantidad, decimal precio)
+    {
+        var existente = _carrito.FirstOrDefault(
+            i => i.ProductoId == producto.ProductoId && i.Precio == precio);
 
         if (existente is not null)
         {
-            existente.Cantidad += cantidad ?? 1;
+            existente.Cantidad += cantidad;
             GrillaCarrito.Items.Refresh();
             Recalcular();
             return;
@@ -354,9 +431,9 @@ public partial class PaginaVentas : UserControl
         {
             ProductoId = producto.ProductoId,
             Nombre = producto.NombreProducto,
-            Precio = producto.Precio,
+            Precio = precio,
             UnidadMedida = producto.UnidadMedida,
-            Cantidad = cantidad ?? 1
+            Cantidad = cantidad
         };
 
         item.PropertyChanged += (_, _) => Recalcular();

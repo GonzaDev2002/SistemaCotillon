@@ -15,4 +15,10 @@
     <EmbeddedResource Include="Esquema\*.sql" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Para que el sembrado de permisos use la misma lista de módulos que la
+         aplicación, y no una copia en SQL que alguien se olvida de actualizar. -->
+    <ProjectReference Include="..\Cotillon.Shared\Cotillon.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

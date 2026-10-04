@@ -1,3 +1,4 @@
+using Cotillon.Data;
 using Cotillon.LocalApi.Service.Repositories;
 using Cotillon.LocalApi.Service.Services;
 using Cotillon.Shared.DTOs;
@@ -52,6 +53,44 @@ public class PermisosTests : IDisposable
         var permisos = _repository.ObtenerDe(Admin);
 
         Assert.All(Modulos.Codigos, codigo => Assert.Equal(NivelAcceso.Total, permisos[codigo]));
+    }
+
+    [Fact]
+    public void Un_modulo_nuevo_le_llega_a_quien_ya_tenia_permisos_cargados()
+    {
+        // El caso de una actualización: el usuario ya tiene filas de los módulos
+        // viejos. Si el sembrado mirara "¿este usuario tiene algún permiso?" en vez
+        // de "¿tiene éste?", nadie recibiría el módulo nuevo y el dueño se quedaría
+        // sin ver la pantalla recién instalada.
+        var cajero = CrearCajero();
+
+        using (var conexion = _db.Abrir())
+            conexion.Execute(
+                "DELETE FROM PermisosUsuario WHERE Modulo IN ('ENCARGUES', 'CUENTA_CORRIENTE');");
+
+        new DatabaseInitializer(_db.Factory).Sembrar();
+
+        var admin = _repository.ObtenerDe(Admin);
+        var vendedora = _repository.ObtenerDe(cajero);
+
+        Assert.Equal(NivelAcceso.Total, admin[Modulos.Encargues]);
+        Assert.Equal(NivelAcceso.Total, admin[Modulos.CuentaCorriente]);
+        Assert.Equal(NivelAcceso.Editar, vendedora[Modulos.Encargues]);
+    }
+
+    [Fact]
+    public void Sembrar_de_nuevo_no_pisa_lo_que_el_dueno_configuro()
+    {
+        var cajero = CrearCajero();
+
+        _service.Guardar(cajero,
+            new Dictionary<string, NivelAcceso> { [Modulos.Reportes] = NivelAcceso.Total }, Admin);
+
+        new DatabaseInitializer(_db.Factory).Sembrar();
+
+        // Reportes se lo dio el dueño a mano: el sembrado no puede volver a
+        // ponerlo en NINGUNO porque la plantilla del rol diga eso.
+        Assert.Equal(NivelAcceso.Total, _repository.ObtenerDe(cajero)[Modulos.Reportes]);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 using System.Data;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Cotillon.Shared.DTOs.Permisos;
 using Dapper;
 
 namespace Cotillon.Data;
@@ -152,37 +153,39 @@ public class DatabaseInitializer
     /// </summary>
     private static void SembrarPermisosFaltantes(IDbConnection conexion)
     {
+        var usuarios = conexion.Query<FilaUsuarioRol>("SELECT UsuarioId, Rol FROM Usuarios;").ToList();
+
+        if (usuarios.Count == 0)
+            return;
+
+        // Falta POR MÓDULO y no por usuario. Si fuera por usuario, una versión que
+        // agrega un módulo nuevo no le daría permiso a nadie: los usuarios ya
+        // tienen filas de los módulos viejos, así que ninguno contaría como "sin
+        // permisos" y el dueño se quedaría sin ver la pantalla nueva.
+        var filas = usuarios
+            .SelectMany(usuario => PlantillasDeRol.Para(usuario.Rol)
+                .Select(permiso => new
+                {
+                    usuario.UsuarioId,
+                    Modulo = permiso.Key,
+                    Nivel = permiso.Value.ToString().ToUpperInvariant()
+                }))
+            .ToList();
+
         conexion.Execute(
             """
             INSERT INTO PermisosUsuario (UsuarioId, Modulo, Nivel)
-            SELECT u.UsuarioId, m.Modulo,
-                   CASE
-                       WHEN u.Rol = 'Admin' THEN 'TOTAL'
-
-                       WHEN u.Rol = 'Supervisor' THEN
-                           CASE WHEN m.Modulo IN ('USUARIOS', 'CONFIGURACION') THEN 'NINGUNO'
-                                WHEN m.Modulo = 'AUDITORIA'                    THEN 'VER'
-                                ELSE 'TOTAL' END
-
-                       -- Cajero: vende y maneja la caja del día, sin ver costos
-                       -- ni administración.
-                       ELSE
-                           CASE WHEN m.Modulo IN ('VENTAS', 'CAJA', 'CLIENTES')              THEN 'EDITAR'
-                                WHEN m.Modulo IN ('INICIO', 'HISTORIAL_VENTAS', 'PRODUCTOS') THEN 'VER'
-                                ELSE 'NINGUNO' END
-                   END
-            FROM Usuarios u
-            CROSS JOIN (
-                SELECT 'INICIO' AS Modulo      UNION ALL SELECT 'VENTAS'           UNION ALL
-                SELECT 'CAJA'                  UNION ALL SELECT 'HISTORIAL_VENTAS' UNION ALL
-                SELECT 'PRODUCTOS'             UNION ALL SELECT 'CATALOGO'         UNION ALL
-                SELECT 'STOCK'                 UNION ALL SELECT 'COMPRAS'          UNION ALL
-                SELECT 'CLIENTES'              UNION ALL SELECT 'PROVEEDORES'      UNION ALL
-                SELECT 'REPORTES'              UNION ALL SELECT 'USUARIOS'         UNION ALL
-                SELECT 'AUDITORIA'             UNION ALL SELECT 'CONFIGURACION'
-            ) m
+            SELECT @UsuarioId, @Modulo, @Nivel
             WHERE NOT EXISTS (
-                SELECT 1 FROM PermisosUsuario p WHERE p.UsuarioId = u.UsuarioId);
-            """);
+                SELECT 1 FROM PermisosUsuario p
+                WHERE p.UsuarioId = @UsuarioId AND p.Modulo = @Modulo);
+            """,
+            filas);
+    }
+
+    private sealed class FilaUsuarioRol
+    {
+        public int UsuarioId { get; init; }
+        public string Rol { get; init; } = string.Empty;
     }
 }

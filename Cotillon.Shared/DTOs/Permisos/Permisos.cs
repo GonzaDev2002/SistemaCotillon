@@ -39,6 +39,8 @@ public static class Modulos
     public const string Stock = "STOCK";
     public const string Compras = "COMPRAS";
     public const string Clientes = "CLIENTES";
+    public const string CuentaCorriente = "CUENTA_CORRIENTE";
+    public const string Encargues = "ENCARGUES";
     public const string Proveedores = "PROVEEDORES";
     public const string Reportes = "REPORTES";
     public const string Usuarios = "USUARIOS";
@@ -86,6 +88,14 @@ public static class Modulos
             "Dar de alta y modificar clientes, y adjuntar archivos.",
             "Además, darlos de baja y quitar archivos."),
 
+        new(CuentaCorriente, "Cuenta corriente",
+            "Registrar los pagos de los clientes que compran a cuenta.",
+            "Además, ajustar saldos a mano."),
+
+        new(Encargues, "Encargues",
+            "Tomar pedidos con seña y entregarlos.",
+            "Además, cancelarlos."),
+
         new(Proveedores, "Proveedores",
             "Dar de alta y modificar proveedores, y adjuntar archivos.",
             "Además, darlos de baja y quitar archivos."),
@@ -132,15 +142,16 @@ public static class PlantillasDeRol
             [
                 Modulos.Inicio, Modulos.Ventas, Modulos.Caja, Modulos.HistorialVentas,
                 Modulos.Productos, Modulos.Catalogo, Modulos.Stock, Modulos.Compras,
-                Modulos.Clientes, Modulos.Proveedores, Modulos.Reportes
+                Modulos.Clientes, Modulos.CuentaCorriente, Modulos.Encargues,
+                Modulos.Proveedores, Modulos.Reportes
             ],
             ver: [Modulos.Auditoria]),
 
         // El cajero vende y maneja la caja del día. No ve costos, compras,
         // proveedores, reportes ni administración.
         _ => Construir(
-            editar: [Modulos.Ventas, Modulos.Caja, Modulos.Clientes],
-            ver: [Modulos.Inicio, Modulos.HistorialVentas, Modulos.Productos])
+            editar: [Modulos.Ventas, Modulos.Caja, Modulos.Clientes, Modulos.Encargues],
+            ver: [Modulos.Inicio, Modulos.HistorialVentas, Modulos.Productos, Modulos.CuentaCorriente])
     };
 
     private static Dictionary<string, NivelAcceso> Construir(

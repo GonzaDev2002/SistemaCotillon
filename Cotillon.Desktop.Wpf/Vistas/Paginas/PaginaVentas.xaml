@@ -66,7 +66,7 @@
                     <Border DockPanel.Dock="Bottom" Background="#F8FAFC" Padding="16,9"
                             BorderBrush="{StaticResource Borde}" BorderThickness="0,1,0,0">
                         <TextBlock Style="{StaticResource Subtitulo}" FontSize="11.5" TextWrapping="Wrap"
-                                   Text="F2 cantidad  ·  F3 cliente  ·  F4 medio de pago  ·  F5 paga con  ·  Supr quita el ítem  ·  F12 cobra  ·  Esc cancela"/>
+                                   Text="F2 cantidad  ·  F3 cliente  ·  F4 medio de pago  ·  F5 paga con  ·  F6 bulto cerrado  ·  Supr quita el ítem  ·  F12 cobra  ·  Esc cancela"/>
                     </Border>
 
                     <DataGrid x:Name="GrillaCarrito" BorderThickness="0" IsReadOnly="False"

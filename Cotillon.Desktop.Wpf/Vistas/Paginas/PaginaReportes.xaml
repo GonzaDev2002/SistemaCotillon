@@ -11,7 +11,12 @@
                         <ComboBoxItem Content="Productos" IsSelected="True"/>
                         <ComboBoxItem Content="Productos bajo stock"/>
                         <ComboBoxItem Content="Ventas por rango"/>
+                        <ComboBoxItem Content="Temporada contra el año pasado"/>
                     </ComboBox>
+
+                    <ComboBox x:Name="CboTemporada" Width="190" Margin="8,0,0,0"
+                              DisplayMemberPath="Nombre" SelectedValuePath="Codigo"
+                              Visibility="Collapsed"/>
 
                     <StackPanel x:Name="PanelFechas" Orientation="Horizontal" Visibility="Collapsed">
                         <TextBlock Text="Desde" Style="{StaticResource Subtitulo}"
