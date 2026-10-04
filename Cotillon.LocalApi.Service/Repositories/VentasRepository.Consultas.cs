@@ -31,11 +31,13 @@ public partial class VentasRepository
 
         var lineas = conexion.Query<FilaDetalle>(
             """
-            SELECT DetalleVentaId, ProductoId, NombreProducto, Cantidad,
-                   PrecioUnitarioCentavos, DescuentoLineaCentavos, SubtotalLineaCentavos
-            FROM DetalleVentas
-            WHERE VentaId = @Id
-            ORDER BY DetalleVentaId;
+            SELECT d.DetalleVentaId, d.ProductoId, d.NombreProducto, d.Cantidad,
+                   d.PrecioUnitarioCentavos, d.DescuentoLineaCentavos, d.SubtotalLineaCentavos,
+                   COALESCE(p.UnidadMedida, 'UNIDAD') AS UnidadMedida
+            FROM DetalleVentas d
+            LEFT JOIN Productos p ON d.ProductoId = p.ProductoId
+            WHERE d.VentaId = @Id
+            ORDER BY d.DetalleVentaId;
             """,
             new { Id = ventaId });
 
@@ -75,7 +77,8 @@ public partial class VentasRepository
                 Cantidad = (decimal)l.Cantidad,
                 PrecioUnitario = Money.FromCentavos(l.PrecioUnitarioCentavos),
                 DescuentoLinea = Money.FromCentavos(l.DescuentoLineaCentavos),
-                SubtotalLinea = Money.FromCentavos(l.SubtotalLineaCentavos)
+                SubtotalLinea = Money.FromCentavos(l.SubtotalLineaCentavos),
+                UnidadMedida = l.UnidadMedida
             }).ToList(),
             Pagos = pagos.Select(p => new PagoVentaDto
             {
@@ -148,6 +151,7 @@ public partial class VentasRepository
         public long PrecioUnitarioCentavos { get; init; }
         public long DescuentoLineaCentavos { get; init; }
         public long SubtotalLineaCentavos { get; init; }
+        public string UnidadMedida { get; init; } = "UNIDAD";
     }
 
     private sealed class FilaPago

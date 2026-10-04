@@ -36,6 +36,8 @@ public partial class PaginaConfiguracion : UserControl
             ChkVentaSinStock.IsChecked =
                 bool.TryParse(Valor(respuesta.Data, "VENTA_PERMITE_SIN_STOCK"), out var permitir) && permitir;
             TxtMascaraBalanza.Text = Valor(respuesta.Data, EtiquetaBalanza.Clave);
+            CboAnchoTicket.SelectedValue = Impresion.AnchoConfigurado(respuesta.Data).ToString();
+            ChkTicketAutomatico.IsChecked = Impresion.AutomaticoAlCobrar(respuesta.Data);
         }
 
         await VerificarAsync();
@@ -61,7 +63,9 @@ public partial class PaginaConfiguracion : UserControl
                 ["NEGOCIO_TELEFONO"] = TxtTelefono.Text.Trim(),
                 ["TICKET_PIE"] = TxtPieTicket.Text.Trim(),
                 ["VENTA_PERMITE_SIN_STOCK"] = (ChkVentaSinStock.IsChecked == true).ToString().ToLowerInvariant(),
-                [EtiquetaBalanza.Clave] = TxtMascaraBalanza.Text.Trim().ToUpperInvariant()
+                [EtiquetaBalanza.Clave] = TxtMascaraBalanza.Text.Trim().ToUpperInvariant(),
+                [Impresion.ClaveAncho] = CboAnchoTicket.SelectedValue as string ?? "42",
+                [Impresion.ClaveAutomatico] = (ChkTicketAutomatico.IsChecked == true).ToString().ToLowerInvariant()
             };
 
             foreach (var (clave, valor) in claves)

@@ -55,6 +55,19 @@
                     <TextBlock Text="Si está activo, el sistema deja vender aunque el stock llegue a cero. El stock puede quedar en negativo."
                                Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="26,4,0,0"/>
 
+                    <TextBlock Text="TICKET" Style="{StaticResource Etiqueta}" Margin="0,16,0,0"/>
+                    <ComboBox x:Name="CboAnchoTicket" SelectedValuePath="Tag">
+                        <ComboBoxItem Tag="32" Content="Impresora térmica de 58 mm"/>
+                        <ComboBoxItem Tag="42" Content="Impresora térmica de 80 mm"/>
+                    </ComboBox>
+                    <TextBlock Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Text="La térmica se instala en Windows como cualquier impresora: no hace falta nada más. En una impresora común de hoja, el ticket sale como una tira angosta arriba a la izquierda."/>
+
+                    <CheckBox x:Name="ChkTicketAutomatico" Margin="0,10,0,0"
+                              Content="Imprimir el ticket al cobrar, sin preguntar"/>
+                    <TextBlock Text="Si está apagado, el ticket se saca cuando el cliente lo pide, desde Historial de ventas."
+                               Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="26,4,0,0"/>
+
                     <TextBlock Text="ETIQUETAS DE LA BALANZA" Style="{StaticResource Etiqueta}" Margin="0,16,0,0"/>
                     <TextBox x:Name="TxtMascaraBalanza"/>
                     <TextBlock Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="0,4,0,0">

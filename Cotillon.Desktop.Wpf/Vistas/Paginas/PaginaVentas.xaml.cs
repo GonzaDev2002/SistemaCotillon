@@ -26,6 +26,10 @@ public partial class PaginaVentas : UserControl
     /// <summary>Formato de las etiquetas de la balanza. Vacío si el negocio no las usa.</summary>
     private string? _mascaraBalanza;
 
+    private DatosTicket _negocio = DatosTicket.Desde(null);
+    private int _anchoTicket = Ticket.Ancho80mm;
+    private bool _imprimirAlCobrar;
+
     public PaginaVentas(VentanaPrincipal principal)
     {
         InitializeComponent();
@@ -134,7 +138,12 @@ public partial class PaginaVentas : UserControl
         var configuracion = await App.Api.ConfiguracionAsync();
 
         if (configuracion.Success && configuracion.Data is not null)
+        {
             _mascaraBalanza = configuracion.Data.GetValueOrDefault(EtiquetaBalanza.Clave);
+            _negocio = DatosTicket.Desde(configuracion.Data);
+            _anchoTicket = Impresion.AnchoConfigurado(configuracion.Data);
+            _imprimirAlCobrar = Impresion.AutomaticoAlCobrar(configuracion.Data);
+        }
     }
 
     // ------------------------------------------------------------- Búsqueda --
@@ -550,12 +559,38 @@ public partial class PaginaVentas : UserControl
 
             PanelVentaHecha.Visibility = Visibility.Visible;
 
+            Imprimir(registrada);
+
             await _principal.RefrescarEstadoCajaAsync();
         }
         finally
         {
             BtnCobrar.IsEnabled = true;
             BtnCobrar.Content = "Cobrar   (F12)";
+        }
+    }
+
+    /// <summary>
+    /// Saca el ticket si el negocio lo tiene configurado. Que falle la impresora
+    /// no puede voltear la venta: la venta ya está registrada y cobrada, y el
+    /// ticket se puede reimprimir desde el historial.
+    /// </summary>
+    private void Imprimir(VentaDto venta)
+    {
+        if (!_imprimirAlCobrar)
+            return;
+
+        try
+        {
+            Impresion.Imprimir(
+                Ticket.Venta(venta, _negocio, _anchoTicket),
+                _anchoTicket,
+                $"Ticket {venta.VentaId}",
+                preguntar: false);
+        }
+        catch (Exception ex)
+        {
+            MostrarAviso($"La venta se registró, pero no se pudo imprimir: {ex.Message}");
         }
     }
 

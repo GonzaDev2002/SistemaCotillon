@@ -1,5 +1,7 @@
 namespace Cotillon.Shared.DTOs.Ventas;
 
+using Cotillon.Shared.DTOs;
+
 public class CrearVentaDto
 {
     public int UsuarioId { get; set; }
@@ -55,6 +57,12 @@ public class LineaVentaDto
     public decimal PrecioUnitario { get; set; }
     public decimal DescuentoLinea { get; set; }
     public decimal SubtotalLinea { get; set; }
+
+    /// <summary>
+    /// Cómo se vendió, para que el ticket diga "0,35 kg" y no "0,35" a secas.
+    /// Sale del producto, no del detalle: si el producto ya no está, cae en unidad.
+    /// </summary>
+    public string UnidadMedida { get; set; } = UnidadesMedida.Unidad;
 }
 
 public class PagoVentaDto

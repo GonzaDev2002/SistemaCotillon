@@ -20,16 +20,17 @@ que borra la carpeta, OneDrive que sincroniza una versión rota: se pierden
 ventas, stock, clientes y la historia entera, sin vuelta atrás. Ninguna otra
 cosa de esta lista importa si falta ésta.
 
-### 2. Imprimir el ticket — 1 a 2 días
+### 2. Imprimir el ticket — HECHO
 
-- [ ] Ticket de venta en impresora térmica (58/80 mm) y en A4
-- [ ] Enganchar `TICKET_PIE` y los datos del negocio, que ya se configuran y hoy no se usan en ningún lado
-- [ ] Reimprimir desde Historial de ventas
-- [ ] Imprimir el cierre de caja
+- [x] Ticket de venta en impresora térmica (58/80 mm) y en A4
+- [x] Enganchar `TICKET_PIE` y los datos del negocio
+- [x] Reimprimir desde Historial de ventas
+- [x] Imprimir el cierre de caja
+- [x] Elegir el ancho del papel y si sale solo al cobrar, desde Configuración
 
-No hay **nada** de impresión en el sistema. Si el cliente pide comprobante, no
-hay. Para cotillón alcanza con ticket simple: no hace falta impresora fiscal
-salvo que AFIP lo exija.
+El ticket se arma como texto de ancho fijo, que es lo que imprime una térmica.
+La impresora se instala en Windows como cualquier otra: no hace falta librería
+ni driver especial. No hace falta impresora fiscal salvo que AFIP lo exija.
 
 ### 3. Instalador y servicio de Windows — 2 a 3 días
 

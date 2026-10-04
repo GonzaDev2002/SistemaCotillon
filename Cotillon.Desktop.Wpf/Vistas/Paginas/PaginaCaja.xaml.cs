@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Cotillon.Desktop.Wpf.Servicios;
+using Cotillon.Shared.DTOs;
 using Cotillon.Shared.DTOs.Caja;
 using Cotillon.Shared.DTOs.Permisos;
 
@@ -181,6 +182,8 @@ public partial class PaginaCaja : UserControl
 
             MessageBox.Show(respuesta.Message, "Caja cerrada", MessageBoxButton.OK, MessageBoxImage.Information);
 
+            await ImprimirCierreAsync(contado, diferencia);
+
             TxtMontoContado.Clear();
             TxtObsCierre.Clear();
             TxtMontoInicial.Text = "0";
@@ -191,6 +194,44 @@ public partial class PaginaCaja : UserControl
         finally
         {
             BtnCerrarCaja.IsEnabled = true;
+        }
+    }
+
+    /// <summary>
+    /// Ofrece el comprobante del cierre. Es el papel que se guarda junto con la
+    /// plata del día, así que se arma con el arqueo que se acaba de cerrar y no
+    /// con lo que quede en pantalla después de recargar.
+    /// </summary>
+    private async Task ImprimirCierreAsync(decimal contado, decimal diferencia)
+    {
+        if (_arqueo is null)
+            return;
+
+        if (MessageBox.Show("¿Imprimir el comprobante de cierre?", "Cotillón",
+                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+
+        _arqueo.Sesion.MontoContado = contado;
+        _arqueo.Sesion.Diferencia = diferencia;
+        _arqueo.Sesion.FechaCierre = DateTime.Now;
+        _arqueo.Sesion.UsuarioCierre = Sesion.NombreCompleto;
+        _arqueo.Sesion.Observaciones = TxtObsCierre.Text.Trim();
+
+        var configuracion = await App.Api.ConfiguracionAsync();
+        var datos = configuracion.Data;
+
+        try
+        {
+            Impresion.Imprimir(
+                Ticket.CierreDeCaja(_arqueo, DatosTicket.Desde(datos), Impresion.AnchoConfigurado(datos)),
+                Impresion.AnchoConfigurado(datos),
+                $"Cierre de caja {_arqueo.Sesion.SesionCajaId}",
+                preguntar: true);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"La caja quedó cerrada, pero no se pudo imprimir: {ex.Message}",
+                "Cotillón", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 

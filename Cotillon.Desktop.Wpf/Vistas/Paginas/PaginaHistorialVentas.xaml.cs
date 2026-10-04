@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using Cotillon.Desktop.Wpf.Servicios;
+using Cotillon.Shared.DTOs;
 using Cotillon.Shared.DTOs.Permisos;
 using Cotillon.Shared.DTOs.Ventas;
 
@@ -10,6 +11,7 @@ namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 public partial class PaginaHistorialVentas : UserControl
 {
     private int _ventaSeleccionada;
+    private VentaDto? _ultimaVenta;
 
     public PaginaHistorialVentas()
     {
@@ -82,8 +84,39 @@ public partial class PaginaHistorialVentas : UserControl
             ? Visibility.Visible
             : Visibility.Collapsed;
 
+        _ultimaVenta = venta;
+        BtnImprimir.IsEnabled = true;
+
         Adjuntos.Titulo = $"Comprobantes de la venta #{venta.VentaId}";
         await Adjuntos.CargarAsync(venta.VentaId);
+    }
+
+    /// <summary>
+    /// Reimprime el ticket de una venta ya registrada. Acá sí se abre el cuadro de
+    /// impresión: es un pedido puntual del cliente y puede querer mandarse a otra
+    /// impresora que no es la de la caja.
+    /// </summary>
+    private async void AlImprimir(object sender, RoutedEventArgs e)
+    {
+        if (_ultimaVenta is null)
+            return;
+
+        var configuracion = await App.Api.ConfiguracionAsync();
+        var datos = configuracion.Data;
+
+        try
+        {
+            Impresion.Imprimir(
+                Ticket.Venta(_ultimaVenta, DatosTicket.Desde(datos), Impresion.AnchoConfigurado(datos)),
+                Impresion.AnchoConfigurado(datos),
+                $"Ticket {_ultimaVenta.VentaId}",
+                preguntar: true);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"No se pudo imprimir: {ex.Message}", "Cotillón",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private async void AlAnular(object sender, RoutedEventArgs e)
