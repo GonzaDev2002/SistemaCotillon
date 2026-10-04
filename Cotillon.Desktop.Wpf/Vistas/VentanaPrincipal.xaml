@@ -27,12 +27,12 @@
                     </StackPanel>
                 </StackPanel>
 
-                <Border DockPanel.Dock="Bottom" Background="#171449" Padding="16,14">
+                <Border DockPanel.Dock="Bottom" Background="{DynamicResource PieLateral}" Padding="16,14">
                     <StackPanel>
                         <TextBlock x:Name="LblUsuario" FontFamily="Segoe UI" FontSize="13"
                                    FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis"/>
                         <TextBlock x:Name="LblRol" FontFamily="Segoe UI" FontSize="11.5"
-                                   Foreground="#A5B4FC" Margin="0,1,0,10"/>
+                                   Foreground="{DynamicResource TituloMenu}" Margin="0,1,0,10"/>
                         <Button Content="Cerrar sesión" Style="{StaticResource BotonSecundario}"
                                 FontSize="12" Padding="10,6" Click="AlCerrarSesion"/>
                     </StackPanel>
@@ -43,7 +43,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Hidden" Margin="0,0,0,6">
                     <StackPanel x:Name="PanelNavegacion">
                         <TextBlock x:Name="LblOperacion" Text="OPERACIÓN" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
-                                   Foreground="#818CF8" Margin="20,8,0,6"/>
+                                   Foreground="{DynamicResource TituloMenu}" Margin="20,8,0,6"/>
                         <RadioButton x:Name="NavInicio" Style="{StaticResource BotonNavegacion}"
                                      Tag="{x:Static iconos:PackIconMaterialKind.ViewDashboard}"
                                      Background="{StaticResource FichaIndigo}"
@@ -62,7 +62,7 @@
                                      Content="Historial de ventas" Checked="AlNavegar"/>
 
                         <TextBlock x:Name="LblInventario" Text="INVENTARIO" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
-                                   Foreground="#818CF8" Margin="20,16,0,6"/>
+                                   Foreground="{DynamicResource TituloMenu}" Margin="20,16,0,6"/>
                         <RadioButton x:Name="NavProductos" Style="{StaticResource BotonNavegacion}"
                                      Tag="{x:Static iconos:PackIconMaterialKind.PackageVariantClosed}"
                                      Background="{StaticResource FichaCeleste}"
@@ -81,7 +81,7 @@
                                      Content="Compras" Checked="AlNavegar"/>
 
                         <TextBlock x:Name="LblGestion" Text="GESTIÓN" FontFamily="Segoe UI" FontSize="10.5" FontWeight="Bold"
-                                   Foreground="#818CF8" Margin="20,16,0,6"/>
+                                   Foreground="{DynamicResource TituloMenu}" Margin="20,16,0,6"/>
                         <RadioButton x:Name="NavClientes" Style="{StaticResource BotonNavegacion}"
                                      Tag="{x:Static iconos:PackIconMaterialKind.AccountGroup}"
                                      Background="{StaticResource FichaVerde}"
@@ -96,7 +96,7 @@
                                      Content="Reportes" Checked="AlNavegar"/>
 
                         <TextBlock x:Name="LblAdministracion" Text="ADMINISTRACIÓN" FontFamily="Segoe UI"
-                                   FontSize="10.5" FontWeight="Bold" Foreground="#818CF8" Margin="20,16,0,6"/>
+                                   FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TituloMenu}" Margin="20,16,0,6"/>
                         <RadioButton x:Name="NavUsuarios" Style="{StaticResource BotonNavegacion}"
                                      Tag="{x:Static iconos:PackIconMaterialKind.AccountKey}"
                                      Background="{StaticResource FichaAmbar}"

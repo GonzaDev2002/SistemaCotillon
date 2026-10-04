@@ -31,6 +31,12 @@
     <SolidColorBrush x:Key="Lateral" Color="{StaticResource ColorLateral}"/>
     <SolidColorBrush x:Key="LateralHover" Color="{StaticResource ColorLateralHover}"/>
 
+    <!-- El pie y los títulos del menú lateral. Están acá y no sueltos en la
+         ventana porque PaletaPorRol los pisa al entrar: la pantalla cambia de
+         color según quién abrió la sesión. -->
+    <SolidColorBrush x:Key="PieLateral" Color="#171449"/>
+    <SolidColorBrush x:Key="TituloMenu" Color="#818CF8"/>
+
     <FontFamily x:Key="Tipografia">Segoe UI</FontFamily>
 
     <!-- ===================== Iconos =====================

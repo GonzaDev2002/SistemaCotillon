@@ -59,6 +59,11 @@ public partial class App : Application
             return;
         }
 
+        // La pantalla toma el color del rol ANTES de construirse: los
+        // StaticResource se resuelven al cargar el XAML y pisarlos despues no
+        // cambiaria lo que ya quedo dibujado.
+        PaletaPorRol.Aplicar(Sesion.Rol);
+
         var principal = new VentanaPrincipal();
         MainWindow = principal;
         principal.Show();

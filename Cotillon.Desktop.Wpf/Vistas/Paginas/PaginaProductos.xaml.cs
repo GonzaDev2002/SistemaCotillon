@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,6 +16,8 @@ public partial class PaginaProductos : UserControl
     private List<ProductoListadoDto> _productos = [];
     private int _productoSeleccionado;
     private bool _puedeEditar;
+
+    private readonly ObservableCollection<ComponenteComboDto> _componentes = [];
 
     public PaginaProductos()
     {
@@ -41,6 +44,11 @@ public partial class PaginaProductos : UserControl
 
         CboUnidad.ItemsSource = UnidadesMedida.Todas;
         CboUnidad.SelectedValue = UnidadesMedida.Unidad;
+
+        CboTemporada.ItemsSource = Temporadas.Todas.Select(t => new { t.Codigo, t.Nombre }).ToList();
+        CboTemporada.SelectedValue = Temporadas.TodoElAno;
+
+        GrillaCombo.ItemsSource = _componentes;
 
         Loaded += async (_, _) =>
         {
@@ -261,6 +269,22 @@ public partial class PaginaProductos : UserControl
         TxtMarca.Text = producto.Marca;
         TxtDescripcion.Text = producto.Descripcion;
         ChkSinStock.IsChecked = producto.PermiteVentaSinStock;
+        TxtUnidadesPorBulto.Text = producto.UnidadesPorBulto.ToString("0.###", CultureInfo.CurrentCulture);
+        TxtPrecioBulto.Text = producto.PrecioBulto.ToString(CultureInfo.CurrentCulture);
+        CboTemporada.SelectedValue = producto.Temporada ?? Temporadas.TodoElAno;
+        ChkEsCombo.IsChecked = producto.EsCombo;
+
+        _componentes.Clear();
+
+        if (producto.EsCombo)
+        {
+            var receta = await App.Api.ComponentesComboAsync(producto.ProductoId);
+
+            foreach (var componente in receta.Data ?? [])
+                _componentes.Add(componente);
+
+            ActualizarResumenCombo();
+        }
 
         // El stock no se edita desde acá: cambiarlo a mano dejaría el inventario sin
         // explicación. Para eso está la pantalla de movimientos de stock.
@@ -365,7 +389,11 @@ public partial class PaginaProductos : UserControl
             StockMinimo = Numero(TxtStockMinimo.Text),
             Marca = TxtMarca.Text.Trim(),
             UnidadMedida = CboUnidad.SelectedValue as string ?? UnidadesMedida.Unidad,
-            PermiteVentaSinStock = ChkSinStock.IsChecked == true
+            PermiteVentaSinStock = ChkSinStock.IsChecked == true,
+            UnidadesPorBulto = Numero(TxtUnidadesPorBulto.Text),
+            PrecioBulto = Numero(TxtPrecioBulto.Text),
+            Temporada = CboTemporada.SelectedValue as string ?? string.Empty,
+            EsCombo = ChkEsCombo.IsChecked == true
         };
 
         BtnGuardar.IsEnabled = false;
@@ -380,6 +408,26 @@ public partial class PaginaProductos : UserControl
             {
                 MessageBox.Show(respuesta.Message, "Cotillón", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
+            }
+
+            // La receta se guarda aparte porque necesita el id del combo. En un alta
+            // el id lo asigna la base reción ahora, asi que el producto se guarda
+            // primero y la receta se carga al volver a abrirlo.
+            if (producto.EsCombo && _componentes.Count > 0 && _productoSeleccionado > 0)
+            {
+                var receta = await App.Api.GuardarComboAsync(_productoSeleccionado, [.. _componentes]);
+
+                if (!receta.Success)
+                {
+                    MessageBox.Show(receta.Message, "Cotillón", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            }
+            else if (producto.EsCombo && _componentes.Count > 0)
+            {
+                MessageBox.Show(
+                    "El combo quedó creado. Abrilo de la lista para guardarle qué lleva adentro.",
+                    "Cotillón", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
             MostrarEscaneo($"{producto.NombreProducto} guardado. Dispará el lector para el siguiente.", Exito);
@@ -440,6 +488,121 @@ public partial class PaginaProductos : UserControl
         await CargarProductosAsync();
     }
 
+    // ------------------------------------------------------------- Combos --
+
+    private void AlCambiarCombo(object sender, RoutedEventArgs e)
+    {
+        if (PanelCombo is null)
+            return;
+
+        PanelCombo.Visibility = ChkEsCombo.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+
+        // Un combo no tiene stock propio: se arma con lo que hay de sus partes.
+        TxtStock.IsEnabled = ChkEsCombo.IsChecked != true && _productoSeleccionado == 0;
+    }
+
+    private async void AlTeclaComponente(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+            return;
+
+        e.Handled = true;
+        await AgregarComponenteAsync();
+    }
+
+    private async void AlAgregarComponente(object sender, RoutedEventArgs e) =>
+        await AgregarComponenteAsync();
+
+    /// <summary>
+    /// Suma un producto a la receta. Acepta "5*caramelo" igual que el buscador de
+    /// ventas, para no tener que cargar cinco veces el mismo renglón.
+    /// </summary>
+    private async Task AgregarComponenteAsync()
+    {
+        var texto = TxtComponente.Text.Trim();
+
+        if (texto.Length == 0)
+            return;
+
+        var cantidad = 1m;
+        var separador = texto.IndexOfAny(['*', 'x', 'X']);
+
+        if (separador > 0 && Numero(texto[..separador]) > 0)
+        {
+            cantidad = Numero(texto[..separador]);
+            texto = texto[(separador + 1)..].Trim();
+        }
+
+        var respuesta = await App.Api.BuscarProductosAsync(texto);
+
+        if (!respuesta.Success || respuesta.Data is null || respuesta.Data.Count == 0)
+        {
+            MostrarEscaneo($"No se encontró ningún producto con «{texto}».", Peligro);
+            return;
+        }
+
+        var producto = respuesta.Data[0];
+
+        if (producto.ProductoId == _productoSeleccionado)
+        {
+            MostrarEscaneo("Un combo no puede llevarse a sí mismo adentro.", Peligro);
+            return;
+        }
+
+        if (producto.EsCombo)
+        {
+            MostrarEscaneo($"«{producto.NombreProducto}» también es un combo y no puede ir adentro de otro.", Peligro);
+            return;
+        }
+
+        // Si ya estaba, se suma en vez de duplicar el renglón.
+        var existente = _componentes.FirstOrDefault(c => c.ComponenteProductoId == producto.ProductoId);
+
+        if (existente is not null)
+        {
+            existente.Cantidad += cantidad;
+            GrillaCombo.Items.Refresh();
+        }
+        else
+        {
+            _componentes.Add(new ComponenteComboDto
+            {
+                ComponenteProductoId = producto.ProductoId,
+                NombreProducto = producto.NombreProducto,
+                Cantidad = cantidad,
+                UnidadMedida = producto.UnidadMedida,
+                StockComponente = producto.Stock
+            });
+        }
+
+        TxtComponente.Clear();
+        TxtComponente.Focus();
+        ActualizarResumenCombo();
+    }
+
+    private void AlQuitarComponente(object sender, RoutedEventArgs e)
+    {
+        if (GrillaCombo.SelectedItem is ComponenteComboDto componente)
+            _componentes.Remove(componente);
+
+        ActualizarResumenCombo();
+    }
+
+    private void ActualizarResumenCombo()
+    {
+        if (_componentes.Count == 0)
+        {
+            LblCostoCombo.Text = string.Empty;
+            return;
+        }
+
+        var armables = _componentes.Min(c => c.CombosQueAlcanza);
+
+        LblCostoCombo.Text =
+            $"Con el stock de hoy se pueden armar {armables:0} combos. " +
+            $"El costo de armar uno es {_componentes.Sum(c => c.CostoLinea):C2}.";
+    }
+
     private async void AlImportar(object sender, RoutedEventArgs e)
     {
         var ventana = new VentanaImportarProductos { Owner = Window.GetWindow(this) };
@@ -479,6 +642,13 @@ public partial class PaginaProductos : UserControl
         TxtMarca.Clear();
         TxtDescripcion.Clear();
         ChkSinStock.IsChecked = false;
+        TxtUnidadesPorBulto.Text = "1";
+        TxtPrecioBulto.Text = "0";
+        CboTemporada.SelectedValue = Temporadas.TodoElAno;
+        ChkEsCombo.IsChecked = false;
+        PanelCombo.Visibility = Visibility.Collapsed;
+        _componentes.Clear();
+        LblCostoCombo.Text = string.Empty;
 
         TxtStock.IsEnabled = true;
         LblStockAviso.Visibility = Visibility.Collapsed;

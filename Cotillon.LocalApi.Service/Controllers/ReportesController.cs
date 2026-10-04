@@ -41,6 +41,22 @@ public class ReportesController : ControllerBase
         }
     }
 
+    [HttpGet("temporada")]
+    public IActionResult Temporada(
+        [FromQuery] DateTime desde, [FromQuery] DateTime hasta, [FromQuery] string? temporada = null)
+    {
+        try
+        {
+            var resultado = _service.Temporada(temporada, desde, hasta);
+
+            return resultado.Success ? Ok(resultado) : BadRequest(resultado);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<string>.Fail($"Error interno al generar el reporte: {ex.Message}"));
+        }
+    }
+
     [HttpGet("ventas")]
     public IActionResult VentasPorRango([FromQuery] DateTime desde, [FromQuery] DateTime hasta)
     {

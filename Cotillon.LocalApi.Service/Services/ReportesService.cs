@@ -21,6 +21,16 @@ public class ReportesService
         ApiResponse<List<ReporteProductoDto>>.Ok(
             _repository.ListarProductosBajoStock(), "Reporte de productos bajo stock generado correctamente.");
 
+    public ApiResponse<List<ReporteTemporadaDto>> Temporada(string? temporada, DateTime desde, DateTime hasta)
+    {
+        if (desde.Date > hasta.Date)
+            return ApiResponse<List<ReporteTemporadaDto>>.Fail("La fecha desde no puede ser mayor a la fecha hasta.");
+
+        return ApiResponse<List<ReporteTemporadaDto>>.Ok(
+            _repository.Temporada(temporada, desde, hasta),
+            "Comparación contra la misma temporada del año anterior.");
+    }
+
     public ApiResponse<List<ReporteVentaDto>> ListarVentasPorRango(DateTime desde, DateTime hasta)
     {
         if (desde.Date > hasta.Date)

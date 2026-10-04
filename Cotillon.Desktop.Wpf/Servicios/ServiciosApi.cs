@@ -3,6 +3,7 @@ using Cotillon.Shared.DTOs.Adjuntos;
 using Cotillon.Shared.DTOs.Auditoria;
 using Cotillon.Shared.DTOs.Caja;
 using Cotillon.Shared.DTOs.Compras;
+using Cotillon.Shared.DTOs.Encargues;
 using Cotillon.Shared.DTOs.Permisos;
 using Cotillon.Shared.DTOs.Reportes;
 using Cotillon.Shared.DTOs.Stock;
@@ -213,6 +214,63 @@ public class ServiciosApi
     public Task<ApiResponse<List<ReporteVentaDto>>> ReporteVentasAsync(DateTime desde, DateTime hasta) =>
         _cliente.ObtenerAsync<List<ReporteVentaDto>>(
             $"api/Reportes/ventas?desde={Fecha(desde)}&hasta={Fecha(hasta)}");
+
+    public Task<ApiResponse<List<ReporteTemporadaDto>>> ReporteTemporadaAsync(
+        string? temporada, DateTime desde, DateTime hasta) =>
+        _cliente.ObtenerAsync<List<ReporteTemporadaDto>>(
+            $"api/Reportes/temporada?desde={Fecha(desde)}&hasta={Fecha(hasta)}" +
+            (string.IsNullOrWhiteSpace(temporada) ? string.Empty : $"&temporada={Uri.EscapeDataString(temporada)}"));
+
+    // ----------------------------------------------------------------- Combos --
+
+    public Task<ApiResponse<List<ComponenteComboDto>>> ComponentesComboAsync(int productoId) =>
+        _cliente.ObtenerAsync<List<ComponenteComboDto>>($"api/Combos/{productoId}");
+
+    public Task<ApiResponse<bool>> GuardarComboAsync(int productoId, List<ComponenteComboDto> componentes) =>
+        _cliente.ActualizarAsync<bool>($"api/Combos/{productoId}?usuarioId={Sesion.UsuarioId}", componentes);
+
+    // ---------------------------------------------------------------- Precios --
+
+    public Task<ApiResponse<List<CambioPrecioDto>>> SimularAumentoAsync(AumentoPreciosDto aumento) =>
+        _cliente.PublicarAsync<List<CambioPrecioDto>>("api/Precios/simular", aumento);
+
+    public Task<ApiResponse<ResultadoAumentoDto>> AplicarAumentoAsync(AumentoPreciosDto aumento) =>
+        _cliente.PublicarAsync<ResultadoAumentoDto>("api/Precios/aplicar", aumento);
+
+    // -------------------------------------------------------- Cuenta corriente --
+
+    public Task<ApiResponse<List<SaldoClienteDto>>> SaldosClientesAsync(bool soloConDeuda = true) =>
+        _cliente.ObtenerAsync<List<SaldoClienteDto>>($"api/CuentaCorriente/saldos?soloConDeuda={soloConDeuda}");
+
+    public Task<ApiResponse<CuentaCorrienteDto>> CuentaClienteAsync(int clienteId) =>
+        _cliente.ObtenerAsync<CuentaCorrienteDto>($"api/CuentaCorriente/{clienteId}");
+
+    public Task<ApiResponse<bool>> PagarCuentaAsync(RegistrarPagoCuentaDto pago) =>
+        _cliente.PublicarAsync<bool>("api/CuentaCorriente/pago", pago);
+
+    public Task<ApiResponse<bool>> AjustarCuentaAsync(AjustarCuentaDto ajuste) =>
+        _cliente.PublicarAsync<bool>("api/CuentaCorriente/ajuste", ajuste);
+
+    // -------------------------------------------------------------- Encargues --
+
+    public Task<ApiResponse<List<EncargueDto>>> EncarguesAsync(DateTime? hasta, bool incluirCerrados) =>
+        _cliente.ObtenerAsync<List<EncargueDto>>(
+            $"api/Encargues?incluirCerrados={incluirCerrados}" +
+            (hasta is null ? string.Empty : $"&hasta={Fecha(hasta.Value)}"));
+
+    public Task<ApiResponse<EncargueDto>> EncargueAsync(int encargueId) =>
+        _cliente.ObtenerAsync<EncargueDto>($"api/Encargues/{encargueId}");
+
+    public Task<ApiResponse<EncargueDto>> CrearEncargueAsync(CrearEncargueDto datos) =>
+        _cliente.PublicarAsync<EncargueDto>("api/Encargues", datos);
+
+    public Task<ApiResponse<int>> EntregarEncargueAsync(int encargueId, EntregarEncargueDto datos) =>
+        _cliente.PublicarAsync<int>($"api/Encargues/{encargueId}/entregar", datos);
+
+    public Task<ApiResponse<bool>> CancelarEncargueAsync(int encargueId, string motivo) =>
+        _cliente.PublicarAsync<bool>(
+            $"api/Encargues/{encargueId}/cancelar?usuarioId={Sesion.UsuarioId}" +
+            $"&motivo={Uri.EscapeDataString(motivo)}", new { });
 
     // -------------------------------------------------------------- Auditoría --
 
