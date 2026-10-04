@@ -52,12 +52,18 @@ public sealed class EscenarioVentas : IDisposable
     public ClientesRepository Clientes { get; }
 
     public int MedioEfectivoId => ObtenerMedio("EFECTIVO");
+    public int MedioCuentaCorrienteId => ObtenerMedio("CUENTA CORRIENTE");
     public int MedioDebitoId => ObtenerMedio("DEBITO");
 
     public int AbrirCaja(decimal montoInicial = 1000m) =>
         Caja.Abrir(UsuarioId, montoInicial, "Apertura de prueba");
 
     public IDbConnection Abrir() => _db.Abrir();
+
+    public IDbConnectionFactory Factory => _db.Factory;
+
+    /// <summary>Arqueo de la caja abierta, que es lo que se mira en casi toda prueba.</summary>
+    public ArqueoCajaDto Arqueo() => Caja.ObtenerArqueo(Caja.ObtenerSesionAbierta()!);
 
     public double StockDe(int productoId)
     {

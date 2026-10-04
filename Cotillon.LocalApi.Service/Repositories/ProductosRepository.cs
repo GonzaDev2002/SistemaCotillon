@@ -21,10 +21,12 @@ public class ProductosRepository
             """
             INSERT INTO Productos
                 (CategoriaId, CodigoProducto, NombreProducto, Descripcion, PrecioCentavos, CostoCentavos,
-                 Stock, StockMinimo, CodigoBarras, Marca, UnidadMedida, ImagenUrl, PermiteVentaSinStock, Activo)
+                 Stock, StockMinimo, CodigoBarras, Marca, UnidadMedida, ImagenUrl, PermiteVentaSinStock,
+                 UnidadesPorBulto, PrecioBultoCentavos, Temporada, EsCombo, Activo)
             VALUES
                 (@CategoriaId, @CodigoProducto, @NombreProducto, @Descripcion, @Precio, @Costo,
-                 @Stock, @StockMinimo, @CodigoBarras, @Marca, @UnidadMedida, @ImagenUrl, @PermiteVentaSinStock, 1);
+                 @Stock, @StockMinimo, @CodigoBarras, @Marca, @UnidadMedida, @ImagenUrl, @PermiteVentaSinStock,
+                 @UnidadesPorBulto, @PrecioBulto, @Temporada, @EsCombo, 1);
             """,
             AParametros(producto)) > 0;
     }
@@ -48,11 +50,58 @@ public class ProductosRepository
                 UnidadMedida = @UnidadMedida,
                 ImagenUrl = @ImagenUrl,
                 PermiteVentaSinStock = @PermiteVentaSinStock,
+                UnidadesPorBulto = @UnidadesPorBulto,
+                PrecioBultoCentavos = @PrecioBulto,
+                Temporada = @Temporada,
+                EsCombo = @EsCombo,
                 FechaActualizacion = datetime('now', 'localtime')
             WHERE ProductoId = @ProductoId;
             """,
             AParametros(producto)) > 0;
     }
+
+    /// <summary>
+    /// Columnas del listado. Un combo no tiene stock propio: el que se informa es
+    /// cuántos se pueden armar con lo que hay, y lo marca el componente que menos
+    /// alcanza, porque falta uno y no se arma ninguno.
+    /// </summary>
+    private const string ColumnasListado =
+        """
+            p.ProductoId,
+            p.NombreProducto,
+            p.PrecioCentavos,
+            p.Activo,
+            p.UnidadMedida,
+            p.UnidadesPorBulto,
+            p.PrecioBultoCentavos,
+            p.EsCombo,
+            COALESCE(p.Temporada, '') AS Temporada,
+            CASE WHEN p.EsCombo = 1 THEN COALESCE((
+                    SELECT MIN(CAST(cp.Stock / cc.Cantidad AS INT))
+                    FROM ComboComponentes cc
+                    JOIN Productos cp ON cc.ComponenteProductoId = cp.ProductoId
+                    WHERE cc.ComboProductoId = p.ProductoId
+                 ), 0)
+                 ELSE p.Stock END AS Stock,
+            COALESCE(c.NombreCategoria, '(Sin categoría)') AS NombreCategoria,
+            COALESCE(s.NombreSeccion, '(Sin sección)')     AS NombreSeccion
+        """;
+
+    private static ProductoListadoDto AListado(FilaListado f) => new()
+    {
+        ProductoId = f.ProductoId,
+        NombreProducto = f.NombreProducto,
+        NombreSeccion = f.NombreSeccion,
+        NombreCategoria = f.NombreCategoria,
+        Precio = Money.FromCentavos(f.PrecioCentavos),
+        Stock = (decimal)f.Stock,
+        Activo = f.Activo,
+        UnidadMedida = f.UnidadMedida,
+        UnidadesPorBulto = (decimal)f.UnidadesPorBulto,
+        PrecioBulto = Money.FromCentavos(f.PrecioBultoCentavos),
+        EsCombo = f.EsCombo,
+        Temporada = f.Temporada
+    };
 
     public List<ProductoListadoDto> ObtenerTodos(bool incluirInactivos)
     {
@@ -61,14 +110,7 @@ public class ProductosRepository
         var filas = conexion.Query<FilaListado>(
             $"""
             SELECT
-                p.ProductoId,
-                p.NombreProducto,
-                p.PrecioCentavos,
-                p.Stock,
-                p.Activo,
-                p.UnidadMedida,
-                COALESCE(c.NombreCategoria, '(Sin categoría)') AS NombreCategoria,
-                COALESCE(s.NombreSeccion, '(Sin sección)')     AS NombreSeccion
+            {ColumnasListado}
             FROM Productos p
             LEFT JOIN Categorias c ON p.CategoriaId = c.CategoriaId
             LEFT JOIN Secciones  s ON c.SeccionId   = s.SeccionId
@@ -76,17 +118,7 @@ public class ProductosRepository
             ORDER BY p.NombreProducto;
             """);
 
-        return filas.Select(f => new ProductoListadoDto
-        {
-            ProductoId = f.ProductoId,
-            NombreProducto = f.NombreProducto,
-            NombreSeccion = f.NombreSeccion,
-            NombreCategoria = f.NombreCategoria,
-            Precio = Money.FromCentavos(f.PrecioCentavos),
-            Stock = (decimal)f.Stock,
-            Activo = f.Activo,
-            UnidadMedida = f.UnidadMedida
-        }).ToList();
+        return filas.Select(AListado).ToList();
     }
 
     /// <summary>
@@ -98,16 +130,9 @@ public class ProductosRepository
         using var conexion = _factory.Crear();
 
         var filas = conexion.Query<FilaListado>(
-            """
+            $"""
             SELECT
-                p.ProductoId,
-                p.NombreProducto,
-                p.PrecioCentavos,
-                p.Stock,
-                p.Activo,
-                p.UnidadMedida,
-                COALESCE(c.NombreCategoria, '(Sin categoría)') AS NombreCategoria,
-                COALESCE(s.NombreSeccion, '(Sin sección)')     AS NombreSeccion
+            {ColumnasListado}
             FROM Productos p
             LEFT JOIN Categorias c ON p.CategoriaId = c.CategoriaId
             LEFT JOIN Secciones  s ON c.SeccionId   = s.SeccionId
@@ -123,17 +148,7 @@ public class ProductosRepository
             """,
             new { Exacto = texto, Parcial = $"%{texto}%", Limite = limite });
 
-        return filas.Select(f => new ProductoListadoDto
-        {
-            ProductoId = f.ProductoId,
-            NombreProducto = f.NombreProducto,
-            NombreSeccion = f.NombreSeccion,
-            NombreCategoria = f.NombreCategoria,
-            Precio = Money.FromCentavos(f.PrecioCentavos),
-            Stock = (decimal)f.Stock,
-            Activo = f.Activo,
-            UnidadMedida = f.UnidadMedida
-        }).ToList();
+        return filas.Select(AListado).ToList();
     }
 
     public ProductoDto? ObtenerPorId(int productoId)
@@ -177,7 +192,8 @@ public class ProductosRepository
         """
         SELECT ProductoId, CategoriaId, CodigoProducto, NombreProducto, Descripcion,
                PrecioCentavos, CostoCentavos, Stock, StockMinimo, CodigoBarras, Marca,
-               UnidadMedida, ImagenUrl, PermiteVentaSinStock, Activo
+               UnidadMedida, ImagenUrl, PermiteVentaSinStock, Activo,
+               UnidadesPorBulto, PrecioBultoCentavos, COALESCE(Temporada, '') AS Temporada, EsCombo
         FROM Productos
         """;
 
@@ -197,7 +213,11 @@ public class ProductosRepository
         UnidadMedida = fila.UnidadMedida,
         ImagenUrl = fila.ImagenUrl ?? string.Empty,
         PermiteVentaSinStock = fila.PermiteVentaSinStock,
-        Activo = fila.Activo
+        Activo = fila.Activo,
+        UnidadesPorBulto = (decimal)fila.UnidadesPorBulto,
+        PrecioBulto = Money.FromCentavos(fila.PrecioBultoCentavos),
+        Temporada = fila.Temporada,
+        EsCombo = fila.EsCombo
     };
 
     public bool EliminarLogico(int productoId) => CambiarActivo(productoId, false);
@@ -303,7 +323,12 @@ public class ProductosRepository
         Marca = Opcional(producto.Marca),
         UnidadMedida = string.IsNullOrWhiteSpace(producto.UnidadMedida) ? "UNIDAD" : producto.UnidadMedida.Trim(),
         ImagenUrl = Opcional(producto.ImagenUrl),
-        PermiteVentaSinStock = producto.PermiteVentaSinStock ? 1 : 0
+        PermiteVentaSinStock = producto.PermiteVentaSinStock ? 1 : 0,
+        // Menos de uno dejaría un bulto que descuenta fracciones de unidad.
+        UnidadesPorBulto = producto.UnidadesPorBulto < 1 ? 1m : producto.UnidadesPorBulto,
+        PrecioBulto = Money.ToCentavos(producto.PrecioBulto),
+        Temporada = Opcional(producto.Temporada),
+        EsCombo = producto.EsCombo ? 1 : 0
     };
 
     // Los códigos únicos se guardan como NULL cuando vienen vacíos: el índice único
@@ -321,6 +346,10 @@ public class ProductosRepository
         public double Stock { get; init; }
         public bool Activo { get; init; }
         public string UnidadMedida { get; init; } = "UNIDAD";
+        public double UnidadesPorBulto { get; init; } = 1;
+        public long PrecioBultoCentavos { get; init; }
+        public bool EsCombo { get; init; }
+        public string Temporada { get; init; } = string.Empty;
     }
 
     private sealed class FilaDashboard : FilaListado
@@ -346,5 +375,9 @@ public class ProductosRepository
         public string? ImagenUrl { get; init; }
         public bool PermiteVentaSinStock { get; init; }
         public bool Activo { get; init; }
+        public double UnidadesPorBulto { get; init; } = 1;
+        public long PrecioBultoCentavos { get; init; }
+        public string Temporada { get; init; } = string.Empty;
+        public bool EsCombo { get; init; }
     }
 }

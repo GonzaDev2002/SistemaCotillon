@@ -97,7 +97,9 @@ public class DatabaseInitializer
             new { Nombre = "DEBITO",         Afecta = 0, Orden = 2 },
             new { Nombre = "CREDITO",        Afecta = 0, Orden = 3 },
             new { Nombre = "TRANSFERENCIA",  Afecta = 0, Orden = 4 },
-            new { Nombre = "QR / BILLETERA", Afecta = 0, Orden = 5 }
+            new { Nombre = "QR / BILLETERA", Afecta = 0, Orden = 5 },
+            // No entra plata al cajón: queda anotado en la cuenta del cliente.
+            new { Nombre = "CUENTA CORRIENTE", Afecta = 0, Orden = 6 }
         };
 
         conexion.Execute(

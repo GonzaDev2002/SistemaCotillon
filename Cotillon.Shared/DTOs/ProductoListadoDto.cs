@@ -20,5 +20,23 @@ public class ProductoListadoDto
     /// </summary>
     public string UnidadMedida { get; set; } = UnidadesMedida.Unidad;
 
-    public string StockFormateado => UnidadesMedida.De(UnidadMedida).Formatear(Stock);
+    /// <summary>Unidades del bulto cerrado. 1 = el producto no se vende por bulto.</summary>
+    public decimal UnidadesPorBulto { get; set; } = 1;
+
+    /// <summary>Precio del bulto. En cero se cobra el unitario por la cantidad.</summary>
+    public decimal PrecioBulto { get; set; }
+
+    /// <summary>
+    /// Un combo no tiene stock propio: el que viaja acá es cuántos se pueden
+    /// armar con lo que hay de sus componentes.
+    /// </summary>
+    public bool EsCombo { get; set; }
+
+    public string Temporada { get; set; } = string.Empty;
+
+    public bool SeVendePorBulto => UnidadesPorBulto > 1;
+
+    public string StockFormateado => EsCombo
+        ? $"{Stock:0.##} armables"
+        : UnidadesMedida.De(UnidadMedida).Formatear(Stock);
 }

@@ -51,6 +51,10 @@ builder.Services.AddScoped<AdjuntosService>();
 builder.Services.AddScoped<AuditoriaRepository>();
 builder.Services.AddScoped<UsuariosRepository>();
 builder.Services.AddScoped<MediosPagoRepository>();
+builder.Services.AddScoped<CombosRepository>();
+builder.Services.AddScoped<PreciosRepository>();
+builder.Services.AddScoped<CuentaCorrienteRepository>();
+builder.Services.AddScoped<EncarguesRepository>();
 
 var app = builder.Build();
 

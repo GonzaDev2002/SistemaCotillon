@@ -115,6 +115,19 @@ public partial class VentasRepository
                     pago.Referencia
                 }, tx);
 
+            // Cuenta corriente: no entra plata, queda anotado en la cuenta del
+            // cliente. Sin cliente no hay a quién anotarle, así que se rechaza.
+            if (pago.EsCuentaCorriente)
+            {
+                if (venta.ClienteId is not > 0)
+                    throw new VentaInvalidaException(
+                        "Para vender en cuenta corriente hay que elegir el cliente.");
+
+                CuentaCorrienteRepository.RegistrarVenta(
+                    conexion, tx, venta.ClienteId.Value, venta.UsuarioId, ventaId,
+                    pago.ImporteCentavos - pago.VueltoCentavos);
+            }
+
             if (!pago.AfectaEfectivo)
                 continue;
 
@@ -175,12 +188,21 @@ public partial class VentasRepository
             """,
             new { VentaId = ventaId, datos.UsuarioId, datos.Motivo }, tx);
 
-        var lineas = conexion.Query<FilaDetalleAnulacion>(
-            "SELECT ProductoId, NombreProducto, Cantidad FROM DetalleVentas WHERE VentaId = @VentaId;",
+        // Se devuelve exactamente lo que la venta sacó, leído de los movimientos
+        // de stock y no del detalle. Es lo único que funciona con los combos: el
+        // detalle dice "bolsita sorpresa", pero de la góndola salieron los ocho
+        // productos que la arman. Y si la receta del combo cambió después de la
+        // venta, igual se devuelve lo que realmente se descontó aquel día.
+        var movimientos = conexion.Query<FilaDetalleAnulacion>(
+            """
+            SELECT ProductoId, -Cantidad AS Cantidad
+            FROM StockMovimientos
+            WHERE OrigenTipo = 'VENTA' AND OrigenId = @VentaId AND TipoMovimiento = 'VENTA';
+            """,
             new { VentaId = ventaId }, tx);
 
-        foreach (var linea in lineas)
-            RestituirStock(conexion, tx, datos.UsuarioId, ventaId, linea);
+        foreach (var movimiento in movimientos)
+            RestituirStock(conexion, tx, datos.UsuarioId, ventaId, movimiento);
 
         var efectivoDevueltoCentavos = conexion.ExecuteScalar<long>(
             """
@@ -216,6 +238,10 @@ public partial class VentasRepository
                 }, tx);
         }
 
+        // Si la venta se habia anotado en la cuenta del cliente, la deuda se da de
+        // baja con otro movimiento: el resumen tiene que explicar por que bajo.
+        CuentaCorrienteRepository.RegistrarAnulacion(conexion, tx, datos.UsuarioId, ventaId);
+
         Auditoria.Registrar(conexion, tx, datos.UsuarioId, "Ventas", "ANULACION", ventaId,
             $"Anulación por {Money.FromCentavos(venta.TotalVentaCentavos):C2}. Motivo: {datos.Motivo}");
 
@@ -237,7 +263,7 @@ public partial class VentasRepository
             var producto = conexion.QuerySingleOrDefault<FilaProducto>(
                 """
                 SELECT ProductoId, NombreProducto, PrecioCentavos, CostoCentavos,
-                       Stock, UnidadMedida, PermiteVentaSinStock, Activo
+                       Stock, UnidadMedida, PermiteVentaSinStock, Activo, EsCombo
                 FROM Productos
                 WHERE ProductoId = @Id;
                 """,
@@ -249,7 +275,13 @@ public partial class VentasRepository
 
             var permiteSinStock = producto.PermiteVentaSinStock || permitirSinStockGlobal;
 
-            if (!permiteSinStock && producto.Stock < (double)linea.Cantidad)
+            // Un combo no tiene stock propio: lo que se controla y lo que se
+            // descuenta son sus componentes. El combo en sí no se toca nunca.
+            var componentes = producto.EsCombo
+                ? ResolverComponentes(conexion, tx, producto, linea.Cantidad, permiteSinStock)
+                : [];
+
+            if (!producto.EsCombo && !permiteSinStock && producto.Stock < (double)linea.Cantidad)
             {
                 // Con la unidad en el mensaje: "Disponible: 0,3 kg" se entiende,
                 // "Disponible: 0,3" al lado de un pedido de 500 no.
@@ -279,7 +311,9 @@ public partial class VentasRepository
                 PrecioCentavos = producto.PrecioCentavos,
                 CostoCentavos = producto.CostoCentavos,
                 BrutoCentavos = brutoCentavos,
-                DescuentoCentavos = descuentoCentavos
+                DescuentoCentavos = descuentoCentavos,
+                EsCombo = producto.EsCombo,
+                Componentes = componentes
             });
         }
 
@@ -287,6 +321,57 @@ public partial class VentasRepository
             throw new VentaInvalidaException("La venta no tiene ítems.");
 
         return resueltas;
+    }
+
+    /// <summary>
+    /// Qué hay que sacar de la góndola para armar los combos que se están
+    /// vendiendo. Si el mismo componente aparece en dos combos de la misma venta,
+    /// cada línea reserva su parte y el control de stock se hace sobre el total
+    /// pedido, no sobre cada combo por separado.
+    /// </summary>
+    private static List<ComponenteResuelto> ResolverComponentes(
+        IDbConnection conexion, IDbTransaction tx, FilaProducto combo, decimal cantidadCombos, bool permiteSinStock)
+    {
+        var filas = conexion.Query<FilaComponente>(
+            """
+            SELECT cc.ComponenteProductoId AS ProductoId, cc.Cantidad AS PorCombo,
+                   p.NombreProducto, p.UnidadMedida, p.Stock
+            FROM ComboComponentes cc
+            JOIN Productos p ON cc.ComponenteProductoId = p.ProductoId
+            WHERE cc.ComboProductoId = @Id;
+            """,
+            new { Id = combo.ProductoId }, tx).ToList();
+
+        if (filas.Count == 0)
+            throw new VentaInvalidaException(
+                $"El combo '{combo.NombreProducto}' no tiene cargado qué lleva adentro.");
+
+        var resueltos = new List<ComponenteResuelto>();
+
+        foreach (var fila in filas)
+        {
+            var necesario = (double)cantidadCombos * fila.PorCombo;
+
+            if (!permiteSinStock && fila.Stock < necesario)
+            {
+                var unidad = UnidadesMedida.De(fila.UnidadMedida);
+
+                throw new VentaInvalidaException(
+                    $"No alcanza para armar '{combo.NombreProducto}': hacen falta " +
+                    $"{unidad.Formatear((decimal)necesario)} de '{fila.NombreProducto}' " +
+                    $"y hay {unidad.Formatear((decimal)fila.Stock)}.");
+            }
+
+            resueltos.Add(new ComponenteResuelto
+            {
+                ProductoId = fila.ProductoId,
+                NombreProducto = fila.NombreProducto,
+                Cantidad = necesario,
+                StockAnterior = fila.Stock
+            });
+        }
+
+        return resueltos;
     }
 
     private static List<PagoResuelto> ResolverPagos(
@@ -314,6 +399,8 @@ public partial class VentasRepository
             {
                 MedioPagoId = medio.MedioPagoId,
                 AfectaEfectivo = medio.AfectaEfectivo,
+                EsCuentaCorriente = string.Equals(medio.NombreMedioPago,
+                    CuentaCorrienteRepository.MedioCuentaCorriente, StringComparison.OrdinalIgnoreCase),
                 ImporteCentavos = Money.ToCentavos(pago.Importe),
                 Referencia = pago.Referencia
             });
@@ -347,7 +434,33 @@ public partial class VentasRepository
     private static void DescontarStock(
         IDbConnection conexion, IDbTransaction tx, int usuarioId, int ventaId, LineaResuelta linea)
     {
-        var stockNuevo = linea.StockAnterior - linea.Cantidad;
+        // Del combo no se descuenta nada: lo que sale de la góndola son las cosas
+        // con las que se arma.
+        if (linea.EsCombo)
+        {
+            foreach (var componente in linea.Componentes)
+                DescontarProducto(conexion, tx, usuarioId, ventaId,
+                    componente.ProductoId, componente.Cantidad,
+                    $"Venta #{ventaId} · {linea.NombreProducto}");
+
+            return;
+        }
+
+        DescontarProducto(conexion, tx, usuarioId, ventaId,
+            linea.ProductoId, linea.Cantidad, $"Venta #{ventaId}");
+    }
+
+    private static void DescontarProducto(
+        IDbConnection conexion, IDbTransaction tx, int usuarioId, int ventaId,
+        int productoId, double cantidad, string observaciones)
+    {
+        // El stock anterior se relee acá y no se usa el que trae la línea: dos
+        // combos de la misma venta pueden llevar el mismo componente, y el segundo
+        // tiene que partir de lo que dejó el primero.
+        var anterior = conexion.ExecuteScalar<double>(
+            "SELECT Stock FROM Productos WHERE ProductoId = @Id;", new { Id = productoId }, tx);
+
+        var stockNuevo = anterior - cantidad;
 
         conexion.Execute(
             """
@@ -355,7 +468,7 @@ public partial class VentasRepository
             SET Stock = @Stock, FechaActualizacion = datetime('now', 'localtime')
             WHERE ProductoId = @ProductoId;
             """,
-            new { Stock = stockNuevo, linea.ProductoId }, tx);
+            new { Stock = stockNuevo, ProductoId = productoId }, tx);
 
         conexion.Execute(
             """
@@ -366,13 +479,13 @@ public partial class VentasRepository
             """,
             new
             {
-                linea.ProductoId,
+                ProductoId = productoId,
                 UsuarioId = usuarioId,
-                Cantidad = -linea.Cantidad,
-                Anterior = linea.StockAnterior,
+                Cantidad = -cantidad,
+                Anterior = anterior,
                 Nuevo = stockNuevo,
                 VentaId = ventaId,
-                Observaciones = $"Venta #{ventaId}"
+                Observaciones = observaciones
             }, tx);
     }
 
@@ -421,12 +534,32 @@ public partial class VentasRepository
         public long CostoCentavos { get; init; }
         public long BrutoCentavos { get; init; }
         public long DescuentoCentavos { get; init; }
+        public bool EsCombo { get; init; }
+        public List<ComponenteResuelto> Componentes { get; init; } = [];
+    }
+
+    private sealed class ComponenteResuelto
+    {
+        public int ProductoId { get; init; }
+        public string NombreProducto { get; init; } = string.Empty;
+        public double Cantidad { get; init; }
+        public double StockAnterior { get; init; }
+    }
+
+    private sealed class FilaComponente
+    {
+        public int ProductoId { get; init; }
+        public double PorCombo { get; init; }
+        public string NombreProducto { get; init; } = string.Empty;
+        public string UnidadMedida { get; init; } = "UNIDAD";
+        public double Stock { get; init; }
     }
 
     private sealed class PagoResuelto
     {
         public int MedioPagoId { get; init; }
         public bool AfectaEfectivo { get; init; }
+        public bool EsCuentaCorriente { get; init; }
         public long ImporteCentavos { get; init; }
         public long VueltoCentavos { get; set; }
         public string? Referencia { get; init; }
@@ -442,6 +575,7 @@ public partial class VentasRepository
         public string UnidadMedida { get; init; } = "UNIDAD";
         public bool PermiteVentaSinStock { get; init; }
         public bool Activo { get; init; }
+        public bool EsCombo { get; init; }
     }
 
     private sealed class FilaMedioPago
