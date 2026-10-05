@@ -5,6 +5,34 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="26,22">
         <StackPanel>
+            <!-- Aviso de respaldo. Va arriba de todo y en rojo porque es lo único
+                 de esta pantalla que, si se ignora, puede costar el negocio
+                 entero. Aparece sólo cuando hay algo que hacer. -->
+            <Border x:Name="PanelRespaldo" Background="#FEE2E2" CornerRadius="12" Padding="16,13"
+                    BorderBrush="{StaticResource Peligro}" BorderThickness="1.5"
+                    Margin="0,0,0,18" Visibility="Collapsed">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Left" Width="34" Height="34" VerticalAlignment="Center"
+                          Margin="0,0,13,0">
+                        <Border CornerRadius="10" Background="{StaticResource Peligro}"
+                                Effect="{StaticResource SombraFicha}"/>
+                        <iconos:PackIconMaterial Kind="DatabaseAlertOutline" Width="18" Height="18"
+                                                 Foreground="White" HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"/>
+                    </Grid>
+                    <Button DockPanel.Dock="Right" x:Name="BtnRespaldar" Content="Respaldar ahora"
+                            Style="{StaticResource BotonPeligro}" VerticalAlignment="Center"
+                            Margin="13,0,0,0" Click="AlRespaldar"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="LblRespaldo" FontFamily="Segoe UI" FontSize="14"
+                                   FontWeight="Bold" Foreground="#991B1B" TextWrapping="Wrap"/>
+                        <TextBlock Text="Si se rompe el disco de esta computadora, se pierde lo que no esté respaldado."
+                                   FontFamily="Segoe UI" FontSize="12" Foreground="#B91C1C"
+                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
             <!-- KPIs -->
             <UniformGrid Rows="1" Columns="4" Margin="0,0,0,20">
                 <Border Style="{StaticResource Tarjeta}" Margin="0,0,8,0">

@@ -1,6 +1,8 @@
+using Cotillon.Data;
 using Cotillon.LocalApi.Service.Repositories;
 using Cotillon.Shared.DTOs;
 using Cotillon.Shared.DTOs.Encargues;
+using Cotillon.Shared.DTOs.Respaldos;
 using Cotillon.Shared.DTOs.Terceros;
 using Cotillon.Shared.DTOs.Ventas;
 using Cotillon.Shared.Responses;
@@ -25,7 +27,8 @@ public abstract class CotillonControllerBase : ControllerBase
                                       or CuentaCorrienteInvalidaException
                                       or EncargueInvalidoException
                                       or AumentoInvalidoException
-                                      or VentaInvalidaException)
+                                      or VentaInvalidaException
+                                      or RespaldoFallidoException)
         {
             return BadRequest(ApiResponse<T>.Fail(ex.Message));
         }
@@ -98,6 +101,22 @@ public class CuentaCorrienteController(CuentaCorrienteRepository repositorio) : 
             repositorio.Ajustar(ajuste);
             return true;
         }, "Ajuste registrado.");
+}
+
+[ApiController]
+[Route("api/[controller]")]
+public class RespaldosController(
+    IDbConnectionFactory factory, ConfiguracionRepository configuracion) : CotillonControllerBase
+{
+    [HttpGet]
+    public IActionResult Estado() =>
+        Ejecutar(() => new Respaldos(factory).Estado(
+            ConfiguracionRespaldoDto.Desde(configuracion.ObtenerTodo())), "Estado de los respaldos.");
+
+    [HttpPost]
+    public IActionResult Crear() =>
+        Ejecutar(() => new Respaldos(factory).Crear(
+            ConfiguracionRespaldoDto.Desde(configuracion.ObtenerTodo())), "Respaldo generado.");
 }
 
 [ApiController]

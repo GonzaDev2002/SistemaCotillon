@@ -55,6 +55,57 @@
                     <TextBlock Text="Si está activo, el sistema deja vender aunque el stock llegue a cero. El stock puede quedar en negativo."
                                Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="26,4,0,0"/>
 
+                    <TextBlock Text="RESPALDOS" Style="{StaticResource Etiqueta}" Margin="0,16,0,0"/>
+
+                    <Border x:Name="PanelAvisoRespaldo" Background="#FEE2E2" CornerRadius="10"
+                            Padding="14,11" Margin="0,0,0,10" Visibility="Collapsed">
+                        <TextBlock x:Name="LblAvisoRespaldo" FontFamily="Segoe UI" FontSize="13"
+                                   FontWeight="SemiBold" Foreground="#991B1B" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <CheckBox x:Name="ChkRespaldoActivo" Content="Respaldar automáticamente"/>
+
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="CADA CUÁNTOS DÍAS" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="CboRespaldoDias" SelectedValuePath="Tag">
+                                <ComboBoxItem Tag="1" Content="Todos los días" IsSelected="True"/>
+                                <ComboBoxItem Tag="2" Content="Cada 2 días"/>
+                                <ComboBoxItem Tag="3" Content="Cada 3 días"/>
+                                <ComboBoxItem Tag="7" Content="Una vez por semana"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="COPIAS QUE SE GUARDAN" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="CboRespaldoCopias" SelectedValuePath="Tag">
+                                <ComboBoxItem Tag="7" Content="Las últimas 7"/>
+                                <ComboBoxItem Tag="30" Content="Las últimas 30" IsSelected="True"/>
+                                <ComboBoxItem Tag="90" Content="Las últimas 90"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="CARPETA QUE SE SUBE A LA NUBE" Style="{StaticResource Etiqueta}"
+                               Margin="0,10,0,0"/>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="Elegir" Width="80" Margin="6,0,0,0"
+                                Style="{StaticResource BotonSecundario}" FontSize="12" Padding="8,6"
+                                Click="AlElegirCarpetaNube"/>
+                        <TextBox x:Name="TxtCarpetaNube"/>
+                    </DockPanel>
+                    <TextBlock Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Text="Apuntá a tu carpeta de OneDrive, Drive o Dropbox y el respaldo se sube solo. Se copia un archivo ya terminado, no la base en uso: la base dentro de una carpeta sincronizada es la forma más común de corromperla. Vacío: la copia queda sólo en esta PC."/>
+
+                    <Button x:Name="BtnRespaldarAhora" Content="Respaldar ahora"
+                            Style="{StaticResource BotonSecundario}" Margin="0,10,0,0"
+                            Click="AlRespaldarAhora"/>
+                    <TextBlock x:Name="LblRespaldos" Style="{StaticResource Subtitulo}"
+                               TextWrapping="Wrap" Margin="0,6,0,0"/>
+
                     <CheckBox x:Name="ChkArqueoCiego" Margin="0,14,0,0"
                               Content="Arqueo ciego: el que cuenta la caja no ve cuánto tendría que haber"/>
                     <TextBlock Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="26,4,0,0"

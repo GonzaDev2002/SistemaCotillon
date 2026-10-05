@@ -56,6 +56,7 @@ builder.Services.AddScoped<PreciosRepository>();
 builder.Services.AddScoped<CuentaCorrienteRepository>();
 builder.Services.AddScoped<EncarguesRepository>();
 builder.Services.AddScoped<ControlRepository>();
+builder.Services.AddHostedService<RespaldoAutomatico>();
 
 var app = builder.Build();
 

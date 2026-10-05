@@ -121,7 +121,11 @@ public class DatabaseInitializer
             new { Clave = "BALANZA_MASCARA",         Valor = "",            Descripcion = "Formato de las etiquetas con peso que imprime la balanza. Vacío: no se usan." },
             new { Clave = "TICKET_ANCHO",            Valor = "42",          Descripcion = "Caracteres por renglón del ticket: 32 para papel de 58 mm, 42 para 80 mm." },
             new { Clave = "TICKET_AUTOMATICO",       Valor = "false",       Descripcion = "Imprime el ticket al cobrar, sin preguntar." },
-            new { Clave = "CAJA_ARQUEO_CIEGO",       Valor = "false",       Descripcion = "El que cuenta la caja no ve cuánto tendría que haber." }
+            new { Clave = "CAJA_ARQUEO_CIEGO",       Valor = "false",       Descripcion = "El que cuenta la caja no ve cuánto tendría que haber." },
+            new { Clave = "BACKUP_ACTIVO",           Valor = "true",        Descripcion = "Respaldar la base automáticamente." },
+            new { Clave = "BACKUP_CADA_DIAS",        Valor = "1",           Descripcion = "Cada cuántos días se respalda." },
+            new { Clave = "BACKUP_COPIAS",           Valor = "30",          Descripcion = "Cuántas copias se conservan." },
+            new { Clave = "BACKUP_CARPETA_NUBE",     Valor = "",            Descripcion = "Carpeta sincronizada con la nube donde se deja una copia." }
         };
 
         conexion.Execute(

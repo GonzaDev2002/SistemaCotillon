@@ -7,18 +7,30 @@ orden en que conviene hacerlo. El esfuerzo es grueso y en días de trabajo.
 
 ## Bloqueantes: sin esto no se puede abrir el local
 
-### 1. Backups automáticos — 1 día
+### 1. Backups automáticos — HECHO
 
-- [ ] Copia diaria de la base con fecha en el nombre
-- [ ] Retención configurable (ej. últimos 30 días) y borrado de las viejas
-- [ ] Copia espejo a pendrive o carpeta de red
-- [ ] Botón "Respaldar ahora" en Configuración
-- [ ] Aviso si hace más de N días que no hay backup
+- [x] Copia automática con fecha en el nombre, cada 1/2/3/7 días
+- [x] Retención configurable (7, 30 o 90 copias) y borrado de las viejas
+- [x] Copia a la carpeta que sincroniza con la nube (OneDrive, Drive, Dropbox)
+- [x] Botón "Respaldar ahora" en Configuración y en Inicio
+- [x] Aviso en rojo en Inicio si hace más días que la frecuencia elegida
+- [x] La copia se verifica con PRAGMA integrity_check antes de darla por buena
+- [x] Los adjuntos (PDF e imágenes) van en el mismo zip
+- [ ] Restaurar desde la aplicación (hoy es manual: ver abajo)
 
-Hoy todo el negocio vive en **un archivo**. Disco que falla, ransomware, alguien
-que borra la carpeta, OneDrive que sincroniza una versión rota: se pierden
-ventas, stock, clientes y la historia entera, sin vuelta atrás. Ninguna otra
-cosa de esta lista importa si falta ésta.
+La copia se saca con VACUUM INTO, que es la única forma correcta de copiar una
+base SQLite en uso. File.Copy del archivo .db produce una copia inservible: con
+WAL activado parte de los datos está en el archivo -wal, y encima se copia
+mientras alguien escribe. Esa copia abre, parece normal, y falla el día que
+hace falta.
+
+**Para restaurar** (procedimiento manual, hasta que esté en la aplicación):
+
+1. Cerrar la aplicación en todos los puestos y detener el servicio.
+2. Renombrar la base, que vive en la carpeta ProgramData del sistema (no borrarla todavía).
+3. Descomprimir el zip del respaldo: deja `cotillon.db` y la carpeta `Adjuntos`.
+4. Copiar los dos a esa misma carpeta, reemplazando lo que haya.
+5. Arrancar el servicio y verificar que estén las ventas del día del respaldo.
 
 ### 2. Imprimir el ticket — HECHO
 
@@ -158,6 +170,7 @@ trazabilidad · compras · clientes · proveedores · reportes · usuarios con
 permisos por módulo · auditoría · adjuntos (PDF e imágenes) · refresco en vivo
 de las pantallas de mirar · ticket y cierre de caja impresos · combos · bulto ·
 temporadas · cuenta corriente · encargues con seña · aumento masivo de precios ·
-color de pantalla según el rol.
+color de pantalla según el rol · calculadora de precios · controles de caja ·
+respaldos automáticos con copia a la nube.
 
-203 tests automáticos.
+234 tests automáticos.

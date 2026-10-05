@@ -6,6 +6,7 @@ using Cotillon.Shared.DTOs.Compras;
 using Cotillon.Shared.DTOs.Encargues;
 using Cotillon.Shared.DTOs.Permisos;
 using Cotillon.Shared.DTOs.Reportes;
+using Cotillon.Shared.DTOs.Respaldos;
 using Cotillon.Shared.DTOs.Stock;
 using Cotillon.Shared.DTOs.Terceros;
 using Cotillon.Shared.DTOs.Usuarios;
@@ -250,6 +251,14 @@ public class ServiciosApi
 
     public Task<ApiResponse<bool>> AjustarCuentaAsync(AjustarCuentaDto ajuste) =>
         _cliente.PublicarAsync<bool>("api/CuentaCorriente/ajuste", ajuste);
+
+    // --------------------------------------------------------------- Respaldos --
+
+    public Task<ApiResponse<EstadoRespaldoDto>> EstadoRespaldosAsync() =>
+        _cliente.ObtenerAsync<EstadoRespaldoDto>("api/Respaldos");
+
+    public Task<ApiResponse<ResultadoRespaldoDto>> RespaldarAhoraAsync() =>
+        _cliente.PublicarAsync<ResultadoRespaldoDto>("api/Respaldos");
 
     // ---------------------------------------------------------------- Control --
 

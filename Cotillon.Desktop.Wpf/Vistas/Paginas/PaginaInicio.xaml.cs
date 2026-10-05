@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using Cotillon.Desktop.Wpf.Servicios;
+using Cotillon.Shared.DTOs.Permisos;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 
@@ -42,6 +43,52 @@ public partial class PaginaInicio : UserControl
 
         var ultimos = await App.Api.UltimosProductosAsync();
         GrillaUltimos.ItemsSource = ultimos.Data;
+
+        await RevisarRespaldoAsync();
+    }
+
+    /// <summary>
+    /// El aviso de respaldo. Se muestra sólo al que puede hacer algo al respecto:
+    /// un cartel rojo que la vendedora no puede resolver es ruido que se aprende
+    /// a ignorar, y el día que importe de verdad ya nadie lo mira.
+    /// </summary>
+    private async Task RevisarRespaldoAsync()
+    {
+        if (!Sesion.PuedeTodo(Modulos.Configuracion))
+        {
+            PanelRespaldo.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var respuesta = await App.Api.EstadoRespaldosAsync();
+
+        if (!respuesta.Success || respuesta.Data is null)
+            return;
+
+        LblRespaldo.Text = respuesta.Data.Aviso;
+        PanelRespaldo.Visibility = respuesta.Data.HayQueAvisar ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private async void AlRespaldar(object sender, RoutedEventArgs e)
+    {
+        BtnRespaldar.IsEnabled = false;
+        BtnRespaldar.Content = "Respaldando...";
+
+        try
+        {
+            var respuesta = await App.Api.RespaldarAhoraAsync();
+
+            MessageBox.Show(
+                respuesta.Data?.Mensaje ?? respuesta.Message, "Cotillón", MessageBoxButton.OK,
+                respuesta.Data?.Exito == true ? MessageBoxImage.Information : MessageBoxImage.Warning);
+
+            await RevisarRespaldoAsync();
+        }
+        finally
+        {
+            BtnRespaldar.IsEnabled = true;
+            BtnRespaldar.Content = "Respaldar ahora";
+        }
     }
 
     private async void AlActualizar(object sender, RoutedEventArgs e)
