@@ -367,3 +367,7 @@ FodyWeavers.xsd
 *.db-wal
 *.db-shm
 *.db.*.bak
+
+# Salida del empaquetado: son 254 MB de runtime publicado que se regeneran con
+# Instalador\Empaquetar.ps1. Lo que se versiona son los scripts, no el binario.
+Instalador/Paquete/

@@ -1,0 +1,127 @@
+===============================================================================
+  COTILLON - Instalacion
+===============================================================================
+
+QUE INSTALAR EN CADA PC
+-----------------------
+
+  La PC del local que guarda los datos  ->  modo SERVIDOR
+  Cualquier otra PC (segunda caja, la    ->  modo TERMINAL
+  del administrador en su casa)
+
+
+PASOS
+-----
+
+  1. Copiar esta carpeta entera a la PC.
+  2. Doble clic en INSTALAR.bat.
+  3. Aceptar el pedido de permisos de Windows.
+  4. Elegir 1 (servidor) o 2 (terminal).
+  5. En una terminal, escribir la IP del servidor. El instalador del servidor
+     la muestra al terminar; anotala.
+
+  Al terminar queda un acceso "Cotillon" en el escritorio.
+
+
+PRIMER INGRESO
+--------------
+
+  Usuario: admin
+  PIN:     1234
+
+  Cambiar el PIN antes de dejar el equipo.
+
+
+LO PRIMERO QUE HAY QUE CONFIGURAR
+---------------------------------
+
+  Entrar a Configuracion y cargar:
+
+  1. Los datos del negocio (nombre, direccion, CUIT): salen en el ticket.
+  2. La carpeta de respaldos sincronizada con la nube. Apuntar a la carpeta de
+     OneDrive o Drive del cliente. Sin esto, los respaldos quedan solo en esta
+     PC, y si se rompe el disco se pierden junto con la base.
+  3. El ancho del ticket segun la impresora (58 u 80 mm).
+
+  Despues, en Catalogo, crear al menos una seccion y una categoria para poder
+  cargar productos.
+
+
+DONDE QUEDA TODO
+----------------
+
+  Programa    Archivos de programa\Cotillon
+  Datos       ProgramData\Cotillon\cotillon.db
+  Adjuntos    ProgramData\Cotillon\Adjuntos
+  Respaldos   ProgramData\Cotillon\Respaldos
+  Logs        ProgramData\Cotillon\Logs
+
+  Los datos NO estan en la carpeta del programa: desinstalar o actualizar no
+  los toca.
+
+
+ACTUALIZAR A UNA VERSION NUEVA
+------------------------------
+
+  Correr INSTALAR.bat de la version nueva sobre la instalacion existente.
+  Reemplaza los archivos del programa y deja la base y la configuracion como
+  estan. No hace falta desinstalar antes.
+
+
+EL SERVICIO
+-----------
+
+  En el servidor se instala un servicio de Windows llamado "Cotillon" que
+  arranca con el equipo, antes de que nadie inicie sesion. Eso es lo que hace
+  que la caja ande despues de un reinicio, que los respaldos salgan aunque el
+  local este cerrado, y que el administrador pueda entrar desde afuera.
+
+  Si se cae, Windows lo vuelve a levantar solo.
+
+  Para mirarlo: servicios.msc, buscar "Cotillon".
+
+
+SI UNA TERMINAL NO SE CONECTA
+-----------------------------
+
+  1. Que la PC servidor este prendida.
+  2. Que las dos esten en la misma red.
+  3. Probar desde la terminal, en el navegador:
+        http://IP-DEL-SERVIDOR:5189/api/Configuracion
+     Si eso responde, el problema es la direccion cargada en la aplicacion:
+     se corrige en Configuracion. Si no responde, es firewall o red.
+
+
+ENTRAR DESDE LA CASA DEL ADMINISTRADOR
+--------------------------------------
+
+  NO abrir el puerto 5189 en el router. El servicio no pide contrasena en cada
+  llamada, asi que publicado a internet cualquiera que encuentre la direccion
+  leeria y escribiria todo el negocio.
+
+  La forma correcta es una VPN (por ejemplo Tailscale, gratis para este uso):
+  se instala en las dos PC, quedan en una red privada entre ellas, y en la
+  terminal de la casa se pone la IP que da la VPN. Solo pasan los equipos dados
+  de alta.
+
+
+RESTAURAR UN RESPALDO
+---------------------
+
+  1. Cerrar la aplicacion en todos los puestos.
+  2. Detener el servicio "Cotillon" desde servicios.msc.
+  3. Renombrar ProgramData\Cotillon\cotillon.db (no borrarlo todavia).
+  4. Descomprimir el zip del respaldo: trae cotillon.db y la carpeta Adjuntos.
+  5. Copiar los dos a ProgramData\Cotillon.
+  6. Arrancar el servicio y verificar que esten las ventas del dia del respaldo.
+
+  Recien cuando se verifico, borrar el archivo renombrado del paso 3.
+
+
+DESINSTALAR
+-----------
+
+  Doble clic en DESINSTALAR.bat.
+
+  Quita el programa y el servicio. NO borra la base, los adjuntos ni los
+  respaldos: esos son datos del negocio y quedan en ProgramData\Cotillon.

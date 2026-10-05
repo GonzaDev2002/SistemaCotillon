@@ -44,15 +44,24 @@ El ticket se arma como texto de ancho fijo, que es lo que imprime una térmica.
 La impresora se instala en Windows como cualquier otra: no hace falta librería
 ni driver especial. No hace falta impresora fiscal salvo que AFIP lo exija.
 
-### 3. Instalador y servicio de Windows — 2 a 3 días
+### 3. Instalador y servicio de Windows — HECHO
 
-- [ ] Instalador real (no copiar una carpeta)
-- [ ] La API registrada como servicio de Windows, que arranca sola con la PC
-- [ ] Configuración del puesto (servidor o terminal) desde el instalador
-- [ ] Actualización sin reinstalar todo
+- [x] Instalador: doble clic en INSTALAR.bat, pide administrador solo
+- [x] La API registrada como servicio de Windows, arranca con la PC y se
+      reinicia sola si se cae
+- [x] Configuración del puesto (servidor o terminal) desde el instalador
+- [x] Actualización sin reinstalar: se corre encima y no toca la base
+- [x] Regla de firewall sólo en redes privadas
+- [x] Accesos directos, desinstalador y LEEME con los procedimientos
+- [x] Publicado autocontenido: no hace falta instalar .NET en la PC del cliente
 
-Hoy la API se apaga cuando se cierra el cliente. Si la PC se reinicia un sábado
-a la mañana, alguien tiene que saber qué ejecutable abrir.
+Se empaqueta con `Instaladormpaquetar.ps1`, que deja una carpeta lista para
+llevar al cliente. Los pasos de instalación, actualización y restauración están
+en `Instaladoreeme.txt`.
+
+el servicio es lo que hace que la caja ande después de un reinicio, que los
+respaldos salgan aunque el local esté cerrado, y que el administrador pueda
+entrar desde afuera: antes la api se apagaba cuando se cerraba la aplicación.
 
 ---
 

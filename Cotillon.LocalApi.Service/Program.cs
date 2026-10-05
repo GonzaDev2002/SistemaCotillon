@@ -1,9 +1,21 @@
 using Cotillon.Data;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Cotillon.LocalApi.Service.Repositories;
 using Cotillon.LocalApi.Service.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Permite que esto mismo corra como servicio de Windows, prendido con la PC y
+// sin que nadie tenga que iniciar sesión. Es lo que hace que la caja ande
+// después de un reinicio y que los respaldos salgan aunque el local esté
+// cerrado. Corriendo a mano desde la consola no cambia nada: UseWindowsService
+// no hace nada cuando el proceso no fue lanzado por el administrador de
+// servicios.
+//
+// También corrige el directorio de trabajo: un servicio arranca en System32, y
+// sin esto no encontraría su propio appsettings.json.
+builder.Host.UseWindowsService(opciones => opciones.ServiceName = "Cotillon");
 
 var rutaBase = ResolverRutaBaseDeDatos(builder.Configuration);
 var rutaLogs = ResolverRutaLogs(builder.Configuration);
