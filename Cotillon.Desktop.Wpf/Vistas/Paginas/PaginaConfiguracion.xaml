@@ -55,6 +55,11 @@
                     <TextBlock Text="Si está activo, el sistema deja vender aunque el stock llegue a cero. El stock puede quedar en negativo."
                                Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="26,4,0,0"/>
 
+                    <CheckBox x:Name="ChkArqueoCiego" Margin="0,14,0,0"
+                              Content="Arqueo ciego: el que cuenta la caja no ve cuánto tendría que haber"/>
+                    <TextBlock Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="26,4,0,0"
+                               Text="Es el único control de caja que realmente funciona. Si el cajero ve el esperado antes de contar, un faltante se tapa escribiendo ese número en vez de lo que hay en el cajón, y la diferencia que queda registrada es siempre cero. Vos lo seguís viendo."/>
+
                     <TextBlock Text="TICKET" Style="{StaticResource Etiqueta}" Margin="0,16,0,0"/>
                     <ComboBox x:Name="CboAnchoTicket" SelectedValuePath="Tag">
                         <ComboBoxItem Tag="32" Content="Impresora térmica de 58 mm"/>

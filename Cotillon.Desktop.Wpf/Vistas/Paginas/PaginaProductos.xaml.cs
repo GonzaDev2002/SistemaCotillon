@@ -81,6 +81,13 @@ public partial class PaginaProductos : UserControl
             return;
         }
 
+        if (e.Key == Key.F9)
+        {
+            AbrirCalculadora();
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key != Key.Enter)
             return;
 
@@ -489,6 +496,30 @@ public partial class PaginaProductos : UserControl
         BtnEliminar.IsEnabled = true;
 
         await CargarProductosAsync();
+    }
+
+    /// <summary>
+    /// F9: la calculadora de precios, con lo que ya este cargado en el
+    /// formulario. Al confirmar vuelve el costo por unidad y el precio, que es
+    /// justo la cuenta que se hacia aparte en papel y se tipeaba a mano.
+    /// </summary>
+    private void AlAbrirCalculadora(object sender, RoutedEventArgs e) => AbrirCalculadora();
+
+    private void AbrirCalculadora()
+    {
+        var ventana = new VentanaCalculadora(
+            Numero(TxtCosto.Text), Numero(TxtPrecio.Text), Numero(TxtUnidadesPorBulto.Text))
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        if (ventana.ShowDialog() != true)
+            return;
+
+        TxtCosto.Text = ventana.CostoUnitario.ToString("0.##", CultureInfo.CurrentCulture);
+        TxtPrecio.Text = ventana.Precio.ToString("0.##", CultureInfo.CurrentCulture);
+
+        ActualizarMargen();
     }
 
     // ------------------------------------------------------------- Combos --

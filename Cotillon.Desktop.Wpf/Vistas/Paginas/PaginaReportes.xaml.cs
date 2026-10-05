@@ -11,6 +11,7 @@ namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
 public partial class PaginaReportes : UserControl
 {
     private const string TipoTemporada = "Temporada contra el año pasado";
+    private const string TipoControl = "Control por usuario";
 
     private string _titulo = "Reporte";
 
@@ -37,7 +38,7 @@ public partial class PaginaReportes : UserControl
 
         // La temporada tambien necesita el rango: la comparacion es contra la
         // misma franja de dias del ano anterior.
-        PanelFechas.Visibility = tipo is "Ventas por rango" or TipoTemporada
+        PanelFechas.Visibility = tipo is "Ventas por rango" or TipoTemporada or TipoControl
             ? Visibility.Visible
             : Visibility.Collapsed;
 
@@ -59,6 +60,24 @@ public partial class PaginaReportes : UserControl
                 Grilla.ItemsSource = respuesta.Data;
                 _titulo = "Productos bajo stock";
                 LblResultado.Text = $"{respuesta.Data?.Count ?? 0} producto(s) por debajo del stock mínimo";
+                break;
+            }
+
+            case TipoControl:
+            {
+                var respuesta = await App.Api.ControlPorUsuarioAsync(
+                    FechaDesde.SelectedDate ?? DateTime.Today, FechaHasta.SelectedDate ?? DateTime.Today);
+
+                Grilla.ItemsSource = respuesta.Data;
+                _titulo = "Control por usuario";
+
+                var faltante = respuesta.Data?.Sum(c => c.FaltanteAcumulado) ?? 0;
+                var cancelado = respuesta.Data?.Sum(c => c.ImporteCancelado) ?? 0;
+
+                LblResultado.Text =
+                    $"Faltantes de caja: {faltante.ToString("C2", CultureInfo.CurrentCulture)} · " +
+                    $"ventas canceladas antes de cobrar: {cancelado.ToString("C2", CultureInfo.CurrentCulture)}. " +
+                    "Un faltante aislado es un error de vuelto; el mismo faltante todos los días, no.";
                 break;
             }
 

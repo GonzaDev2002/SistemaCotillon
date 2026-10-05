@@ -55,6 +55,7 @@ builder.Services.AddScoped<CombosRepository>();
 builder.Services.AddScoped<PreciosRepository>();
 builder.Services.AddScoped<CuentaCorrienteRepository>();
 builder.Services.AddScoped<EncarguesRepository>();
+builder.Services.AddScoped<ControlRepository>();
 
 var app = builder.Build();
 

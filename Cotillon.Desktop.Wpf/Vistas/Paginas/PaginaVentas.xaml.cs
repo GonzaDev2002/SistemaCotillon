@@ -671,17 +671,55 @@ public partial class PaginaVentas : UserControl
         }
     }
 
-    private void AlCancelar(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Cancela la venta en curso. Pide el motivo y lo registra.
+    ///
+    /// Sin este registro, armar el carrito, cobrarle al cliente y apretar Escape
+    /// no dejaba nada: la plata se iba y el arqueo cerraba perfecto porque esa
+    /// venta nunca había existido. Cancelar sigue estando permitido, porque el
+    /// cliente que cambia de idea es el caso normal y bloquearlo trabaría la caja
+    /// todo el día; lo que cambia es que ahora queda escrito quién, cuándo y por
+    /// cuánta plata.
+    /// </summary>
+    private async void AlCancelar(object sender, RoutedEventArgs e)
     {
         if (_carrito.Count == 0)
             return;
 
-        var confirmar = MessageBox.Show(
-            "¿Querés cancelar la venta en curso?", "Cotillón",
-            MessageBoxButton.YesNo, MessageBoxImage.Question);
+        var total = Total;
+        var items = _carrito.Count;
 
-        if (confirmar == MessageBoxResult.Yes)
-            Limpiar();
+        var ventana = new VentanaMotivo(
+            "Cancelar la venta",
+            $"Se descarta una venta de {total:C2} con {items} ítem(s).",
+            "El cliente cambió de idea", "Error al cargar",
+            "No tenía con qué pagar", "Faltaba stock")
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        if (ventana.ShowDialog() != true)
+            return;
+
+        var detalle = string.Join(" · ", _carrito.Select(i =>
+            $"{i.Cantidad:0.###} x {i.Nombre}"));
+
+        // Se limpia igual si el registro falla: la venta no se cobró y dejar el
+        // carrito trabado porque el servicio no respondió es peor. El faltante de
+        // rastro se ve igual en el arqueo.
+        Limpiar();
+
+        var respuesta = await App.Api.RegistrarCancelacionAsync(new CancelarVentaEnCursoDto
+        {
+            UsuarioId = Sesion.UsuarioId,
+            Total = total,
+            CantidadItems = items,
+            Detalle = detalle.Length > 400 ? detalle[..400] : detalle,
+            Motivo = ventana.Motivo
+        });
+
+        if (!respuesta.Success)
+            MostrarAviso($"La venta se descartó, pero no se pudo registrar el motivo: {respuesta.Message}");
     }
 
     private void Limpiar()

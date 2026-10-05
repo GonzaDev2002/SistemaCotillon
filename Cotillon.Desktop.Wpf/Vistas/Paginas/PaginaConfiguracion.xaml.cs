@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Cotillon.Desktop.Wpf.Servicios;
 using Cotillon.Shared.DTOs;
+using Cotillon.Shared.DTOs.Caja;
 using Cotillon.Shared.DTOs.Permisos;
 
 namespace Cotillon.Desktop.Wpf.Vistas.Paginas;
@@ -38,6 +39,7 @@ public partial class PaginaConfiguracion : UserControl
             TxtMascaraBalanza.Text = Valor(respuesta.Data, EtiquetaBalanza.Clave);
             CboAnchoTicket.SelectedValue = Impresion.AnchoConfigurado(respuesta.Data).ToString();
             ChkTicketAutomatico.IsChecked = Impresion.AutomaticoAlCobrar(respuesta.Data);
+            ChkArqueoCiego.IsChecked = ArqueoCiego.Activo(respuesta.Data);
         }
 
         await VerificarAsync();
@@ -65,7 +67,8 @@ public partial class PaginaConfiguracion : UserControl
                 ["VENTA_PERMITE_SIN_STOCK"] = (ChkVentaSinStock.IsChecked == true).ToString().ToLowerInvariant(),
                 [EtiquetaBalanza.Clave] = TxtMascaraBalanza.Text.Trim().ToUpperInvariant(),
                 [Impresion.ClaveAncho] = CboAnchoTicket.SelectedValue as string ?? "42",
-                [Impresion.ClaveAutomatico] = (ChkTicketAutomatico.IsChecked == true).ToString().ToLowerInvariant()
+                [Impresion.ClaveAutomatico] = (ChkTicketAutomatico.IsChecked == true).ToString().ToLowerInvariant(),
+                [ArqueoCiego.Clave] = (ChkArqueoCiego.IsChecked == true).ToString().ToLowerInvariant()
             };
 
             foreach (var (clave, valor) in claves)

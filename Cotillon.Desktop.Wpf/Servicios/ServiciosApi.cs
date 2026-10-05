@@ -251,6 +251,16 @@ public class ServiciosApi
     public Task<ApiResponse<bool>> AjustarCuentaAsync(AjustarCuentaDto ajuste) =>
         _cliente.PublicarAsync<bool>("api/CuentaCorriente/ajuste", ajuste);
 
+    // ---------------------------------------------------------------- Control --
+
+    public Task<ApiResponse<bool>> RegistrarCancelacionAsync(CancelarVentaEnCursoDto datos) =>
+        _cliente.PublicarAsync<bool>("api/Control/cancelacion", datos);
+
+    public Task<ApiResponse<List<ControlPorUsuarioDto>>> ControlPorUsuarioAsync(
+        DateTime desde, DateTime hasta) =>
+        _cliente.ObtenerAsync<List<ControlPorUsuarioDto>>(
+            $"api/Control/usuarios?desde={Fecha(desde)}&hasta={Fecha(hasta)}");
+
     // -------------------------------------------------------------- Encargues --
 
     public Task<ApiResponse<List<EncargueDto>>> EncarguesAsync(DateTime? hasta, bool incluirCerrados) =>

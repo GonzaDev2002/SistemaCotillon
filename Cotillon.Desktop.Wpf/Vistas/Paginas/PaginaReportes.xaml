@@ -12,6 +12,7 @@
                         <ComboBoxItem Content="Productos bajo stock"/>
                         <ComboBoxItem Content="Ventas por rango"/>
                         <ComboBoxItem Content="Temporada contra el año pasado"/>
+                        <ComboBoxItem Content="Control por usuario"/>
                     </ComboBox>
 
                     <ComboBox x:Name="CboTemporada" Width="190" Margin="8,0,0,0"

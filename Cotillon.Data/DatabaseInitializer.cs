@@ -120,7 +120,8 @@ public class DatabaseInitializer
             new { Clave = "VENTA_PERMITE_SIN_STOCK", Valor = "false",       Descripcion = "Permite vender productos sin stock disponible." },
             new { Clave = "BALANZA_MASCARA",         Valor = "",            Descripcion = "Formato de las etiquetas con peso que imprime la balanza. Vacío: no se usan." },
             new { Clave = "TICKET_ANCHO",            Valor = "42",          Descripcion = "Caracteres por renglón del ticket: 32 para papel de 58 mm, 42 para 80 mm." },
-            new { Clave = "TICKET_AUTOMATICO",       Valor = "false",       Descripcion = "Imprime el ticket al cobrar, sin preguntar." }
+            new { Clave = "TICKET_AUTOMATICO",       Valor = "false",       Descripcion = "Imprime el ticket al cobrar, sin preguntar." },
+            new { Clave = "CAJA_ARQUEO_CIEGO",       Valor = "false",       Descripcion = "El que cuenta la caja no ve cuánto tendría que haber." }
         };
 
         conexion.Execute(

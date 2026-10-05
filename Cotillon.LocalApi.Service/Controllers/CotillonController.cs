@@ -2,6 +2,7 @@ using Cotillon.LocalApi.Service.Repositories;
 using Cotillon.Shared.DTOs;
 using Cotillon.Shared.DTOs.Encargues;
 using Cotillon.Shared.DTOs.Terceros;
+using Cotillon.Shared.DTOs.Ventas;
 using Cotillon.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
 
@@ -97,6 +98,23 @@ public class CuentaCorrienteController(CuentaCorrienteRepository repositorio) : 
             repositorio.Ajustar(ajuste);
             return true;
         }, "Ajuste registrado.");
+}
+
+[ApiController]
+[Route("api/[controller]")]
+public class ControlController(ControlRepository repositorio) : CotillonControllerBase
+{
+    [HttpPost("cancelacion")]
+    public IActionResult Cancelacion([FromBody] CancelarVentaEnCursoDto datos) =>
+        Ejecutar(() =>
+        {
+            repositorio.RegistrarCancelacion(datos);
+            return true;
+        }, "Cancelación registrada.");
+
+    [HttpGet("usuarios")]
+    public IActionResult PorUsuario([FromQuery] DateTime desde, [FromQuery] DateTime hasta) =>
+        Ejecutar(() => repositorio.PorUsuario(desde, hasta), "Control por usuario.");
 }
 
 [ApiController]

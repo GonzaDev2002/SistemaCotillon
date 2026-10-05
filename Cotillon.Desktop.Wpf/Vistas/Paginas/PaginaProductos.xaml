@@ -220,7 +220,10 @@
 
                     <Button x:Name="BtnGuardar" Content="Guardar producto"
                             Style="{StaticResource BotonPrimario}" Click="AlGuardar"/>
-                    <TextBlock Text="Enter pasa al campo siguiente · F12 guarda y vuelve al lector"
+                    <Button x:Name="BtnCalculadora" Content="Calculadora de precios  (F9)"
+                            Style="{StaticResource BotonSecundario}" Margin="0,8,0,0"
+                            Click="AlAbrirCalculadora"/>
+                    <TextBlock Text="Enter pasa al campo siguiente · F9 calculadora · F12 guarda y vuelve al lector"
                                Style="{StaticResource Subtitulo}" TextWrapping="Wrap"
                                HorizontalAlignment="Center" Margin="0,7,0,0"/>
                     <Button Content="Nuevo (limpiar)" Style="{StaticResource BotonSecundario}"

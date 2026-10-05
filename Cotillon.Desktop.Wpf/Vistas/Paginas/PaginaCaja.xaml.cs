@@ -16,6 +16,12 @@ public partial class PaginaCaja : UserControl
     private readonly bool _puedeOperar = Sesion.PuedeEditar(Modulos.Caja);
     private readonly bool _puedeCerrar = Sesion.PuedeTodo(Modulos.Caja);
 
+    /// <summary>
+    /// Arqueo ciego: oculta el esperado al que cuenta. El dueno queda afuera,
+    /// porque es el que despues tiene que revisar la diferencia.
+    /// </summary>
+    private bool _ciego;
+
     public PaginaCaja(VentanaPrincipal principal)
     {
         InitializeComponent();
@@ -49,6 +55,10 @@ public partial class PaginaCaja : UserControl
         LblApertura.Text =
             $"Abierta por {sesion.Data.UsuarioApertura} el {sesion.Data.FechaApertura:dd/MM/yyyy HH:mm}";
 
+        var configuracion = await App.Api.ConfiguracionAsync();
+
+        _ciego = ArqueoCiego.Activo(configuracion.Data) && !Sesion.PuedeTodo(Modulos.Configuracion);
+
         var arqueo = await App.Api.ArqueoAsync();
 
         if (arqueo.Success && arqueo.Data is not null)
@@ -59,8 +69,15 @@ public partial class PaginaCaja : UserControl
             LblTotalVentas.Text = _arqueo.TotalVentas.ToString("C2", CultureInfo.CurrentCulture);
             LblIngresos.Text = _arqueo.TotalIngresos.ToString("C2", CultureInfo.CurrentCulture);
             LblEgresos.Text = _arqueo.TotalEgresos.ToString("C2", CultureInfo.CurrentCulture);
-            LblEfectivoEsperado.Text = _arqueo.EfectivoEsperado.ToString("C2", CultureInfo.CurrentCulture);
-            ListaMedios.ItemsSource = _arqueo.TotalesPorMedioPago;
+            // Arqueo ciego: el que cuenta la plata no ve cuanto tendria que haber.
+            // Si lo ve antes de contar, un faltante se tapa escribiendo el
+            // esperado en vez de lo que hay en el cajon, y el control no sirve.
+            LblEfectivoEsperado.Text = _ciego
+                ? "oculto hasta cerrar"
+                : _arqueo.EfectivoEsperado.ToString("C2", CultureInfo.CurrentCulture);
+
+            LblEfectivoEsperado.FontSize = _ciego ? 15 : 24;
+            ListaMedios.ItemsSource = _ciego ? null : _arqueo.TotalesPorMedioPago;
         }
 
         var movimientos = await App.Api.MovimientosCajaAsync(sesion.Data.SesionCajaId);
@@ -129,6 +146,13 @@ public partial class PaginaCaja : UserControl
 
         if (contado <= 0)
         {
+            PanelDiferencia.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        if (_ciego)
+        {
+            // Tampoco la diferencia en vivo: seria el esperado dicho de otra forma.
             PanelDiferencia.Visibility = Visibility.Collapsed;
             return;
         }
